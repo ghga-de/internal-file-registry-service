@@ -1,7 +1,7 @@
 version: '3'
 
 services:
-  app:
+  internal_file_registry_service:
     build:
       context: .
       dockerfile: ./Dockerfile
@@ -27,19 +27,19 @@ services:
     command: sleep infinity
 
     # Runs app on the same network as the database container, allows "forwardPorts" in devcontainer.json function.
-    network_mode: service:postgresql
+    network_mode: service:internal_file_registry_service_db
 
     # Uncomment the next line to use a non-root user for all processes.
     user: vscode
 
     # define environment variables
     environment:
-      DB_URL: postgresql://postgres:postgres@postgresql/postgres
+      DB_URL: postgresql://postgres:postgres@internal_file_registry_service_db/postgres
 
     # Use "forwardPorts" in **devcontainer.json** to forward an app port locally.
     # (Adding the "ports" property to this file will not forward from a Codespace.)
 
-  postgresql:
+  internal_file_registry_service_db:
     image: postgres:latest
     restart: unless-stopped
     volumes:
