@@ -30,6 +30,5 @@ tests/unit/__init__.py
 
 Dockerfile
 example-config.yaml
-openapi.yaml
 README.md
 setup.py
