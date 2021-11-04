@@ -14,8 +14,6 @@ fileConfig(config.config_file_name)
 # Reads database URL from env variable "DB_URL":
 config.set_main_option("sqlalchemy.url", os.getenv("DB_URL"))
 
-
-# Please adapt to package name
 # add your model's MetaData object here
 # for 'autogenerate' support
 from internal_file_registry_service.dao.db_models import Base

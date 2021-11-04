@@ -14,7 +14,6 @@ We recommend using the provided Docker container.
 
 A pre-build version is available at [docker hub](https://hub.docker.com/repository/docker/ghga/internal-file-registry-service):
 ```bash
-# Please feel free to choose the version as needed:
 docker pull ghga/internal-file-registry-service:<version>
 ```
 
