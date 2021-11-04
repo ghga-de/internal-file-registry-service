@@ -17,23 +17,18 @@
 
 from functools import lru_cache
 
-from ghga_service_chassis_lib.api import ApiConfigBase
 from ghga_service_chassis_lib.config import config_from_yaml
 from ghga_service_chassis_lib.pubsub import PubSubConfigBase
 
-from .models import SupportedLanguages
-
 
 @config_from_yaml(prefix="internal-file-registry-service")
-class Config(ApiConfigBase, PubSubConfigBase):
+class Config(PubSubConfigBase):
     """Config parameters and their defaults."""
 
     # config parameter needed for the api server
-    # are inherited from ApiConfigBase;
-    # config parameter needed for the api server
     # are inherited from PubSubConfigBase;
 
-    language: SupportedLanguages = "Croatian"
+    ...
 
 
 @lru_cache
