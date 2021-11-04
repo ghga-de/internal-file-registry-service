@@ -18,7 +18,7 @@
 from fastapi import status
 from fastapi.testclient import TestClient
 
-from my_microservice.api.main import app
+from internal_file_registry_service.api.main import app
 
 
 def test_index():

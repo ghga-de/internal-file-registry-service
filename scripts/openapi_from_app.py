@@ -27,7 +27,7 @@ import sys
 import yaml
 
 # Please adapt to package name:
-from my_microservice.api.main import app
+from internal_file_registry_service.api.main import app
 
 # get openapi spec as dict:
 openapi_spec = app.openapi()
