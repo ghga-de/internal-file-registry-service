@@ -1,41 +1,8 @@
+![tests](https://github.com/ghga-de/internal-file-registry-service/actions/workflows/unit_and_int_tests.yaml/badge.svg)
+[![codecov](https://codecov.io/gh/ghga-de/internal-file-registry-service/branch/main/graph/badge.svg?token=GYH99Y71CK)](https://codecov.io/gh/ghga-de/internal-file-registry-service)
+# Internal-File-Registry-Service
 
-
-
-# Microservice Repository Template
-
-This repo is a template for creating a new microservice.
-
-The directories, files, and their structure herein are recommendations
-from the GHGA Dev Team.
-
-## Naming Conventions
-The github repository contains only lowercase letters, numbers, and hyphens "-",
-e.g.: `internal-file-registry-service`
-
-The python package (and thus the source repository) contains underscores "_"
-instead of hyphens, e.g.: `internal_file_registry_service`
-
-The command-line script that is used to run the service, the docker repository
-(published to docker hub), and the helm chart (not part of this repository) use the
-same pattern as the repository name, e.g.: `internal-file-registry-service`
-## Adapt to your service
-This is just a template and needs some adaption to your specific use case.
-
-Please search for **"please adapt"** comments. They will indicate all locations
-that need modification. Once the adaptions are in place, please remove these #
-comments.
-
-The following should serve as a template for the final repo's README,
-please adapt it accordingly (e.g. replace all occurences of `internal-file-registry-service` or `internal_file_registry_service` with the final package name and don't forget to adapt the links):
-
----
-
-**\# please adapt the links of following badges:**
-![tests](https://github.com/ghga-de/microservice-repository-template/actions/workflows/unit_and_int_tests.yaml/badge.svg)
-[![codecov](https://codecov.io/gh/ghga-de/microservice-repository-template/branch/main/graph/badge.svg?token=GYH99Y71CK)](https://codecov.io/gh/ghga-de/microservice-repository-template)
-# Internal-File-Registry-Service - A Short Description
-
-A longer description explaining the use case of this service.
+This service acts as a registry for the internal location and representation of files. Upon providing an internal file ID, it delivers a URL to the corresponding file. If the file is located on a permanent storage system that is not accessible to other services (i.e. not S3, e.g. a flat-file system), this service SHOULD stage the file into an accessible S3-based storage system and serve the location to the staged file.
 
 ## Documentation:
 
