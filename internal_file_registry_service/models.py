@@ -13,4 +13,44 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Defines all dataclasses/classes pertaining to a data model or schema"""
+"""Defines dataclasses for holding business-logic data"""
+
+from datetime import datetime
+
+from pydantic import UUID4, BaseModel
+
+
+class FileObjectExternal(BaseModel):
+    """
+    A model for communicating file object-related information to external services.
+    This is missing the internal file ID `id` as well as the registration date as
+    this information shouldn't be shared with other services.
+    """
+
+    external_id: str
+    md5_encrypted: str
+    md5_decrypted: str
+
+    class Config:
+        """Additional pydantic configs."""
+
+        orm_mode = True
+
+
+class FileObjectWithoutID(FileObjectExternal):
+    """
+    A model for describing all file object-related information except for the
+    internal ID.
+    Only intended for service-internal use.
+    """
+
+    registration_date: datetime
+
+
+class FileObjectComplete(FileObjectWithoutID):
+    """
+    A model for describing all file object-related information.
+    Only intended for service-internal use.
+    """
+
+    id: UUID4
