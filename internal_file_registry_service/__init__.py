@@ -13,4 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Subpackage defineing a RESTful API"""
+"""This service acts as a registry for the internal location and representation of files."""
+
+__version__ = "0.1.0"
