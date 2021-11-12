@@ -37,20 +37,11 @@ class FileObjectExternal(BaseModel):
         orm_mode = True
 
 
-class FileObjectWithoutID(FileObjectExternal):
-    """
-    A model for describing all file object-related information except for the
-    internal ID.
-    Only intended for service-internal use.
-    """
-
-    registration_date: datetime
-
-
-class FileObjectComplete(FileObjectWithoutID):
+class FileObjectComplete(FileObjectExternal):
     """
     A model for describing all file object-related information.
     Only intended for service-internal use.
     """
 
     id: UUID4
+    registration_date: datetime

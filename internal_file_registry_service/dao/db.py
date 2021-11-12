@@ -15,9 +15,10 @@
 
 """Database DAO"""
 
-from typing import Optional
+from datetime import datetime
+from typing import Any, Optional
 
-from ghga_service_chassis_lib.postgresql import PostgresqlConnector
+from ghga_service_chassis_lib.postgresql import SyncPostgresqlConnector
 from ghga_service_chassis_lib.utils import DaoGenericBase
 from sqlalchemy.future import select
 
@@ -25,7 +26,7 @@ from .. import models
 from ..config import config
 from . import db_models
 
-psql_connector = PostgresqlConnector(config)
+psql_connector = SyncPostgresqlConnector(config)
 
 
 class FileObjectNotFoundError(RuntimeError):
@@ -70,7 +71,7 @@ class DatabaseDao(DaoGenericBase):
         """Get file object information by specifying its external ID"""
         ...
 
-    def register_file_object(self, file_object: models.FileObjectWithoutID) -> None:
+    def register_file_object(self, file_object: models.FileObjectExternal) -> None:
         """Register a new file object to the database."""
         ...
 
@@ -84,25 +85,25 @@ class PostgresDatabase(DatabaseDao):
     An implementation of the  DatabaseDao interface using a PostgreSQL backend.
     """
 
-    def __init__(self):
+    def __init__(self, postgresql_connector: SyncPostgresqlConnector = psql_connector):
         """initialze DAO implementation"""
 
         super().__init__()
+        self._postgresql_connector = postgresql_connector
 
         # will be defined on __enter__:
-        self._session_cm = None
-        self._session = None
+        self._session_cm: Any = None
+        self._session: Any = None
 
     def __enter__(self):
         """Setup database connection"""
 
-        self._session_cm = psql_connector.transactional_session()
+        self._session_cm = self._postgresql_connector.transactional_session()
         self._session = self._session_cm.__enter__()
         return self
 
     def __exit__(self, error_type, error_value, error_traceback):
         """Teardown database connection"""
-
         self._session_cm.__exit__(error_type, error_value, error_traceback)
 
     def _get_orm_file_object(self, external_id: str) -> db_models.FileObject:
@@ -123,7 +124,7 @@ class PostgresDatabase(DatabaseDao):
         orm_file_object = self._get_orm_file_object(external_id=external_id)
         return models.FileObjectComplete.from_orm(orm_file_object)
 
-    def register_file_object(self, file_object: models.FileObjectWithoutID) -> None:
+    def register_file_object(self, file_object: models.FileObjectExternal) -> None:
         """Register a new file object to the database."""
 
         # check for collisions in the database:
@@ -136,7 +137,8 @@ class PostgresDatabase(DatabaseDao):
             # this is a problem
             raise FileObjectAlreadyExists(external_id=file_object.external_id)
 
-        orm_file_object = db_models.FileObject(**file_object.dict())
+        file_object_dict = {**file_object.dict(), "registration_date": datetime.now()}
+        orm_file_object = db_models.FileObject(**file_object_dict)
         self._session.add(orm_file_object)
 
     def unregister_file_object(self, external_id: str) -> None:

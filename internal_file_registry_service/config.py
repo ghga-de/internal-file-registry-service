@@ -21,7 +21,7 @@ from ghga_service_chassis_lib.pubsub import PubSubConfigBase
 from ghga_service_chassis_lib.s3 import S3ConfigBase
 
 
-@config_from_yaml(prefix="internal-file-registry-service")
+@config_from_yaml(prefix="internal_file_registry_service")
 class Config(PubSubConfigBase, PostgresqlConfigBase, S3ConfigBase):
     """Config parameters and their defaults."""
 
