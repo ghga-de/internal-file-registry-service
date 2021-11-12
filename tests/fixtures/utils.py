@@ -15,7 +15,6 @@
 
 """Utils for Fixture handling"""
 
-import os
 from pathlib import Path
 
 import yaml
@@ -25,12 +24,7 @@ from . import BASE_DIR
 DEFAULT_TEST_CONFIG_PATH = (BASE_DIR.parent.parent / ".devcontainer").resolve()
 
 
-def with_test_config(config_yaml: Path = DEFAULT_TEST_CONFIG_PATH):
-    """Make test config available by changing in the correct directory."""
-    os.chdir(config_yaml)
-
-
-def read_yaml(path: str) -> dict:
+def read_yaml(path: Path) -> dict:
     """Read yaml file and return content as dict."""
     with open(path, "r") as file_:
         return yaml.safe_load(file_)

@@ -34,7 +34,7 @@ services:
 
     # define environment variables
     environment:
-      INTERNAL_FILE_REGISTRY_SERVICE_CONFIG_YAML: /home/kersten/internal-file-registry-service/.devcontainer/.internal_file_registry_service.yaml
+      INTERNAL_FILE_REGISTRY_SERVICE_CONFIG_YAML: /workspace/.devcontainer/.internal_file_registry_service.yaml
 
     # Use "forwardPorts" in **devcontainer.json** to forward an app port locally.
     # (Adding the "ports" property to this file will not forward from a Codespace.)

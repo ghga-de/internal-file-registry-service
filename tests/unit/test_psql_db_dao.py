@@ -15,10 +15,6 @@
 
 """Tests the database DAO implementation base on PostgreSQL"""
 
-from ..fixtures.utils import with_test_config
-
-with_test_config()
-
 import pytest
 from ghga_service_chassis_lib.postgresql import SyncPostgresqlConnector
 from testcontainers.postgres import PostgresContainer

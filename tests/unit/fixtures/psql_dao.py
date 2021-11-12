@@ -29,10 +29,6 @@
 
 """Fixtures for testing the PostgreSQL functionalities"""
 
-from ...fixtures.utils import with_test_config
-
-with_test_config()
-
 from datetime import datetime
 from hashlib import md5
 
