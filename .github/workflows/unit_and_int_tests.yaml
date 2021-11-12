@@ -28,9 +28,14 @@ jobs:
           pip install ".[all]"
       - name: Run pytest
         run: |
+          # change dir so that config yaml is considered:
+          cd .devcontainer
+
           pytest \
             --cov="${{ steps.main_src_dir.outputs.MAIN_SRC_DIR }}" \
             --cov-report=xml
+
+          cd ..
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v2
         with:
