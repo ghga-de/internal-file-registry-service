@@ -30,3 +30,24 @@ class Config(PubSubConfigBase, PostgresqlConfigBase, S3ConfigBase):
 
 
 config = Config()
+=======
+from functools import lru_cache
+
+from ghga_service_chassis_lib.config import config_from_yaml
+from ghga_service_chassis_lib.pubsub import PubSubConfigBase
+
+
+@config_from_yaml(prefix="internal-file-registry-service")
+class Config(PubSubConfigBase):
+    """Config parameters and their defaults."""
+
+    # config parameter needed for the api server
+    # are inherited from PubSubConfigBase;
+
+    ...
+
+
+@lru_cache
+def get_config():
+    """Get runtime configuration."""
+    return Config()

@@ -146,3 +146,4 @@ class PostgresDatabase(DatabaseDao):
 
         orm_file_object = self._get_orm_file_object(external_id=external_id)
         self._session.delete(orm_file_object)
+
