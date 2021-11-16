@@ -21,8 +21,8 @@ from ghga_service_chassis_lib.postgresql_testing import config_from_psql_contain
 from testcontainers.postgres import PostgresContainer
 
 from internal_file_registry_service.dao.db import (
-    FileObjectAlreadyExists,
-    FileObjectNotFoundError,
+    FileInfoAlreadyExistsError,
+    FileInfoNotFoundError,
     PostgresDatabase,
 )
 
@@ -45,37 +45,37 @@ def configure_database_dao(postgres: PostgresContainer) -> PostgresDatabase:
 
 
 def test_get_existing_file_obj():
-    """Test getting exiting file object."""
+    """Test getting exiting file info."""
 
     existing_file_obj = PREPOPULATED_FILE_FIXTURES[0]
 
     with PostgresContainer() as postgres:
         with configure_database_dao(postgres) as database:
-            returned_file_obj = database.get_file_object(existing_file_obj.external_id)
+            returned_file_obj = database.get_file_info(existing_file_obj.external_id)
 
     assert existing_file_obj.md5_checksum == returned_file_obj.md5_checksum
 
 
 def test_get_non_existing_file_obj():
-    """Test getting not existing file object and expect corresponding error."""
+    """Test getting not existing file info and expect corresponding error."""
 
     non_existing_file_obj = ADDITIONAL_FILE_FIXTURES[0]
 
     with PostgresContainer() as postgres:
         with configure_database_dao(postgres) as database:
-            with pytest.raises(FileObjectNotFoundError):
-                database.get_file_object(non_existing_file_obj.external_id)
+            with pytest.raises(FileInfoNotFoundError):
+                database.get_file_info(non_existing_file_obj.external_id)
 
 
 def test_register_non_existing_file_obj():
-    """Test registering not existing file object."""
+    """Test registering not existing file info."""
 
     non_existing_file_obj = ADDITIONAL_FILE_FIXTURES[0]
 
     with PostgresContainer() as postgres:
         with configure_database_dao(postgres) as database:
-            database.register_file_object(non_existing_file_obj)
-            returned_file_obj = database.get_file_object(
+            database.register_file_info(non_existing_file_obj)
+            returned_file_obj = database.get_file_info(
                 non_existing_file_obj.external_id
             )
 
@@ -83,37 +83,37 @@ def test_register_non_existing_file_obj():
 
 
 def test_register_existing_file_obj():
-    """Test registering an already existing file object and expect corresponding
+    """Test registering an already existing file info and expect corresponding
     error."""
 
     existing_file_obj = PREPOPULATED_FILE_FIXTURES[0]
 
     with PostgresContainer() as postgres:
         with configure_database_dao(postgres) as database:
-            with pytest.raises(FileObjectAlreadyExists):
-                database.register_file_object(existing_file_obj)
+            with pytest.raises(FileInfoAlreadyExistsError):
+                database.register_file_info(existing_file_obj)
 
 
 def test_unregister_non_existing_file_obj():
-    """Test unregistering not existing file object and expect corresponding error."""
+    """Test unregistering not existing file info and expect corresponding error."""
 
     non_existing_file_obj = ADDITIONAL_FILE_FIXTURES[0]
 
     with PostgresContainer() as postgres:
         with configure_database_dao(postgres) as database:
-            with pytest.raises(FileObjectNotFoundError):
-                database.unregister_file_object(non_existing_file_obj.external_id)
+            with pytest.raises(FileInfoNotFoundError):
+                database.unregister_file_info(non_existing_file_obj.external_id)
 
 
 def test_unregister_existing_file_obj():
-    """Test unregistering an existing file object."""
+    """Test unregistering an existing file info."""
 
     existing_file_obj = PREPOPULATED_FILE_FIXTURES[0]
 
     with PostgresContainer() as postgres:
         with configure_database_dao(postgres) as database:
-            database.unregister_file_object(existing_file_obj.external_id)
+            database.unregister_file_info(existing_file_obj.external_id)
 
-            # check if file object can no longer be found:
-            with pytest.raises(FileObjectNotFoundError):
-                database.get_file_object(existing_file_obj.external_id)
+            # check if file info can no longer be found:
+            with pytest.raises(FileInfoNotFoundError):
+                database.get_file_info(existing_file_obj.external_id)

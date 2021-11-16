@@ -29,26 +29,26 @@ from . import db_models
 psql_connector = SyncPostgresqlConnector(config)
 
 
-class FileObjectNotFoundError(RuntimeError):
-    """Thrown when trying to access a file object with an external ID that doesn't
+class FileInfoNotFoundError(RuntimeError):
+    """Thrown when trying to access info on a file with an external ID that doesn't
     exist in the database."""
 
     def __init__(self, external_id: Optional[str]):
         message = (
-            "The file object "
+            "The information for the file"
             + (f"with external ID '{external_id}' " if external_id else "")
             + "does not exist in the database."
         )
         super().__init__(message)
 
 
-class FileObjectAlreadyExists(RuntimeError):
-    """Thrown when trying to create a file object with an external ID that already
+class FileInfoAlreadyExistsError(RuntimeError):
+    """Thrown when trying to create info for a file with an external ID that already
     exist in the database."""
 
     def __init__(self, external_id: Optional[str]):
         message = (
-            "The file object "
+            "The information for the file"
             + (f"with external ID '{external_id}' " if external_id else "")
             + "already exist in the database."
         )
@@ -63,20 +63,22 @@ class DatabaseDao(DaoGenericBase):
     A DAO base class for interacting with the database.
 
     It might throw following exception to communicate selected error events:
-        - FileObjectNotFoundError
-        - FileObjectAlreadyExists
+        - FileInfoNotFoundError
+        - FileInfoAlreadyExistsError
     """
 
-    def get_file_object(self, external_id: str) -> models.FileObjectComplete:
-        """Get file object information by specifying its external ID"""
+    def get_file_info(self, external_id: str) -> models.FileInfoComplete:
+        """Get information for a file by specifying its external ID"""
         ...
 
-    def register_file_object(self, file_object: models.FileObjectExternal) -> None:
-        """Register a new file object to the database."""
+    def register_file_info(self, file_info: models.FileInfoExternal) -> None:
+        """Register information for a new to the database."""
         ...
 
-    def unregister_file_object(self, external_id: str) -> None:
-        """Unregister a file object from the database specifying its external ID."""
+    def unregister_file_info(self, external_id: str) -> None:
+        """
+        Unregister information for a file with the specified external ID from the database.
+        """
         ...
 
 
@@ -106,43 +108,48 @@ class PostgresDatabase(DatabaseDao):
         """Teardown database connection"""
         self._session_cm.__exit__(error_type, error_value, error_traceback)
 
-    def _get_orm_file_object(self, external_id: str) -> db_models.FileObject:
-        """Internal method to get the ORM representation of a file object by specifying
+    def _get_orm_file_info(self, external_id: str) -> db_models.FileInfo:
+        """Internal method to get the ORM representation of a file info by specifying
         its external ID"""
 
-        statement = select(db_models.FileObject).filter_by(external_id=external_id)
-        orm_file_object = self._session.execute(statement).scalars().one_or_none()
+        statement = select(db_models.FileInfo).filter_by(external_id=external_id)
+        orm_file_info = self._session.execute(statement).scalars().one_or_none()
 
-        if orm_file_object is None:
-            raise FileObjectNotFoundError(external_id=external_id)
+        if orm_file_info is None:
+            raise FileInfoNotFoundError(external_id=external_id)
 
-        return orm_file_object
+        return orm_file_info
 
-    def get_file_object(self, external_id: str) -> models.FileObjectComplete:
-        """Get file object information by specifying its external ID"""
+    def get_file_info(self, external_id: str) -> models.FileInfoComplete:
+        """Get information for a file by specifying its external ID"""
 
-        orm_file_object = self._get_orm_file_object(external_id=external_id)
-        return models.FileObjectComplete.from_orm(orm_file_object)
+        orm_file_info = self._get_orm_file_info(external_id=external_id)
+        return models.FileInfoComplete.from_orm(orm_file_info)
 
-    def register_file_object(self, file_object: models.FileObjectExternal) -> None:
-        """Register a new file object to the database."""
+    def register_file_info(self, file_info: models.FileInfoExternal) -> None:
+        """Register information for a new file to the database."""
 
         # check for collisions in the database:
         try:
-            self._get_orm_file_object(external_id=file_object.external_id)
-        except FileObjectNotFoundError:
+            self._get_orm_file_info(external_id=file_info.external_id)
+        except FileInfoNotFoundError:
             # this is expected
             pass
         else:
             # this is a problem
-            raise FileObjectAlreadyExists(external_id=file_object.external_id)
+            raise FileInfoAlreadyExistsError(external_id=file_info.external_id)
 
-        file_object_dict = {**file_object.dict(), "registration_date": datetime.now()}
-        orm_file_object = db_models.FileObject(**file_object_dict)
-        self._session.add(orm_file_object)
+        file_info_dict = {
+            **file_info.dict(),
+            "registration_date": datetime.now(),
+        }
+        orm_file_info = db_models.FileInfo(**file_info_dict)
+        self._session.add(orm_file_info)
 
-    def unregister_file_object(self, external_id: str) -> None:
-        """Unregister a file object from the database specifying its external ID."""
+    def unregister_file_info(self, external_id: str) -> None:
+        """
+        Unregister information for a file with the specified external ID from the database.
+        """
 
-        orm_file_object = self._get_orm_file_object(external_id=external_id)
-        self._session.delete(orm_file_object)
+        orm_file_info = self._get_orm_file_info(external_id=external_id)
+        self._session.delete(orm_file_info)

@@ -20,9 +20,9 @@ from datetime import datetime
 from pydantic import UUID4, BaseModel
 
 
-class FileObjectExternal(BaseModel):
+class FileInfoExternal(BaseModel):
     """
-    A model for communicating file object-related information to external services.
+    A model for communicating file info to external services.
     This is missing the internal file ID `id` as well as the registration date as
     this information shouldn't be shared with other services.
     """
@@ -37,9 +37,9 @@ class FileObjectExternal(BaseModel):
         orm_mode = True
 
 
-class FileObjectComplete(FileObjectExternal):
+class FileInfoComplete(FileInfoExternal):
     """
-    A model for describing all file object-related information.
+    A model for describing all file info.
     Only intended for service-internal use.
     """
 

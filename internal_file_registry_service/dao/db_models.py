@@ -25,12 +25,12 @@ from sqlalchemy.orm.decl_api import DeclarativeMeta
 Base: DeclarativeMeta = declarative_base()
 
 
-class FileObject(Base):
+class FileInfo(Base):
     """
-    ORM model for a File Object.
+    ORM model for file info.
     """
 
-    __tablename__ = "fileobjects"
+    __tablename__ = "fileinfo"
     id = Column(
         UUID(
             as_uuid=True,

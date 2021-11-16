@@ -47,12 +47,12 @@ def hash_string(str_: str):
 
 
 PREPOPULATED_FILE_FIXTURES = [
-    models.FileObjectExternal(
+    models.FileInfoExternal(
         external_id="GHGAF-02143324934345",
         md5_checksum=hash_string("something to hash 1"),
         size=1000,
     ),
-    models.FileObjectExternal(
+    models.FileInfoExternal(
         external_id="GHGAF-23429923423423",
         md5_checksum=hash_string("something to hash 2"),
         size=2000,
@@ -61,12 +61,12 @@ PREPOPULATED_FILE_FIXTURES = [
 
 
 ADDITIONAL_FILE_FIXTURES = [
-    models.FileObjectExternal(
+    models.FileInfoExternal(
         external_id="GHGAF-29992342342234",
         md5_checksum=hash_string("something to hash 3"),
         size=3000,
     ),
-    models.FileObjectExternal(
+    models.FileInfoExternal(
         external_id="GHGAF-50098123865883",
         md5_checksum=hash_string("something to hash 4"),
         size=4000,
@@ -86,6 +86,6 @@ def populate_db(db_url: str):
     with session_factor() as session:
         for entry in PREPOPULATED_FILE_FIXTURES:
             param_dict = {**entry.dict(), "registration_date": datetime.now()}
-            orm_entry = db_models.FileObject(**param_dict)
+            orm_entry = db_models.FileInfo(**param_dict)
             session.add(orm_entry)
         session.commit()
