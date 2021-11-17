@@ -35,8 +35,6 @@ jobs:
         run: |
           pip install ".[all]"
       - name: Run pytest
-        env:
-          INTERNAL_FILE_REGISTRY_SERVICE_CONFIG_YAML: /home/runner/work/internal-file-registry-service/internal-file-registry-service/.devcontainer/.dev_config.yaml
         run: |
           pytest \
             --cov="${{ steps.runtime_variables.outputs.MAIN_SRC_DIR }}" \
