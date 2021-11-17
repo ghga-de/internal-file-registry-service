@@ -32,10 +32,8 @@
 from datetime import datetime
 from hashlib import md5
 
-from ghga_service_chassis_lib.postgresql import PostgresqlConfigBase
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from testcontainers.postgres import PostgresContainer
 
 from internal_file_registry_service import models
 from internal_file_registry_service.dao import db_models
@@ -91,11 +89,3 @@ def populate_db(db_url: str):
             orm_entry = db_models.FileObject(**param_dict)
             session.add(orm_entry)
         session.commit()
-
-
-def config_from_psql_container(container: PostgresContainer) -> PostgresqlConfigBase:
-    """Prepares a PostgresqlConfigBase from an instance of
-    postgres test container."""
-    db_url = container.get_connection_url()
-    db_url_formatted = db_url.replace("postgresql+psycopg2", "postgresql")
-    return PostgresqlConfigBase(db_url=db_url_formatted)

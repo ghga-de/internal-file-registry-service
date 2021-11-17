@@ -17,6 +17,7 @@
 
 import pytest
 from ghga_service_chassis_lib.postgresql import SyncPostgresqlConnector
+from ghga_service_chassis_lib.postgresql_testing import config_from_psql_container
 from testcontainers.postgres import PostgresContainer
 
 from internal_file_registry_service.dao.db import (
@@ -28,7 +29,6 @@ from internal_file_registry_service.dao.db import (
 from .fixtures.psql_dao import (
     ADDITIONAL_FILE_FIXTURES,
     PREPOPULATED_FILE_FIXTURES,
-    config_from_psql_container,
     populate_db,
 )
 
