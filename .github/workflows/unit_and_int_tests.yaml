@@ -15,14 +15,15 @@ jobs:
 
     steps:
       - uses: actions/checkout@v1
-      - name: Get important paths
-        id: get_paths
+      - name: Get/export important runtime variables
+        id: runtime_variables
         run: |
           PACKAGE_NAME="$(./scripts/get_package_name.py)"
           PACKAGE_NAME_UPPERSNAKE="$( echo ${PACKAGE_NAME^^} | sed "s/-/_/g"
           MAIN_SRC_DIR="${PWD}/${PACKAGE_NAME}"
           TEST_CONFIG_YAML="${PWD}/.devcontainer/.dev_config.yaml"
-          export ${PACKAGE_NAME_UPPERSNAKE}_CONFIG_YAML="${{ steps.get_paths.outputs.TEST_CONFIG_YAML }}"
+          # set path to config yaml:
+          export ${PACKAGE_NAME_UPPERSNAKE}_CONFIG_YAML="${{ steps.runtime_variables.outputs.TEST_CONFIG_YAML }}"
           echo "::set-output name=PACKAGE_NAME::${PACKAGE_NAME}"
           echo "::set-output name=MAIN_SRC_DIR::${MAIN_SRC_DIR}"
           echo "::set-output name=TEST_CONFIG_YAML::${TEST_CONFIG_YAML}"
@@ -34,11 +35,11 @@ jobs:
         run: |
           pip install ".[all]"
       - name: Run pytest
+        env:
+          INTERNAL_FILE_REGISTRY_SERVICE_CONFIG_YAML: /home/runner/work/internal-file-registry-service/internal-file-registry-service/.devcontainer/.dev_config.yaml
         run: |
-          echo "CONFIG YAML:"
-          echo $INTERNAL_FILE_REGISTRY_SERVICE_CONFIG_YAML
           pytest \
-            --cov="${{ steps.get_paths.outputs.MAIN_SRC_DIR }}" \
+            --cov="${{ steps.runtime_variables.outputs.MAIN_SRC_DIR }}" \
             --cov-report=xml
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v2
