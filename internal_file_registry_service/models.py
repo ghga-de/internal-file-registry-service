@@ -17,6 +17,12 @@
 
 from datetime import datetime
 
+from ghga_service_chassis_lib.object_storage_dao import (
+    BucketIdValidationError,
+    ObjectIdValidationError,
+    validate_bucket_id,
+    validate_object_id,
+)
 from pydantic import UUID4, BaseModel, validator
 
 
@@ -33,12 +39,33 @@ class FileInfoExternal(BaseModel):
     size: int
     
     # pylint: disable=no-self-argument,no-self-use
-    @validator("grouping_label")
-    def db_url_prefix(cls, value: str):
-        """Checks if grouping label is valid for use as a s3 bucket label."""
-        "^[a-zA-Z0-9.\-_]{1,255}$"
+    @validator("external_id")
+    def check_external_id(cls, value: str):
+        """Checks if the external_id is valid for use as a s3 object id."""
+
+        try:
+            validate_object_id(value)
+        except ObjectIdValidationError as error:
+            raise ValueError(
+                f"External ID '{value}' cannot be used as a (S3) object id."
+            ) from error
 
         return value
+
+    @validator("grouping_label")
+    def check_grouping_label(cls, value: str):
+        """Checks if the grouping_label is valid for use as a (S3) bucket label."""
+
+        value_casted = value.lower()
+
+        try:
+            validate_bucket_id(value_casted)
+        except BucketIdValidationError as error:
+            raise ValueError(
+                f"Grouping label '{value}' cannot be casted into a bucket id."
+            ) from error
+
+        return value_casted
 
     class Config:
         """Additional pydantic configs."""
