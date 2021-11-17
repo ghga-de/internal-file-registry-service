@@ -23,11 +23,9 @@ jobs:
           MAIN_SRC_DIR="${PWD}/${PACKAGE_NAME}"
           TEST_CONFIG_YAML="${PWD}/.devcontainer/.dev_config.yaml"
           
-          # export path to config yaml:
-          export ${PACKAGE_NAME_UPPERSNAKE}_CONFIG_YAML="${TEST_CONFIG_YAML}"
-          
           # attach all other variables to the step's output:
           echo "::set-output name=PACKAGE_NAME::${PACKAGE_NAME}"
+          echo "::set-output name=PACKAGE_NAME_UPPERSNAKE::${PACKAGE_NAME_UPPERSNAKE}"
           echo "::set-output name=MAIN_SRC_DIR::${MAIN_SRC_DIR}"
           echo "::set-output name=TEST_CONFIG_YAML::${TEST_CONFIG_YAML}"
       - name: Set up Python 3.9
@@ -39,6 +37,7 @@ jobs:
           pip install ".[all]"
       - name: Run pytest
         run: |
+          export ${{ steps.runtime_variables.outputs.PACKAGE_NAME_UPPERSNAKE }}_CONFIG_YAML="${{ steps.runtime_variables.outputs.TEST_CONFIG_YAML }}"
           pytest \
             --cov="${{ steps.runtime_variables.outputs.MAIN_SRC_DIR }}" \
             --cov-report=xml
