@@ -24,10 +24,6 @@ jobs:
           echo "::set-output name=PACKAGE_NAME::${PACKAGE_NAME}"
           echo "::set-output name=MAIN_SRC_DIR::${MAIN_SRC_DIR}"
           echo "::set-output name=TEST_CONFIG_YAML::${TEST_CONFIG_YAML}"
-      - name: Set config yaml env var
-        run: |
-          PACKAGE_NAME=${{ steps.get_paths.outputs.PACKAGE_NAME }}
-          export ${PACKAGE_NAME^^}_CONFIG_YAML="${PWD}/.devcontainer/.internal_file_registry_service.yaml"
       - name: Set up Python 3.9
         uses: actions/setup-python@v2
         with:
@@ -38,6 +34,8 @@ jobs:
       - name: Run pytest
         run: |
           export ${PACKAGE_NAME^^}_CONFIG_YAML="${{ steps.get_paths.outputs.TEST_CONFIG_YAML }}"
+          echo "CONFIG YAML:"
+          echo $INTERNAL_FILE_REGISTRY_SERVICE_CONFIG_YAML
           pytest \
             --cov="${{ steps.get_paths.outputs.MAIN_SRC_DIR }}" \
             --cov-report=xml
