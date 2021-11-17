@@ -28,8 +28,8 @@ class FileObjectExternal(BaseModel):
     """
 
     external_id: str
-    md5_encrypted: str
-    md5_decrypted: str
+    md5_checksum: str
+    size: int
 
     class Config:
         """Additional pydantic configs."""

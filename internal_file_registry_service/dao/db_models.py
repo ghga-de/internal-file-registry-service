@@ -17,7 +17,7 @@
 
 import uuid
 
-from sqlalchemy import Column, DateTime, String
+from sqlalchemy import Column, DateTime, Integer, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm.decl_api import DeclarativeMeta
@@ -48,12 +48,10 @@ class FileObject(Base):
             + "May be presented to users."
         ),
     )
-    md5_encrypted = Column(
-        String, nullable=False, doc="MD5 checksum of the encrypted file."
+    md5_checksum = Column(
+        String, nullable=False, doc="MD5 checksum of the file content."
     )
-    md5_decrypted = Column(
-        String, nullable=False, doc="MD5 checksum of the dencrypted file."
-    )
+    size = Column(Integer, nullable=False, doc="Size of the file content in bytes.")
     registration_date = Column(
         DateTime,
         nullable=False,
