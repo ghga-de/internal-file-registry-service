@@ -15,14 +15,18 @@ jobs:
 
     steps:
       - uses: actions/checkout@v1
-      - name: Retrieve main src dir
-        id: main_src_dir
+      - name: Get important paths
+        id: get_paths
         run: |
-          echo "::set-output name=PACKAGE_NAME::$(./scripts/get_package_name.py)"
-          echo "::set-output name=MAIN_SRC_DIR::${PWD}/$(./scripts/get_package_name.py)"
+          PACKAGE_NAME="$(./scripts/get_package_name.py)"
+          MAIN_SRC_DIR="${PWD}/${PACKAGE_NAME}"
+          TEST_CONFIG_YAML="${PWD}/.devcontainer/.dev_config.yaml"
+          echo "::set-output name=PACKAGE_NAME::${PACKAGE_NAME}"
+          echo "::set-output name=MAIN_SRC_DIR::${MAIN_SRC_DIR}"
+          echo "::set-output name=TEST_CONFIG_YAML::${TEST_CONFIG_YAML}"
       - name: Set config yaml env var
         run: |
-          PACKAGE_NAME=${{ steps.main_src_dir.outputs.PACKAGE_NAME }}
+          PACKAGE_NAME=${{ steps.get_paths.outputs.PACKAGE_NAME }}
           export ${PACKAGE_NAME^^}_CONFIG_YAML="${PWD}/.devcontainer/.internal_file_registry_service.yaml"
       - name: Set up Python 3.9
         uses: actions/setup-python@v2
@@ -33,9 +37,9 @@ jobs:
           pip install ".[all]"
       - name: Run pytest
         run: |
-          export
+          export ${PACKAGE_NAME^^}_CONFIG_YAML="${{ steps.get_paths.outputs.TEST_CONFIG_YAML }}"
           pytest \
-            --cov="${{ steps.main_src_dir.outputs.MAIN_SRC_DIR }}" \
+            --cov="${{ steps.get_paths.outputs.MAIN_SRC_DIR }}" \
             --cov-report=xml
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v2
