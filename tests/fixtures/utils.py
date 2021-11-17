@@ -15,10 +15,16 @@
 
 """Utils for Fixture handling"""
 
+from pathlib import Path
+
 import yaml
 
+from . import BASE_DIR
 
-def read_yaml(path: str) -> dict:
+DEFAULT_TEST_CONFIG_PATH = (BASE_DIR.parent.parent / ".devcontainer").resolve()
+
+
+def read_yaml(path: Path) -> dict:
     """Read yaml file and return content as dict."""
     with open(path, "r") as file_:
         return yaml.safe_load(file_)

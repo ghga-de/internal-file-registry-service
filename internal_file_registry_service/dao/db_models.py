@@ -13,27 +13,47 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Defines all database specific ORM classes (e.g. for SQLAlchemy)"""
+"""Definition of SQL ORM classes"""
 
-from sqlalchemy import Boolean, Column, Integer, String
-from sqlalchemy.dialects.postgresql import JSON
+import uuid
 
-from .db import Base
+from sqlalchemy import Column, DateTime, Integer, String
+from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm.decl_api import DeclarativeMeta
 
-
-class ExampleObjectA(Base):
-    """An example object stored in the DB"""
-
-    __tablename__ = "visas"
-    id = Column(Integer, primary_key=True)
-    name = Column(String, nullable=False)
-    some_json_details = Column(JSON, nullable=False)
+Base: DeclarativeMeta = declarative_base()
 
 
-class ExampleObjectB(Base):
-    """Another example object stored in the DB"""
+class FileObject(Base):
+    """
+    ORM model for a File Object.
+    """
 
-    __tablename__ = "table_b"
-    id = Column(Integer, primary_key=True)
-    name = Column(String, nullable=False)
-    active = Column(Boolean, nullable=False)
+    __tablename__ = "fileobjects"
+    id = Column(
+        UUID(
+            as_uuid=True,
+        ),
+        default=uuid.uuid4,
+        primary_key=True,
+        doc="Service-internal file ID.",
+    )
+    external_id = Column(
+        String,
+        nullable=False,
+        unique=True,
+        doc=(
+            "ID used to refer to this file across services. "
+            + "May be presented to users."
+        ),
+    )
+    md5_checksum = Column(
+        String, nullable=False, doc="MD5 checksum of the file content."
+    )
+    size = Column(Integer, nullable=False, doc="Size of the file content in bytes.")
+    registration_date = Column(
+        DateTime,
+        nullable=False,
+        doc="Date/time when the file was internally registered.",
+    )

@@ -34,24 +34,49 @@ services:
 
     # define environment variables
     environment:
+      INTERNAL_FILE_REGISTRY_SERVICE_CONFIG_YAML: /workspace/.devcontainer/.dev_config.yaml
       DB_URL: postgresql://postgres:postgres@internal_file_registry_service_db/postgres
-
     # Use "forwardPorts" in **devcontainer.json** to forward an app port locally.
     # (Adding the "ports" property to this file will not forward from a Codespace.)
+
+  internal_file_registry_service_rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - 5672:5672
+      - 15672:15672
 
   internal_file_registry_service_db:
     image: postgres:latest
     restart: unless-stopped
     volumes:
-      - postgres-data:/var/lib/postgresql/data
+      - postgres_fs:/var/lib/postgresql/data
     environment:
       POSTGRES_USER: postgres
       POSTGRES_DB: postgres
       POSTGRES_PASSWORD: postgres
-
     # Add "forwardPorts": ["5432"] to **devcontainer.json** to forward PostgreSQL locally.
     # (Adding the "ports" property to this file will not forward from a Codespace.)
 
+  internal_file_registry_service_s3:
+    image: localstack/localstack
+    ports:
+      - "4566:4566"
+    environment:
+      SERVICES: s3
+      DEFAULT_REGION: eu-west-1
+      AWS_DEFAULT_REGION: eu-west-1
+      # accessible at localhost
+      HOSTNAME_EXTERNAL: localhost
+      USE_SSL: "false"
+      DATA_DIR: /tmp/localstack/data
+      DEBUG: 1
+    volumes:
+      - type: volume
+        source: s3_fs
+        target: /tmp/localstack
+        volume:
+          nocopy: true
+
 volumes:
-  postgres-data:
-    external: false
+  postgres_fs: {}
+  s3_fs: {}
