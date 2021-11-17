@@ -19,7 +19,7 @@ jobs:
         id: runtime_variables
         run: |
           PACKAGE_NAME="$(./scripts/get_package_name.py)"
-          PACKAGE_NAME_UPPERSNAKE="$( echo ${PACKAGE_NAME^^} | sed "s/-/_/g )"
+          PACKAGE_NAME_UPPERSNAKE="$( echo ${PACKAGE_NAME^^} | sed "s/-/_/g" )"
           MAIN_SRC_DIR="${PWD}/${PACKAGE_NAME}"
           TEST_CONFIG_YAML="${PWD}/.devcontainer/.dev_config.yaml"
           # set path to config yaml:
