@@ -53,7 +53,7 @@ def test_get_existing_file_obj():
         with configure_database_dao(postgres) as database:
             returned_file_obj = database.get_file_object(existing_file_obj.external_id)
 
-    assert existing_file_obj.md5_encrypted == returned_file_obj.md5_encrypted
+    assert existing_file_obj.md5_checksum == returned_file_obj.md5_checksum
 
 
 def test_get_non_existing_file_obj():
@@ -79,7 +79,7 @@ def test_register_non_existing_file_obj():
                 non_existing_file_obj.external_id
             )
 
-    assert non_existing_file_obj.md5_encrypted == returned_file_obj.md5_encrypted
+    assert non_existing_file_obj.md5_checksum == returned_file_obj.md5_checksum
 
 
 def test_register_existing_file_obj():

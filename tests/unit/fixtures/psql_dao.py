@@ -49,13 +49,13 @@ def hash_string(str_: str):
 PREPOPULATED_FILE_FIXTURES = [
     models.FileObjectExternal(
         external_id="GHGAF-02143324934345",
-        md5_encrypted=hash_string("something to hash 1"),
-        md5_decrypted=hash_string("something to hash 2"),
+        md5_checksum=hash_string("something to hash 1"),
+        size=1000,
     ),
     models.FileObjectExternal(
         external_id="GHGAF-23429923423423",
-        md5_encrypted=hash_string("something to hash 3"),
-        md5_decrypted=hash_string("something to hash 4"),
+        md5_checksum=hash_string("something to hash 2"),
+        size=2000,
     ),
 ]
 
@@ -63,13 +63,13 @@ PREPOPULATED_FILE_FIXTURES = [
 ADDITIONAL_FILE_FIXTURES = [
     models.FileObjectExternal(
         external_id="GHGAF-29992342342234",
-        md5_encrypted=hash_string("something to hash 5"),
-        md5_decrypted=hash_string("something to hash 6"),
+        md5_checksum=hash_string("something to hash 3"),
+        size=3000,
     ),
     models.FileObjectExternal(
         external_id="GHGAF-50098123865883",
-        md5_encrypted=hash_string("something to hash 7"),
-        md5_decrypted=hash_string("something to hash 8"),
+        md5_checksum=hash_string("something to hash 4"),
+        size=4000,
     ),
 ]
 
