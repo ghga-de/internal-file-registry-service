@@ -13,19 +13,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Config Parameter Modeling and Parsing"""
+"""Main business-logic of this service"""
 
-from ghga_service_chassis_lib.config import config_from_yaml
-from ghga_service_chassis_lib.postgresql import PostgresqlConfigBase
-from ghga_service_chassis_lib.pubsub import PubSubConfigBase
-from ghga_service_chassis_lib.s3 import S3ConfigBase
+from typing import Optional
 
-
-@config_from_yaml(prefix="internal_file_registry_service")
-class Config(PubSubConfigBase, PostgresqlConfigBase, S3ConfigBase):
-    """Config parameters and their defaults."""
-
-    s3_outbox_bucket_id: str
+from ..config import Config, config
+from ..dao import Database, FileInfoNotFoundError, ObjectStorage
 
 
-config = Config()
+def copy_file_to_outbox(external_file_id: str, config_: Config = config):
+    """Copies a file into the outbox bucket."""
+
+    # get file info from the database:
+    # (will through an error if file not in registry)
+    with Database() as database:
+        file_info = database.get_file_info(external_file_id)
+
+    # copy file object to the outbox bucket:
+    with ObjectStorage() as storage:
+        storage.copy_object(source_bucket_id=)

@@ -48,6 +48,15 @@ class FileInfo(Base):
             + "May be presented to users."
         ),
     )
+    grouping_label = Column(
+        String,
+        nullable=False,
+        unique=True,
+        doc=(
+            "This is a label that might be use to group multiple files together. "
+            + "It is used as bucket_id for the storing files in the permanent storage."
+        ),
+    )
     md5_checksum = Column(
         String, nullable=False, doc="MD5 checksum of the file content."
     )

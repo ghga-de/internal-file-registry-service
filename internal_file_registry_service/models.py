@@ -17,7 +17,7 @@
 
 from datetime import datetime
 
-from pydantic import UUID4, BaseModel
+from pydantic import UUID4, BaseModel, validator
 
 
 class FileInfoExternal(BaseModel):
@@ -28,8 +28,17 @@ class FileInfoExternal(BaseModel):
     """
 
     external_id: str
+    grouping_label: str
     md5_checksum: str
     size: int
+    
+    # pylint: disable=no-self-argument,no-self-use
+    @validator("grouping_label")
+    def db_url_prefix(cls, value: str):
+        """Checks if grouping label is valid for use as a s3 bucket label."""
+        "^[a-zA-Z0-9.\-_]{1,255}$"
+
+        return value
 
     class Config:
         """Additional pydantic configs."""
