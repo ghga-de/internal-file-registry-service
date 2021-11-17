@@ -23,7 +23,7 @@ jobs:
       - name: Set config yaml env var
         run: |
           PACKAGE_NAME=${{ steps.main_src_dir.outputs.PACKAGE_NAME }}
-          export ${PACKAGE_NAME^^}_CONFIG_YAML="${PWD}.devcontainer/.internal_file_registry_service.yaml"
+          export ${PACKAGE_NAME^^}_CONFIG_YAML="${PWD}/.devcontainer/.internal_file_registry_service.yaml"
       - name: Set up Python 3.9
         uses: actions/setup-python@v2
         with:
