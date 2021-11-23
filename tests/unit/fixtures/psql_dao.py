@@ -39,7 +39,6 @@ from internal_file_registry_service import models
 from internal_file_registry_service.dao import db_models
 
 SOME_DATE = datetime.now()
-MIGRATION_DIR = "/workspace/db_migration/alembic"
 
 
 def hash_string(str_: str):
