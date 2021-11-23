@@ -79,8 +79,8 @@ def populate_db(db_url: str):
     """Create and populates the DB"""
 
     # setup database and tables:
-    run_migrations(MIGRATION_DIR, db_url)
     engine = create_engine(db_url)
+    db_models.Base.metadata.create_all(engine)
 
     # populate with test data:
     session_factor = sessionmaker(engine)
@@ -90,14 +90,3 @@ def populate_db(db_url: str):
             orm_entry = db_models.FileObject(**param_dict)
             session.add(orm_entry)
         session.commit()
-
-
-from alembic import command
-from alembic.config import Config
-
-
-def run_migrations(script_location: str, dsn: str) -> None:
-    alembic_cfg = Config()
-    alembic_cfg.set_main_option("script_location", script_location)
-    alembic_cfg.set_main_option("sqlalchemy.url", dsn)
-    command.upgrade(alembic_cfg, "head")
