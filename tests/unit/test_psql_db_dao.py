@@ -16,104 +16,70 @@
 """Tests the database DAO implementation base on PostgreSQL"""
 
 import pytest
-from ghga_service_chassis_lib.postgresql import SyncPostgresqlConnector
-from ghga_service_chassis_lib.postgresql_testing import config_from_psql_container
-from testcontainers.postgres import PostgresContainer
 
 from internal_file_registry_service.dao.db import (
     FileInfoAlreadyExistsError,
     FileInfoNotFoundError,
-    PostgresDatabase,
 )
 
-from .fixtures.psql_dao import (
-    ADDITIONAL_FILE_FIXTURES,
-    PREPOPULATED_FILE_FIXTURES,
-    populate_db,
-)
+from .fixtures import psql_fixture  # noqa: F401
 
 
-def configure_database_dao(postgres: PostgresContainer) -> PostgresDatabase:
-    """
-    Get a PostgresDatabase DAO implementation configured for the provided
-    PostgresContainer. Moreover, it will prepopulate the database with fixture entries.
-    """
-    config = config_from_psql_container(postgres)
-    populate_db(config.db_url)
-    psql_connector = SyncPostgresqlConnector(config)
-    return PostgresDatabase(postgresql_connector=psql_connector)
-
-
-def test_get_existing_file_obj():
+def test_get_existing_file_obj(psql_fixture):  # noqa: F811
     """Test getting exiting file info."""
-
-    existing_file_obj = PREPOPULATED_FILE_FIXTURES[0]
-
-    with PostgresContainer() as postgres:
-        with configure_database_dao(postgres) as database:
-            returned_file_obj = database.get_file_info(existing_file_obj.external_id)
-
-    assert existing_file_obj.md5_checksum == returned_file_obj.md5_checksum
+    returned_file_obj = psql_fixture.database.get_file_info(
+        psql_fixture.existing_file_info.external_id,
+    )
+    assert (
+        psql_fixture.existing_file_info.md5_checksum == returned_file_obj.md5_checksum
+    )
 
 
-def test_get_non_existing_file_obj():
+def test_get_non_existing_file_obj(psql_fixture):  # noqa: F811
     """Test getting not existing file info and expect corresponding error."""
-
-    non_existing_file_obj = ADDITIONAL_FILE_FIXTURES[0]
-
-    with PostgresContainer() as postgres:
-        with configure_database_dao(postgres) as database:
-            with pytest.raises(FileInfoNotFoundError):
-                database.get_file_info(non_existing_file_obj.external_id)
+    with pytest.raises(FileInfoNotFoundError):
+        psql_fixture.database.get_file_info(
+            psql_fixture.not_existing_file_info.external_id
+        )
 
 
-def test_register_non_existing_file_obj():
+def test_register_non_existing_file_obj(psql_fixture):  # noqa: F811
     """Test registering not existing file info."""
 
-    non_existing_file_obj = ADDITIONAL_FILE_FIXTURES[0]
+    psql_fixture.database.register_file_info(psql_fixture.not_existing_file_info)
+    returned_file_obj = psql_fixture.database.get_file_info(
+        psql_fixture.not_existing_file_info.external_id
+    )
 
-    with PostgresContainer() as postgres:
-        with configure_database_dao(postgres) as database:
-            database.register_file_info(non_existing_file_obj)
-            returned_file_obj = database.get_file_info(
-                non_existing_file_obj.external_id
-            )
-
-    assert non_existing_file_obj.md5_checksum == returned_file_obj.md5_checksum
+    assert (
+        psql_fixture.not_existing_file_info.md5_checksum
+        == returned_file_obj.md5_checksum
+    )
 
 
-def test_register_existing_file_obj():
+def test_register_existing_file_obj(psql_fixture):  # noqa: F811
     """Test registering an already existing file info and expect corresponding
     error."""
 
-    existing_file_obj = PREPOPULATED_FILE_FIXTURES[0]
-
-    with PostgresContainer() as postgres:
-        with configure_database_dao(postgres) as database:
-            with pytest.raises(FileInfoAlreadyExistsError):
-                database.register_file_info(existing_file_obj)
+    with pytest.raises(FileInfoAlreadyExistsError):
+        psql_fixture.database.register_file_info(psql_fixture.existing_file_info)
 
 
-def test_unregister_non_existing_file_obj():
+def test_unregister_non_existing_file_obj(psql_fixture):  # noqa: F811
     """Test unregistering not existing file info and expect corresponding error."""
-
-    non_existing_file_obj = ADDITIONAL_FILE_FIXTURES[0]
-
-    with PostgresContainer() as postgres:
-        with configure_database_dao(postgres) as database:
-            with pytest.raises(FileInfoNotFoundError):
-                database.unregister_file_info(non_existing_file_obj.external_id)
+    with pytest.raises(FileInfoNotFoundError):
+        psql_fixture.database.unregister_file_info(
+            psql_fixture.not_existing_file_info.external_id
+        )
 
 
-def test_unregister_existing_file_obj():
+def test_unregister_existing_file_obj(psql_fixture):  # noqa: F811
     """Test unregistering an existing file info."""
 
-    existing_file_obj = PREPOPULATED_FILE_FIXTURES[0]
+    psql_fixture.database.unregister_file_info(
+        psql_fixture.existing_file_info.external_id
+    )
 
-    with PostgresContainer() as postgres:
-        with configure_database_dao(postgres) as database:
-            database.unregister_file_info(existing_file_obj.external_id)
-
-            # check if file info can no longer be found:
-            with pytest.raises(FileInfoNotFoundError):
-                database.get_file_info(existing_file_obj.external_id)
+    # check if file info can no longer be found:
+    with pytest.raises(FileInfoNotFoundError):
+        psql_fixture.database.get_file_info(psql_fixture.existing_file_info.external_id)

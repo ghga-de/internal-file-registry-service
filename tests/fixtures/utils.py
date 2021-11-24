@@ -13,18 +13,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Utils for Fixture handling"""
+"""General testing utilities"""
 
 from pathlib import Path
 
 import yaml
 
-from . import BASE_DIR
-
-DEFAULT_TEST_CONFIG_PATH = (BASE_DIR.parent.parent / ".devcontainer").resolve()
+BASE_DIR = Path(__file__).parent.resolve()
 
 
 def read_yaml(path: Path) -> dict:
     """Read yaml file and return content as dict."""
-    with open(path, "r") as file_:
+    with open(path, "r", encoding="utf8") as file_:
         return yaml.safe_load(file_)

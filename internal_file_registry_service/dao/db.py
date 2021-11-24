@@ -19,8 +19,8 @@ from datetime import datetime
 from typing import Any, Optional
 
 from ghga_service_chassis_lib.postgresql import (
-    SyncPostgresqlConnector,
     PostgresqlConfigBase,
+    SyncPostgresqlConnector,
 )
 from ghga_service_chassis_lib.utils import DaoGenericBase
 from sqlalchemy.future import select
@@ -91,7 +91,7 @@ class PostgresDatabase(DatabaseDao):
     def __init__(self, config: PostgresqlConfigBase = CONFIG):
         """initialze DAO implementation"""
 
-        super().__init__()
+        super().__init__(config=config)
         self._postgresql_connector = SyncPostgresqlConnector(config)
 
         # will be defined on __enter__:

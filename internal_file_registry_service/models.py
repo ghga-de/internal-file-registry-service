@@ -37,7 +37,7 @@ class FileInfoExternal(BaseModel):
     grouping_label: str
     md5_checksum: str
     size: int
-    
+
     # pylint: disable=no-self-argument,no-self-use
     @validator("external_id")
     def check_external_id(cls, value: str):

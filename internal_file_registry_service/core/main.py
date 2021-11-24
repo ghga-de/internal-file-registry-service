@@ -15,7 +15,7 @@
 
 """Main business-logic of this service"""
 
-from ..config import Config, CONFIG
+from ..config import CONFIG, Config
 from ..dao import Database, ObjectStorage
 
 
@@ -24,11 +24,11 @@ def copy_file_to_stage(external_file_id: str, config: Config = CONFIG):
 
     # get file info from the database:
     # (will throw an error if file not in registry)
-    with Database(config) as database:
+    with Database(config=config) as database:
         file_info = database.get_file_info(external_file_id)
 
     # copy file object to the stage bucket:
-    with ObjectStorage(config) as storage:
+    with ObjectStorage(config=config) as storage:
         storage.copy_object(
             source_bucket_id=file_info.grouping_label,
             source_object_id=external_file_id,

@@ -16,13 +16,35 @@
 """Test config"""
 
 from pathlib import Path
+from typing import Dict, Optional
 
+from ghga_service_chassis_lib.postgresql_testing import config_from_psql_container
+from ghga_service_chassis_lib.s3_testing import config_from_localstack_container
+from testcontainers.localstack import LocalStackContainer
+from testcontainers.postgres import PostgresContainer
 
-from internal_file_registry_service.config import config
-from . import BASE_DIR
+from internal_file_registry_service.config import Config
+
+from .utils import BASE_DIR
 
 TEST_CONFIG_YAML = BASE_DIR / "test_config.yaml"
 
 
-def get_config(**kwargs):
-    return Config(config_yaml=TEST_CONFIG_YAML, **kwargs)
+def get_config(
+    config_yaml: Path = TEST_CONFIG_YAML,
+    localstack_container: Optional[LocalStackContainer] = None,
+    psql_container: Optional[PostgresContainer] = None,
+):
+    """Merges parameters from the default TEST_CONFIG_YAML with params inferred
+    from testcontainers."""
+    params: Dict[str, object] = {}
+
+    if localstack_container is not None:
+        s3_config = config_from_localstack_container(localstack_container)
+        params.update(**s3_config.dict())
+
+    if psql_container is not None:
+        psql_config = config_from_psql_container(psql_container)
+        params.update(**psql_config.dict())
+
+    return Config(config_yaml=config_yaml, **params)

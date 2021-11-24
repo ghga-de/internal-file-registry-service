@@ -36,7 +36,7 @@ services:
     environment:
       INTERNAL_FILE_REGISTRY_SERVICE_CONFIG_YAML: /workspace/.devcontainer/.dev_config.yaml
       DB_URL: postgresql://postgres:postgres@internal_file_registry_service_db/postgres
-      
+
     # Use "forwardPorts" in **devcontainer.json** to forward an app port locally.
     # (Adding the "ports" property to this file will not forward from a Codespace.)
 

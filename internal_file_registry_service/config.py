@@ -27,4 +27,5 @@ class Config(PubSubConfigBase, PostgresqlConfigBase, S3ConfigBase):
 
     s3_stage_bucket_id: str
 
+
 CONFIG = Config()
