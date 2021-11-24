@@ -103,11 +103,12 @@ class PostgresDatabase(DatabaseDao):
         """Setup database connection"""
 
         self._session_cm = self._postgresql_connector.transactional_session()
-        self._session = self._session_cm.__enter__()
+        self._session = self._session_cm.__enter__()  # pylint: disable=no-member
         return self
 
     def __exit__(self, error_type, error_value, error_traceback):
         """Teardown database connection"""
+        # pylint: disable=no-member
         self._session_cm.__exit__(error_type, error_value, error_traceback)
 
     def _get_orm_file_info(self, external_id: str) -> db_models.FileInfo:
