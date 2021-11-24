@@ -80,6 +80,7 @@ class DatabaseDao(DaoGenericBase):
         """
         Unregister information for a file with the specified external ID from the database.
         """
+
         ...
 
 
