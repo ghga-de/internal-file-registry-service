@@ -29,4 +29,3 @@ class Config(PubSubConfigBase, PostgresqlConfigBase, S3ConfigBase):
 
 
 CONFIG = Config()
-
