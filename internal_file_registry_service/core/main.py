@@ -15,23 +15,23 @@
 
 """Main business-logic of this service"""
 
-from ..config import Config, config
+from ..config import Config, CONFIG
 from ..dao import Database, ObjectStorage
 
 
-def copy_file_to_outbox(external_file_id: str, config_: Config = config):
-    """Copies a file into the outbox bucket."""
+def copy_file_to_stage(external_file_id: str, config: Config = CONFIG):
+    """Copies a file into the stage bucket."""
 
     # get file info from the database:
     # (will throw an error if file not in registry)
-    with Database() as database:
+    with Database(config) as database:
         file_info = database.get_file_info(external_file_id)
 
-    # copy file object to the outbox bucket:
-    with ObjectStorage() as storage:
+    # copy file object to the stage bucket:
+    with ObjectStorage(config) as storage:
         storage.copy_object(
             source_bucket_id=file_info.grouping_label,
             source_object_id=external_file_id,
-            dest_bucket_id=config_.s3_outbox_bucket_id,
+            dest_bucket_id=config.s3_stage_bucket_id,
             dest_object_id=external_file_id,
         )

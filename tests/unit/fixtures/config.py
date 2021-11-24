@@ -13,18 +13,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Config Parameter Modeling and Parsing"""
+"""Test config"""
 
-from ghga_service_chassis_lib.config import config_from_yaml
-from ghga_service_chassis_lib.postgresql import PostgresqlConfigBase
-from ghga_service_chassis_lib.pubsub import PubSubConfigBase
-from ghga_service_chassis_lib.s3 import S3ConfigBase
+from pathlib import Path
 
 
-@config_from_yaml(prefix="internal_file_registry_service")
-class Config(PubSubConfigBase, PostgresqlConfigBase, S3ConfigBase):
-    """Config parameters and their defaults."""
+from internal_file_registry_service.config import config
+from . import BASE_DIR
 
-    s3_stage_bucket_id: str
+TEST_CONFIG_YAML = BASE_DIR / "test_config.yaml"
 
-CONFIG = Config()
+
+def get_config(**kwargs):
+    return Config(config_yaml=TEST_CONFIG_YAML, **kwargs)

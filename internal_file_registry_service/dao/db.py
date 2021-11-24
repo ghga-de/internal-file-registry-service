@@ -18,15 +18,16 @@
 from datetime import datetime
 from typing import Any, Optional
 
-from ghga_service_chassis_lib.postgresql import SyncPostgresqlConnector
+from ghga_service_chassis_lib.postgresql import (
+    SyncPostgresqlConnector,
+    PostgresqlConfigBase,
+)
 from ghga_service_chassis_lib.utils import DaoGenericBase
 from sqlalchemy.future import select
 
 from .. import models
-from ..config import config
+from ..config import CONFIG
 from . import db_models
-
-psql_connector = SyncPostgresqlConnector(config)
 
 
 class FileInfoNotFoundError(RuntimeError):
@@ -87,11 +88,11 @@ class PostgresDatabase(DatabaseDao):
     An implementation of the  DatabaseDao interface using a PostgreSQL backend.
     """
 
-    def __init__(self, postgresql_connector: SyncPostgresqlConnector = psql_connector):
+    def __init__(self, config: PostgresqlConfigBase = CONFIG):
         """initialze DAO implementation"""
 
         super().__init__()
-        self._postgresql_connector = postgresql_connector
+        self._postgresql_connector = SyncPostgresqlConnector(config)
 
         # will be defined on __enter__:
         self._session_cm: Any = None

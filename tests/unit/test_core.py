@@ -13,18 +13,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Config Parameter Modeling and Parsing"""
+"""Tests business-functionality of `core` subpackage"""
 
-from ghga_service_chassis_lib.config import config_from_yaml
-from ghga_service_chassis_lib.postgresql import PostgresqlConfigBase
-from ghga_service_chassis_lib.pubsub import PubSubConfigBase
-from ghga_service_chassis_lib.s3 import S3ConfigBase
+import pytest
+from testcontainers.localstack import LocalStackContainer
+from ghga_service_chassis_lib.s3_testing import config_from_localstack_container
+from internal_file_registry_service.core.main import copy_file_to_stage
+
+import fixtures
+from tests.unit.fixtures.config import get_config
 
 
-@config_from_yaml(prefix="internal_file_registry_service")
-class Config(PubSubConfigBase, PostgresqlConfigBase, S3ConfigBase):
-    """Config parameters and their defaults."""
+def test_copy_file():
+    """Test copying of file"""
 
-    s3_stage_bucket_id: str
+    with LocalStackContainer() as localstack:
+        s3_config = config_from_localstack_container(localstack)
+        config = get_config(**s3_config.dict())
 
-CONFIG = Config()
+        copy_file_to_stage()

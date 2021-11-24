@@ -15,7 +15,6 @@ pip install \
 # install pre-commit hooks to git:
 pre-commit install
 
-cd db_migration
-
 # Check if the database has been initialized and if not initialize it
-# alembic -c alembic.ini upgrade head
+cd db_migration
+alembic -c alembic.ini upgrade head
