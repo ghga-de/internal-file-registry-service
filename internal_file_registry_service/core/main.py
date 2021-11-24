@@ -19,7 +19,7 @@ from ..config import CONFIG, Config
 from ..dao import Database, ObjectStorage
 
 
-def copy_file_to_stage(external_file_id: str, config: Config = CONFIG):
+def stage_file(external_file_id: str, config: Config = CONFIG):
     """Copies a file into the stage bucket."""
 
     # get file info from the database:

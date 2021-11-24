@@ -15,7 +15,7 @@
 
 """Tests business-functionality of `core` subpackage"""
 
-from internal_file_registry_service.core.main import copy_file_to_stage
+from internal_file_registry_service.core.main import stage_file
 
 from .fixtures import core_fixture  # noqa: F401
 
@@ -23,7 +23,7 @@ from .fixtures import core_fixture  # noqa: F401
 def test_copy_file(core_fixture):  # noqa: F811
     """Test copying of file"""
 
-    copy_file_to_stage(
+    stage_file(
         external_file_id=core_fixture.existing_object.object_id,
         config=core_fixture.config,
     )
