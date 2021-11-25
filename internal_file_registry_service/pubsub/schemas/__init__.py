@@ -15,7 +15,7 @@
 
 """Package containing schemas."""
 
-from read_schemas import (  # noqa: F401
+from .read_schemas import (  # noqa: F401
     FILE_STAGED_FOR_DOWNLOAD,
     NON_STAGED_FILE_REQUESTED,
 )
