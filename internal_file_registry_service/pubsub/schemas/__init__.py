@@ -13,9 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""
-Subpackage defineing functions for publishing to or subscribing from
-asynchronous messaging topics.
-"""
+"""Package containing schemas."""
 
-from .sub import subscribe  # noqa: F401
+from read_schemas import (  # noqa: F401
+    FILE_STAGED_FOR_DOWNLOAD,
+    NON_STAGED_FILE_REQUESTED,
+)
