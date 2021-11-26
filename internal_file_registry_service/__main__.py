@@ -13,4 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""This sub-package collects any Data Access Object pattern-related code"""
+"""Entrypoint of the package"""
+
+
+def run():
+    """Run the service"""
+    ...
+
+
+if __name__ == "__main__":
+    run()
