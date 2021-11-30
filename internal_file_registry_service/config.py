@@ -25,8 +25,7 @@ from ghga_service_chassis_lib.s3 import S3ConfigBase
 class Config(PubSubConfigBase, PostgresqlConfigBase, S3ConfigBase):
     """Config parameters and their defaults."""
 
-    # no custom params needed
-    pass  # pylint: disable=unnecessary-pass
+    s3_stage_bucket_id: str
 
 
-config = Config()
+CONFIG = Config()

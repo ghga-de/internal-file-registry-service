@@ -25,12 +25,12 @@ from sqlalchemy.orm.decl_api import DeclarativeMeta
 Base: DeclarativeMeta = declarative_base()
 
 
-class FileObject(Base):
+class FileInfo(Base):
     """
-    ORM model for a File Object.
+    ORM model for file info.
     """
 
-    __tablename__ = "fileobjects"
+    __tablename__ = "fileinfo"
     id = Column(
         UUID(
             as_uuid=True,
@@ -46,6 +46,15 @@ class FileObject(Base):
         doc=(
             "ID used to refer to this file across services. "
             + "May be presented to users."
+        ),
+    )
+    grouping_label = Column(
+        String,
+        nullable=False,
+        unique=True,
+        doc=(
+            "This is a label that might be use to group multiple files together. "
+            + "It is used as bucket_id for the storing files in the permanent storage."
         ),
     )
     md5_checksum = Column(

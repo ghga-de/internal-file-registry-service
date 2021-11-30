@@ -30,7 +30,7 @@
 """Fixtures for testing the PostgreSQL functionalities"""
 
 from datetime import datetime
-from hashlib import md5
+from typing import List
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -38,43 +38,24 @@ from sqlalchemy.orm import sessionmaker
 from internal_file_registry_service import models
 from internal_file_registry_service.dao import db_models
 
-SOME_DATE = datetime.now()
+from .storage import EXISTING_OBJECT, NOT_EXISTING_OBJECT
+
+EXISTING_FILE_INFO = models.FileInfoExternal(
+    external_id=EXISTING_OBJECT.object_id,
+    grouping_label=EXISTING_OBJECT.bucket_id,
+    md5_checksum=EXISTING_OBJECT.md5,
+    size=1000,  # not the real size
+)
+
+NOT_EXISTING_FILE_INFO = models.FileInfoExternal(
+    external_id=NOT_EXISTING_OBJECT.object_id,
+    grouping_label=NOT_EXISTING_OBJECT.bucket_id,
+    md5_checksum=NOT_EXISTING_OBJECT.md5,
+    size=2000,  # not the real size
+)
 
 
-def hash_string(str_: str):
-    """md5 hashes a string"""
-    return md5(str_.encode("utf8")).hexdigest()
-
-
-PREPOPULATED_FILE_FIXTURES = [
-    models.FileObjectExternal(
-        external_id="GHGAF-02143324934345",
-        md5_checksum=hash_string("something to hash 1"),
-        size=1000,
-    ),
-    models.FileObjectExternal(
-        external_id="GHGAF-23429923423423",
-        md5_checksum=hash_string("something to hash 2"),
-        size=2000,
-    ),
-]
-
-
-ADDITIONAL_FILE_FIXTURES = [
-    models.FileObjectExternal(
-        external_id="GHGAF-29992342342234",
-        md5_checksum=hash_string("something to hash 3"),
-        size=3000,
-    ),
-    models.FileObjectExternal(
-        external_id="GHGAF-50098123865883",
-        md5_checksum=hash_string("something to hash 4"),
-        size=4000,
-    ),
-]
-
-
-def populate_db(db_url: str):
+def populate_db(db_url: str, fixtures: List[models.FileInfoExternal]):
     """Create and populates the DB"""
 
     # setup database and tables:
@@ -84,8 +65,8 @@ def populate_db(db_url: str):
     # populate with test data:
     session_factor = sessionmaker(engine)
     with session_factor() as session:
-        for entry in PREPOPULATED_FILE_FIXTURES:
-            param_dict = {**entry.dict(), "registration_date": datetime.now()}
-            orm_entry = db_models.FileObject(**param_dict)
+        for fixture in fixtures:
+            param_dict = {**fixture.dict(), "registration_date": datetime.now()}
+            orm_entry = db_models.FileInfo(**param_dict)
             session.add(orm_entry)
         session.commit()

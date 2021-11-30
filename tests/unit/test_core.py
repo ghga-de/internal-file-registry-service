@@ -13,16 +13,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""General testing utilities"""
+"""Tests business-functionality of `core` subpackage"""
 
-from pathlib import Path
+from internal_file_registry_service.core.main import stage_file
 
-import yaml
-
-BASE_DIR = Path(__file__).parent.resolve()
+from .fixtures import core_fixture  # noqa: F401
 
 
-def read_yaml(path: Path) -> dict:
-    """Read yaml file and return content as dict."""
-    with open(path, "r", encoding="utf8") as file_:
-        return yaml.safe_load(file_)
+def test_copy_file(core_fixture):  # noqa: F811
+    """Test copying of file"""
+
+    stage_file(
+        external_file_id=core_fixture.existing_object.object_id,
+        config=core_fixture.config,
+    )
+
+    assert core_fixture.storage.does_object_exist(
+        object_id=core_fixture.existing_object.object_id,
+        bucket_id=core_fixture.config.s3_stage_bucket_id,
+    )

@@ -15,6 +15,4 @@
 
 """Fixtures that exclusively used in unit tests"""
 
-from pathlib import Path
-
-BASE_DIR = Path(__file__).parent.resolve()
+from .main import core_fixture, psql_fixture  # noqa: F401

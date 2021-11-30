@@ -12,17 +12,3 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-"""General testing utilities"""
-
-from pathlib import Path
-
-import yaml
-
-BASE_DIR = Path(__file__).parent.resolve()
-
-
-def read_yaml(path: Path) -> dict:
-    """Read yaml file and return content as dict."""
-    with open(path, "r", encoding="utf8") as file_:
-        return yaml.safe_load(file_)
