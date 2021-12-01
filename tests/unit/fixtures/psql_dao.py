@@ -29,33 +29,47 @@
 
 """Fixtures for testing the PostgreSQL functionalities"""
 
+from dataclasses import dataclass
 from datetime import datetime
-from typing import List
+from typing import Generator, List
 
+import pytest
+from ghga_service_chassis_lib.object_storage_dao_testing import (
+    DEFAULT_EXISTING_OBJECTS,
+    DEFAULT_NON_EXISTING_OBJECTS,
+)
+from ghga_service_chassis_lib.postgresql import PostgresqlConfigBase
+from ghga_service_chassis_lib.postgresql_testing import config_from_psql_container
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from testcontainers.postgres import PostgresContainer
 
 from internal_file_registry_service import models
 from internal_file_registry_service.dao import db_models
+from internal_file_registry_service.dao.db import PostgresDatabase
 
-from .storage import EXISTING_OBJECT, NOT_EXISTING_OBJECT
+EXISTING_FILE_INFOS = [
+    models.FileInfoExternal(
+        external_id=existing_object.object_id,
+        grouping_label=existing_object.bucket_id,
+        md5_checksum=existing_object.md5,
+        size=1000,  # not the real size
+    )
+    for existing_object in DEFAULT_EXISTING_OBJECTS
+]
 
-EXISTING_FILE_INFO = models.FileInfoExternal(
-    external_id=EXISTING_OBJECT.object_id,
-    grouping_label=EXISTING_OBJECT.bucket_id,
-    md5_checksum=EXISTING_OBJECT.md5,
-    size=1000,  # not the real size
-)
-
-NOT_EXISTING_FILE_INFO = models.FileInfoExternal(
-    external_id=NOT_EXISTING_OBJECT.object_id,
-    grouping_label=NOT_EXISTING_OBJECT.bucket_id,
-    md5_checksum=NOT_EXISTING_OBJECT.md5,
-    size=2000,  # not the real size
-)
+NON_EXISTING_FILE_INFOS = [
+    models.FileInfoExternal(
+        external_id=non_existing_object.object_id,
+        grouping_label=non_existing_object.bucket_id,
+        md5_checksum=non_existing_object.md5,
+        size=1000,  # not the real size
+    )
+    for non_existing_object in DEFAULT_NON_EXISTING_OBJECTS
+]
 
 
-def populate_db(db_url: str, fixtures: List[models.FileInfoExternal]):
+def populate_db(db_url: str, existing_file_infos: List[models.FileInfoExternal]):
     """Create and populates the DB"""
 
     # setup database and tables:
@@ -65,8 +79,38 @@ def populate_db(db_url: str, fixtures: List[models.FileInfoExternal]):
     # populate with test data:
     session_factor = sessionmaker(engine)
     with session_factor() as session:
-        for fixture in fixtures:
-            param_dict = {**fixture.dict(), "registration_date": datetime.now()}
+        for existing_file_info in existing_file_infos:
+            param_dict = {
+                **existing_file_info.dict(),
+                "registration_date": datetime.now(),
+            }
             orm_entry = db_models.FileInfo(**param_dict)
             session.add(orm_entry)
         session.commit()
+
+
+@dataclass
+class PsqlFixture:
+    """Info yielded by the `psql_fixture` function"""
+
+    config: PostgresqlConfigBase
+    database: PostgresDatabase
+    existing_file_infos: List[models.FileInfoExternal]
+    non_existing_file_infos: List[models.FileInfoExternal]
+
+
+@pytest.fixture
+def psql_fixture() -> Generator[PsqlFixture, None, None]:
+    """Pytest fixture for tests of the Prostgres DAO implementation."""
+
+    with PostgresContainer() as postgres:
+        config = config_from_psql_container(postgres)
+        populate_db(config.db_url, existing_file_infos=EXISTING_FILE_INFOS)
+
+        with PostgresDatabase(config) as database:
+            yield PsqlFixture(
+                config=config,
+                database=database,
+                existing_file_infos=EXISTING_FILE_INFOS,
+                non_existing_file_infos=NON_EXISTING_FILE_INFOS,
+            )

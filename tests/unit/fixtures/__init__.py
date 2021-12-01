@@ -15,4 +15,5 @@
 
 """Fixtures that exclusively used in unit tests"""
 
-from .main import core_fixture, psql_fixture  # noqa: F401
+from .psql_dao import psql_fixture  # noqa: F401
+from .s3 import s3_fixture  # noqa: F401

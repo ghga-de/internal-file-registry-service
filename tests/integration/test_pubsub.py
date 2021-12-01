@@ -13,9 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""
-Subpackage defineing functions for publishing to or subscribing from
-asynchronous messaging topics.
-"""
+"""Test the messaging API (pubsub)"""
 
-from .sub import subscribe_stage_requests  # noqa: F401
+
+def test_subscribe_stage_requests():
+    """Test `subscribe_stage_requests` function"""
+    pass

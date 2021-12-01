@@ -16,12 +16,9 @@
 """Test config"""
 
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 
-from ghga_service_chassis_lib.postgresql_testing import config_from_psql_container
-from ghga_service_chassis_lib.s3_testing import config_from_localstack_container
-from testcontainers.localstack import LocalStackContainer
-from testcontainers.postgres import PostgresContainer
+from pydantic.env_settings import BaseSettings
 
 from internal_file_registry_service.config import Config
 
@@ -31,20 +28,18 @@ TEST_CONFIG_YAML = BASE_DIR / "test_config.yaml"
 
 
 def get_config(
-    config_yaml: Path = TEST_CONFIG_YAML,
-    localstack_container: Optional[LocalStackContainer] = None,
-    psql_container: Optional[PostgresContainer] = None,
+    sources: Optional[List[BaseSettings]] = None,
+    default_config_yaml: Path = TEST_CONFIG_YAML,
 ):
     """Merges parameters from the default TEST_CONFIG_YAML with params inferred
     from testcontainers."""
-    params: Dict[str, object] = {}
+    sources_dict: Dict[str, object] = {}
 
-    if localstack_container is not None:
-        s3_config = config_from_localstack_container(localstack_container)
-        params.update(**s3_config.dict())
+    if sources is not None:
+        for source in sources:
+            sources_dict.update(**source.dict())
 
-    if psql_container is not None:
-        psql_config = config_from_psql_container(psql_container)
-        params.update(**psql_config.dict())
+    return Config(config_yaml=default_config_yaml, **sources_dict)
 
-    return Config(config_yaml=config_yaml, **params)
+
+DEFAULT_CONFIG = get_config()

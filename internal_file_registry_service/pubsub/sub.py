@@ -42,7 +42,7 @@ def handle_stage_request(message: Dict[str, Any], config: Config = CONFIG) -> No
     )
 
 
-def subscribe(config: Config = CONFIG) -> None:
+def subscribe_stage_requests(config: Config = CONFIG) -> None:
     """
     Subscribe to topic that informs whenever a file needs to be staged.
     This function is blocking and infinitily waits for new messages.

@@ -31,18 +31,21 @@
 
 """Fixtures for testing the storage DAO"""
 
-from ghga_service_chassis_lib.object_storage_dao_testing import ObjectFixture
-
-from .utils import BASE_DIR
-
-EXISTING_OBJECT = ObjectFixture(
-    file_path=BASE_DIR / "test_file1.yaml",
-    bucket_id="ghgas-9992324243",
-    object_id="ghgaf-8234659943",
+from ghga_service_chassis_lib.object_storage_dao_testing import (
+    DEFAULT_EXISTING_BUCKETS,
+    DEFAULT_EXISTING_OBJECTS,
+    DEFAULT_NON_EXISTING_BUCKETS,
+    DEFAULT_NON_EXISTING_OBJECTS,
 )
+from ghga_service_chassis_lib.s3_testing import s3_fixture_factory
 
-NOT_EXISTING_OBJECT = ObjectFixture(
-    file_path=BASE_DIR / "test_file2.yaml",
-    bucket_id="ghgas-3440345533",
-    object_id="ghgaf-5226343543",
+from .config import DEFAULT_CONFIG
+
+EXISTING_BUCKETS = DEFAULT_EXISTING_BUCKETS.append(DEFAULT_CONFIG.s3_stage_bucket_id)
+
+s3_fixture = s3_fixture_factory(
+    existing_buckets=EXISTING_BUCKETS,
+    non_existing_buckets=DEFAULT_NON_EXISTING_BUCKETS,
+    existing_objects=DEFAULT_EXISTING_OBJECTS,
+    non_existing_objects=DEFAULT_NON_EXISTING_OBJECTS,
 )
