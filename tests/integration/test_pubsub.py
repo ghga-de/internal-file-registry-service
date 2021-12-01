@@ -15,13 +15,20 @@
 
 """Test the messaging API (pubsub)"""
 
+from ghga_service_chassis_lib.utils import exec_with_timeout
+
 from internal_file_registry_service.pubsub import schemas, subscribe_stage_requests
 
-from ..fixtures import TEST_MESSAGES, amqp_fixture, get_config, psql_fixture, s3_fixture
-from ..fixtures.pubsub import exec_with_timeout
+from ..fixtures import (  # noqa: F401
+    TEST_MESSAGES,
+    amqp_fixture,
+    get_config,
+    psql_fixture,
+    s3_fixture,
+)
 
 
-def test_subscribe_stage_requests(psql_fixture, s3_fixture, amqp_fixture):
+def test_subscribe_stage_requests(psql_fixture, s3_fixture, amqp_fixture):  # noqa: F811
     """Test `subscribe_stage_requests` function"""
     config = get_config(
         sources=[psql_fixture.config, s3_fixture.config, amqp_fixture.config]

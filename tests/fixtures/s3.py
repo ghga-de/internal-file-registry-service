@@ -33,7 +33,6 @@
 
 from ghga_service_chassis_lib.object_storage_dao_testing import (
     DEFAULT_EXISTING_BUCKETS,
-    DEFAULT_EXISTING_OBJECTS,
     DEFAULT_NON_EXISTING_BUCKETS,
     DEFAULT_NON_EXISTING_OBJECTS,
 )

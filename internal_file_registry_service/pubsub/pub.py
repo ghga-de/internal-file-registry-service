@@ -15,10 +15,8 @@
 
 """Publish messages/events to async messaging topics."""
 
-from copy import deepcopy
 from datetime import datetime
 
-import pika
 from ghga_service_chassis_lib.pubsub import AmqpTopic
 
 from ..config import CONFIG, Config

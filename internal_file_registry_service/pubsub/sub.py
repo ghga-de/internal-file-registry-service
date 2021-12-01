@@ -17,7 +17,6 @@
 
 from typing import Any, Dict
 
-import pika
 from ghga_service_chassis_lib.pubsub import AmqpTopic
 
 from ..config import CONFIG, Config
