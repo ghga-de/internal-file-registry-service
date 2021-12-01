@@ -39,24 +39,23 @@ def handle_stage_request(message: Dict[str, Any], config: Config = CONFIG) -> No
         request_id=message["request_id"],
         external_file_id=message["file_id"],
         grouping_label=message["grouping_label"],
+        config=config,
     )
 
 
-def subscribe_stage_requests(config: Config = CONFIG) -> None:
+def subscribe_stage_requests(config: Config = CONFIG, run_forever: bool = True) -> None:
     """
     Subscribe to topic that informs whenever a file needs to be staged.
     This function is blocking and infinitily waits for new messages.
     """
 
     topic = AmqpTopic(
-        connection_params=pika.ConnectionParameters(
-            host=config.rabbitmq_host, port=config.rabbitmq_port
-        ),
+        config=config,
         topic_name=config.topic_name_non_staged_file_requested,
-        service_name=config.service_name,
         json_schema=schemas.NON_STAGED_FILE_REQUESTED,
     )
 
-    topic.subscribe_for_ever(
-        exec_on_message=lambda message: handle_stage_request(message, config=config)
+    topic.subscribe(
+        exec_on_message=lambda message: handle_stage_request(message, config=config),
+        run_forever=run_forever,
     )

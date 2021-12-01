@@ -13,8 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Fixtures that are used in both integration and unit tests"""
+"""Fixtures that exclusively used in unit tests"""
 
-from pathlib import Path
-
-BASE_DIR = Path(__file__).parent.resolve()
+from .config import get_config  # noqa: F401
+from .psql import psql_fixture  # noqa: F401
+from .pubsub import TEST_MESSAGES, amqp_fixture  # noqa: F401
+from .s3 import s3_fixture  # noqa: F401

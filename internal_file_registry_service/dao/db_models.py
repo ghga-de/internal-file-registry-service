@@ -51,7 +51,7 @@ class FileInfo(Base):
     grouping_label = Column(
         String,
         nullable=False,
-        unique=True,
+        unique=False,
         doc=(
             "This is a label that might be use to group multiple files together. "
             + "It is used as bucket_id for the storing files in the permanent storage."

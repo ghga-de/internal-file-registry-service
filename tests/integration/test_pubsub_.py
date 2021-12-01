@@ -13,4 +13,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Pub sub fixtures"""
+"""Test the messaging API (pubsub)"""
+
+from ..fixtures import amqp_fixture  # noqa: F401
+
+
+def test_pub_sub(amqp_fixture):
+    """Test `subscribe_stage_requests` function"""
+    topic_name = "test"
+    message = {"test": "test"}
+
+    publisher = amqp_fixture.get_test_publisher(topic_name=topic_name)
+
+    publisher.publish(message)
+
+    subscriber = amqp_fixture.get_test_subscriber(topic_name=topic_name)
+    subscriber.subscribe(expected_message=message, timeout_after=10)

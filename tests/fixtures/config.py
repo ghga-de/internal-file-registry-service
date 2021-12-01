@@ -30,7 +30,7 @@ TEST_CONFIG_YAML = BASE_DIR / "test_config.yaml"
 def get_config(
     sources: Optional[List[BaseSettings]] = None,
     default_config_yaml: Path = TEST_CONFIG_YAML,
-):
+) -> Config:
     """Merges parameters from the default TEST_CONFIG_YAML with params inferred
     from testcontainers."""
     sources_dict: Dict[str, object] = {}

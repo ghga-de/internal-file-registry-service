@@ -35,7 +35,6 @@ from typing import Generator, List
 
 import pytest
 from ghga_service_chassis_lib.object_storage_dao_testing import (
-    DEFAULT_EXISTING_OBJECTS,
     DEFAULT_NON_EXISTING_OBJECTS,
 )
 from ghga_service_chassis_lib.postgresql import PostgresqlConfigBase
@@ -48,6 +47,9 @@ from internal_file_registry_service import models
 from internal_file_registry_service.dao import db_models
 from internal_file_registry_service.dao.db import PostgresDatabase
 
+from .config import DEFAULT_CONFIG
+from .storage import EXISTING_OBJECTS
+
 EXISTING_FILE_INFOS = [
     models.FileInfoExternal(
         external_id=existing_object.object_id,
@@ -55,7 +57,10 @@ EXISTING_FILE_INFOS = [
         md5_checksum=existing_object.md5,
         size=1000,  # not the real size
     )
-    for existing_object in DEFAULT_EXISTING_OBJECTS
+    for existing_object in EXISTING_OBJECTS
+    # Omit objects that are located in the stage bucket
+    # as they are not tracked by this service:
+    if existing_object.bucket_id != DEFAULT_CONFIG.s3_stage_bucket_id
 ]
 
 NON_EXISTING_FILE_INFOS = [

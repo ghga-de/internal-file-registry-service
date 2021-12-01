@@ -22,7 +22,7 @@ from internal_file_registry_service.dao.db import (
     FileInfoNotFoundError,
 )
 
-from .fixtures import psql_fixture  # noqa: F401
+from ..fixtures import psql_fixture  # noqa: F401
 
 
 def test_get_existing_file_obj(psql_fixture):  # noqa: F811

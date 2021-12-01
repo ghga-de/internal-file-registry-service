@@ -16,15 +16,14 @@
 """Tests business-functionality of `core` subpackage"""
 
 from internal_file_registry_service.core.main import stage_file
-from tests.unit.fixtures.config import get_config
 
-from .fixtures import psql_fixture, s3_fixture  # noqa: F401
+from ..fixtures import get_config, psql_fixture, s3_fixture  # noqa: F401
 
 
 def test_copy_file(psql_fixture, s3_fixture):  # noqa: F811
     """Test copying of file"""
     config = get_config(sources=[psql_fixture.config, s3_fixture.config])
-    existing_object_id = s3_fixture.existing_objects[0].object_id
+    existing_object_id = psql_fixture.existing_file_infos[0].external_id
 
     stage_file(
         external_file_id=existing_object_id,

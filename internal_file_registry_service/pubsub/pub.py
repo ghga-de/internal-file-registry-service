@@ -15,6 +15,7 @@
 
 """Publish messages/events to async messaging topics."""
 
+from copy import deepcopy
 from datetime import datetime
 
 import pika
@@ -30,11 +31,8 @@ def publish_file_staged(
     """Publish an event/message informing that a new file was staged."""
 
     topic = AmqpTopic(
-        connection_params=pika.ConnectionParameters(
-            host=config.rabbitmq_host, port=config.rabbitmq_port
-        ),
+        config=config,
         topic_name=config.topic_name_file_staged_for_download,
-        service_name=config.service_name,
         json_schema=schemas.FILE_STAGED_FOR_DOWNLOAD,
     )
 
@@ -42,7 +40,7 @@ def publish_file_staged(
         "request_id": request_id,
         "file_id": external_file_id,
         "grouping_label": grouping_label,
-        "timestamp": datetime.now(),
+        "timestamp": datetime.now().isoformat(),
     }
 
     topic.publish(message)
