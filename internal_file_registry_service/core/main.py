@@ -41,8 +41,32 @@ def stage_file(external_file_id: str, config: Config = CONFIG) -> None:
             storage.copy_object(
                 source_bucket_id=file_info.grouping_label,
                 source_object_id=external_file_id,
-                dest_bucket_id=config.s3_stage_bucket_id,
+                dest_bucket_id=config.s3_out_stage_bucket_id,
                 dest_object_id=external_file_id,
             )
         except ObjectAlreadyExistsError as error:
             raise FileAlreadyOnStageError(external_file_id=external_file_id) from error
+
+
+def register_file(external_file_id: str, config: Config = CONFIG) -> None:
+    """Register a new file to the database and copy it from a stage bucket (e.g. inbox)
+    to the permanent file storage."""
+
+    # get file info from the database:
+    # (will throw an error if file not in registry)
+    with Database(config=config) as database:
+        file_info = database.get_file_info(external_file_id)
+
+        # copy file object to the stage bucket:
+        with ObjectStorage(config=config) as storage:
+            try:
+                storage.copy_object(
+                    source_bucket_id=file_info.grouping_label,
+                    source_object_id=external_file_id,
+                    dest_bucket_id=config.s3_out_stage_bucket_id,
+                    dest_object_id=external_file_id,
+                )
+            except ObjectAlreadyExistsError as error:
+                raise FileAlreadyOnStageError(
+                    external_file_id=external_file_id
+                ) from error

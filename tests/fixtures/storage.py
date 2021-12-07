@@ -22,7 +22,7 @@ from .config import DEFAULT_CONFIG
 
 EXAMPLE_STUDY_ID = "mystudy-123456789"
 
-EXISTING_BUCKETS = [DEFAULT_CONFIG.s3_stage_bucket_id, EXAMPLE_STUDY_ID]
+EXISTING_BUCKETS = [DEFAULT_CONFIG.s3_out_stage_bucket_id, EXAMPLE_STUDY_ID]
 
 EXISTING_OBJECTS = [
     # File located only in the permanent storage:
@@ -39,7 +39,7 @@ EXISTING_OBJECTS = [
     ),
     ObjectFixture(
         file_path=TEST_FILE_PATHS[1],
-        bucket_id=DEFAULT_CONFIG.s3_stage_bucket_id,
+        bucket_id=DEFAULT_CONFIG.s3_out_stage_bucket_id,
         object_id="myfile-22222222",
     ),
 ]

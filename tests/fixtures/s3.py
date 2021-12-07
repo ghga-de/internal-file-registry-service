@@ -41,7 +41,9 @@ from ghga_service_chassis_lib.s3_testing import s3_fixture_factory
 from .config import DEFAULT_CONFIG
 from .storage import EXISTING_OBJECTS
 
-EXISTING_BUCKETS = DEFAULT_EXISTING_BUCKETS.append(DEFAULT_CONFIG.s3_stage_bucket_id)
+EXISTING_BUCKETS = DEFAULT_EXISTING_BUCKETS.append(
+    DEFAULT_CONFIG.s3_out_stage_bucket_id
+)
 
 s3_fixture = s3_fixture_factory(
     existing_buckets=EXISTING_BUCKETS,

@@ -85,7 +85,7 @@ def core_fixture() -> Generator[CoreFixture, None, None]:
 
             with ObjectStorage(config=config) as storage:
                 populate_storage(storage=storage, fixtures=[EXISTING_OBJECT])
-                storage.create_bucket(config.s3_stage_bucket_id)
+                storage.create_bucket(config.s3_out_stage_bucket_id)
 
                 with PostgresDatabase(config) as database:
                     yield CoreFixture(

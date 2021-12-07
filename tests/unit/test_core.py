@@ -32,5 +32,5 @@ def test_copy_file(psql_fixture, s3_fixture):  # noqa: F811
 
     assert s3_fixture.storage.does_object_exist(
         object_id=existing_object_id,
-        bucket_id=config.s3_stage_bucket_id,
+        bucket_id=config.s3_out_stage_bucket_id,
     )

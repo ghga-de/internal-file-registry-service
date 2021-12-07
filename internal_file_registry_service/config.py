@@ -25,7 +25,10 @@ from ghga_service_chassis_lib.s3 import S3ConfigBase
 class Config(PubSubConfigBase, PostgresqlConfigBase, S3ConfigBase):
     """Config parameters and their defaults."""
 
-    s3_stage_bucket_id: str
+    # stage for outgoing objects (download):
+    s3_out_stage_bucket_id: str
+    # stage for incomming objects (registration):
+    # s3_in_stage_bucket_id: str
 
     service_name: str = "internal_file_registry"
     topic_name_non_staged_file_requested: str = "non_staged_file_requested"

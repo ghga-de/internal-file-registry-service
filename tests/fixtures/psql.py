@@ -60,7 +60,7 @@ EXISTING_FILE_INFOS = [
     for existing_object in EXISTING_OBJECTS
     # Omit objects that are located in the stage bucket
     # as they are not tracked by this service:
-    if existing_object.bucket_id != DEFAULT_CONFIG.s3_stage_bucket_id
+    if existing_object.bucket_id != DEFAULT_CONFIG.s3_out_stage_bucket_id
 ]
 
 NON_EXISTING_FILE_INFOS = [
