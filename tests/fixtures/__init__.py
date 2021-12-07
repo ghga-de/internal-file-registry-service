@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Fixtures that exclusively used in unit tests"""
+"""Fixtures that can be used in both unit and integration tests"""
 
 from .config import get_config  # noqa: F401
 from .psql import psql_fixture  # noqa: F401
