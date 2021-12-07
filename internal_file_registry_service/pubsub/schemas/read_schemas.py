@@ -13,4 +13,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Consuming or Subscribing to Async Messaging Topics"""
+"""Read in schemas from json files"""
+
+import json
+from pathlib import Path
+from typing import Dict
+
+HERE = Path(__file__).parent.resolve()
+
+
+def read_schema(topic_name: str) -> Dict[str, object]:
+    """Read schemas from file"""
+    with open(HERE / f"{topic_name}.json", "r", encoding="utf8") as schema_file:
+        return json.load(schema_file)
+
+
+NON_STAGED_FILE_REQUESTED = read_schema("non_staged_file_requested")
+FILE_STAGED_FOR_DOWNLOAD = read_schema("file_staged_for_download")

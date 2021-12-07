@@ -17,12 +17,4 @@
 
 from pathlib import Path
 
-import yaml
-
 BASE_DIR = Path(__file__).parent.resolve()
-
-
-def read_yaml(path: Path) -> dict:
-    """Read yaml file and return content as dict."""
-    with open(path, "r", encoding="utf8") as file_:
-        return yaml.safe_load(file_)

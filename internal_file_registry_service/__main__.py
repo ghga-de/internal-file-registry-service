@@ -15,10 +15,12 @@
 
 """Entrypoint of the package"""
 
+from . import pubsub
+
 
 def run():
     """Run the service"""
-    ...
+    pubsub.subscribe_stage_requests()
 
 
 if __name__ == "__main__":

@@ -16,10 +16,18 @@
 """Main business-logic of this service"""
 
 from ..config import CONFIG, Config
-from ..dao import Database, ObjectStorage
+from ..dao import Database, ObjectAlreadyExistsError, ObjectStorage
 
 
-def stage_file(external_file_id: str, config: Config = CONFIG):
+class FileAlreadyOnStageError(RuntimeError):
+    """Thrown when there was a stage request for an already staged file."""
+
+    def __init__(self, external_file_id: str):
+        message = f"The file with external id {external_file_id} is already staged."
+        super().__init__(message)
+
+
+def stage_file(external_file_id: str, config: Config = CONFIG) -> None:
     """Copies a file into the stage bucket."""
 
     # get file info from the database:
@@ -29,9 +37,12 @@ def stage_file(external_file_id: str, config: Config = CONFIG):
 
     # copy file object to the stage bucket:
     with ObjectStorage(config=config) as storage:
-        storage.copy_object(
-            source_bucket_id=file_info.grouping_label,
-            source_object_id=external_file_id,
-            dest_bucket_id=config.s3_stage_bucket_id,
-            dest_object_id=external_file_id,
-        )
+        try:
+            storage.copy_object(
+                source_bucket_id=file_info.grouping_label,
+                source_object_id=external_file_id,
+                dest_bucket_id=config.s3_stage_bucket_id,
+                dest_object_id=external_file_id,
+            )
+        except ObjectAlreadyExistsError as error:
+            raise FileAlreadyOnStageError(external_file_id=external_file_id) from error

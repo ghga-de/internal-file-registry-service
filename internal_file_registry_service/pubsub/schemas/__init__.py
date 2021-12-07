@@ -13,4 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Fixtures that are used excusively in integration tests"""
+"""Package containing schemas."""
+
+from .read_schemas import (  # noqa: F401
+    FILE_STAGED_FOR_DOWNLOAD,
+    NON_STAGED_FILE_REQUESTED,
+)

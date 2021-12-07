@@ -13,6 +13,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Fixtures that exclusively used in unit tests"""
-
-from .main import core_fixture, psql_fixture  # noqa: F401
+"""Fixtures that are used excusively in unit tests"""

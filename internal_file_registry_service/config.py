@@ -27,5 +27,9 @@ class Config(PubSubConfigBase, PostgresqlConfigBase, S3ConfigBase):
 
     s3_stage_bucket_id: str
 
+    service_name: str = "internal_file_registry"
+    topic_name_non_staged_file_requested: str = "non_staged_file_requested"
+    topic_name_file_staged_for_download: str = "file_staged_for_download"
+
 
 CONFIG = Config()
