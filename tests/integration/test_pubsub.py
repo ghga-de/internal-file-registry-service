@@ -15,11 +15,18 @@
 
 """Test the messaging API (pubsub)"""
 
+from typing import Any, Callable, Dict
+
 from ghga_service_chassis_lib.utils import exec_with_timeout
 
-from internal_file_registry_service.pubsub import schemas, subscribe_stage_requests
+from internal_file_registry_service.pubsub import (
+    schemas,
+    subscribe_registration_request,
+    subscribe_stage_requests,
+)
 
 from ..fixtures import (  # noqa: F401
+    DEFAULT_CONFIG,
     amqp_fixture,
     get_config,
     psql_fixture,
@@ -28,23 +35,33 @@ from ..fixtures import (  # noqa: F401
 )
 
 
-def test_subscribe_stage_requests(psql_fixture, s3_fixture, amqp_fixture):  # noqa: F811
-    """Test `subscribe_stage_requests` function"""
+def sub_and_pub_test_generic(
+    upstream_topic_name: str,
+    downstream_topic_name: str,
+    upstream_message: Dict[str, Any],
+    upstream_msg_schema: dict,
+    downstream_msg_schema: dict,
+    subscribe_func: Callable,
+    psql_fixture,  # noqa: F811
+    s3_fixture,  # noqa: F811
+    amqp_fixture,  # noqa: F811
+):
+    """Generic function for testing functions that first subscribe and then publish."""
+
     config = get_config(
         sources=[psql_fixture.config, s3_fixture.config, amqp_fixture.config]
     )
-    upstream_message = state.FILES["in_registry"].message
 
     # initialize upstream and downstream test services that will publish or receive
     # messages to or from this service:
     upstream_publisher = amqp_fixture.get_test_publisher(
-        topic_name=config.topic_name_non_staged_file_requested,
-        message_schema=schemas.NON_STAGED_FILE_REQUESTED,
+        topic_name=upstream_topic_name,
+        message_schema=upstream_msg_schema,
     )
 
     downstream_subscriber = amqp_fixture.get_test_subscriber(
-        topic_name=config.topic_name_file_staged_for_download,
-        message_schema=schemas.FILE_STAGED_FOR_DOWNLOAD,
+        topic_name=downstream_topic_name,
+        message_schema=downstream_msg_schema,
     )
 
     # publish a stage request:
@@ -52,10 +69,44 @@ def test_subscribe_stage_requests(psql_fixture, s3_fixture, amqp_fixture):  # no
 
     # process the stage request:
     exec_with_timeout(
-        func=lambda: subscribe_stage_requests(config=config, run_forever=False),
+        func=lambda: subscribe_func(config=config, run_forever=False),
         timeout_after=2,
     )
 
     # expect stage confirmation message:
     downstream_message = downstream_subscriber.subscribe(timeout_after=2)
     assert downstream_message["file_id"] == upstream_message["file_id"]
+
+
+def test_subscribe_stage_requests(psql_fixture, s3_fixture, amqp_fixture):  # noqa: F811
+    """Test `subscribe_stage_requests` function"""
+
+    sub_and_pub_test_generic(
+        upstream_topic_name=DEFAULT_CONFIG.topic_name_stage_request,
+        downstream_topic_name=DEFAULT_CONFIG.topic_name_staged_to_outbox,
+        upstream_message=state.FILES["in_registry"].message,
+        upstream_msg_schema=schemas.STAGE_REQUEST,
+        downstream_msg_schema=schemas.STAGED_TO_OUTBOX,
+        subscribe_func=subscribe_stage_requests,
+        psql_fixture=psql_fixture,
+        s3_fixture=s3_fixture,
+        amqp_fixture=amqp_fixture,
+    )
+
+
+def test_subscribe_registration_request(
+    psql_fixture, s3_fixture, amqp_fixture  # noqa: F811
+):
+    """Test `subscribe_registration_request` function"""
+
+    sub_and_pub_test_generic(
+        upstream_topic_name=DEFAULT_CONFIG.topic_name_reg_request,
+        downstream_topic_name=DEFAULT_CONFIG.topic_name_registered,
+        upstream_message=state.FILES["in_inbox_only"].message,
+        upstream_msg_schema=schemas.REG_REQUEST,
+        downstream_msg_schema=schemas.REGISTERED,
+        subscribe_func=subscribe_registration_request,
+        psql_fixture=psql_fixture,
+        s3_fixture=s3_fixture,
+        amqp_fixture=amqp_fixture,
+    )

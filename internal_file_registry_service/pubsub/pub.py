@@ -19,26 +19,60 @@ from datetime import datetime
 
 from ghga_service_chassis_lib.pubsub import AmqpTopic
 
+from .. import models
 from ..config import CONFIG, Config
 from . import schemas
 
 
-def publish_file_staged(
-    request_id: str, external_file_id: str, grouping_label: str, config: Config = CONFIG
+def publish_file_info_generic(
+    topic_name: str,
+    message_schema: dict,
+    file_info: models.FileInfoExternal,
+    request_id: str,
+    config: Config = CONFIG,
 ):
-    """Publish an event/message informing that a new file was staged."""
+    """A generic function to publish file infos as message to specified topic name."""
 
     topic = AmqpTopic(
         config=config,
-        topic_name=config.topic_name_file_staged_for_download,
-        json_schema=schemas.FILE_STAGED_FOR_DOWNLOAD,
+        topic_name=topic_name,
+        json_schema=message_schema,
     )
 
     message = {
         "request_id": request_id,
-        "file_id": external_file_id,
-        "grouping_label": grouping_label,
+        "file_id": file_info.external_id,
+        "grouping_label": file_info.grouping_label,
+        "md5_checksum": file_info.md5_checksum,
         "timestamp": datetime.now().isoformat(),
     }
 
     topic.publish(message)
+
+
+def publish_upon_file_stage(
+    file_info: models.FileInfoExternal, request_id: str, config: Config = CONFIG
+):
+    """Publish an event/message informing that a new file was staged."""
+
+    publish_file_info_generic(
+        topic_name=config.topic_name_staged_to_outbox,
+        message_schema=schemas.STAGED_TO_OUTBOX,
+        file_info=file_info,
+        request_id=request_id,
+        config=config,
+    )
+
+
+def publish_upon_registration(
+    file_info: models.FileInfoExternal, request_id: str, config: Config = CONFIG
+):
+    """Publish an event/message informing that a new file was successfully registered."""
+
+    publish_file_info_generic(
+        topic_name=config.topic_name_registered,
+        message_schema=schemas.REGISTERED,
+        file_info=file_info,
+        request_id=request_id,
+        config=config,
+    )

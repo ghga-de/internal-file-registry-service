@@ -74,7 +74,6 @@ class FileState:
             external_id=self.id,
             grouping_label=self.grouping_label,
             md5_checksum=self.md5,
-            size=1000,  # not the real size
         )
 
         self.storage_objects: List[ObjectFixture] = []
@@ -116,6 +115,7 @@ FILES: Dict[str, FileState] = {
             "drs_id": create_fake_drs_uri(get_file_id_example(0)),
             "file_id": get_file_id_example(0),
             "grouping_label": get_study_id_example(0),
+            "md5_checksum": "3851c5cb7518a2ff67ab5581c3e01f2f",  # fake checksum
             "request_id": "my_test_stage_request_001",
             "timestamp": datetime.now().isoformat(),
         },
@@ -135,6 +135,13 @@ FILES: Dict[str, FileState] = {
         in_permanent_storage=False,
         in_inbox=True,
         in_outbox=False,
+        message={
+            "file_id": get_file_id_example(2),
+            "grouping_label": get_study_id_example(1),
+            "md5_checksum": "3851c5cb7518a2ff67ab5581c3e01f2f",  # fake checksum
+            "request_id": "my_test_reg_request_001",
+            "timestamp": datetime.now().isoformat(),
+        },
     ),
     "db_missing": FileState(
         id=get_file_id_example(100),
