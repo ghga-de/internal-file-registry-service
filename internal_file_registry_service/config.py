@@ -26,9 +26,9 @@ class Config(PubSubConfigBase, PostgresqlConfigBase, S3ConfigBase):
     """Config parameters and their defaults."""
 
     # stage for outgoing objects (download):
-    s3_out_stage_bucket_id: str
+    s3_outbox_bucket_id: str
     # stage for incomming objects (registration):
-    s3_in_stage_bucket_id: str
+    s3_inbox_bucket_id: str
 
     service_name: str = "internal_file_registry"
     topic_name_non_staged_file_requested: str = "non_staged_file_requested"

@@ -41,7 +41,7 @@ class FileAlreadyInRegistryError(RuntimeError):
     def __init__(self, external_file_id: str):
         message = (
             f"The file with external id {external_file_id} is already in the"
-            + "internal file registry."
+            + " internal file registry."
         )
         super().__init__(message)
 
@@ -89,7 +89,7 @@ def stage_file(external_file_id: str, config: Config = CONFIG) -> None:
             storage.copy_object(
                 source_bucket_id=file_info.grouping_label,
                 source_object_id=external_file_id,
-                dest_bucket_id=config.s3_out_stage_bucket_id,
+                dest_bucket_id=config.s3_outbox_bucket_id,
                 dest_object_id=external_file_id,
             )
         except ObjectNotFoundError:
@@ -130,9 +130,9 @@ def register_file(file_info: FileInfoExternal, config: Config = CONFIG) -> None:
 
             try:
                 storage.copy_object(
-                    source_bucket_id=config.s3_in_stage_bucket_id,
+                    source_bucket_id=config.s3_inbox_bucket_id,
                     source_object_id=file_info.external_id,
-                    dest_bucket_id=config.s3_out_stage_bucket_id,
+                    dest_bucket_id=config.s3_outbox_bucket_id,
                     dest_object_id=file_info.external_id,
                 )
             except ObjectAlreadyExistsError as error:

@@ -15,15 +15,15 @@
 
 """Tests business-functionality of `core` subpackage"""
 
-from internal_file_registry_service.core.main import stage_file
+from internal_file_registry_service.core.main import register_file, stage_file
 
-from ..fixtures import get_config, psql_fixture, s3_fixture  # noqa: F401
+from ..fixtures import FILE_FIXTURES, get_config, psql_fixture, s3_fixture  # noqa: F401
 
 
-def test_copy_file(psql_fixture, s3_fixture):  # noqa: F811
-    """Test copying of file"""
+def test_stage_file(psql_fixture, s3_fixture):  # noqa: F811
+    """Test copying of file to the out stage"""
     config = get_config(sources=[psql_fixture.config, s3_fixture.config])
-    existing_object_id = psql_fixture.existing_file_infos[0].external_id
+    existing_object_id = FILE_FIXTURES["in_registry"].id
 
     stage_file(
         external_file_id=existing_object_id,
@@ -32,5 +32,21 @@ def test_copy_file(psql_fixture, s3_fixture):  # noqa: F811
 
     assert s3_fixture.storage.does_object_exist(
         object_id=existing_object_id,
-        bucket_id=config.s3_out_stage_bucket_id,
+        bucket_id=config.s3_outbox_bucket_id,
+    )
+
+
+def test_register_file(psql_fixture, s3_fixture):  # noqa: F811
+    """Test copying of file"""
+    config = get_config(sources=[psql_fixture.config, s3_fixture.config])
+    file_fixture = FILE_FIXTURES["in_inbox_only"]
+
+    register_file(
+        file_info=file_fixture.file_info,
+        config=config,
+    )
+
+    assert s3_fixture.storage.does_object_exist(
+        object_id=file_fixture.id,
+        bucket_id=config.s3_outbox_bucket_id,
     )

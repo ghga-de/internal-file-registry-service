@@ -31,23 +31,28 @@
 
 """Fixtures for testing the storage DAO"""
 
-from ghga_service_chassis_lib.object_storage_dao_testing import (
-    DEFAULT_EXISTING_BUCKETS,
-    DEFAULT_NON_EXISTING_BUCKETS,
-    DEFAULT_NON_EXISTING_OBJECTS,
-)
+from typing import List
+
+from ghga_service_chassis_lib.object_storage_dao_testing import ObjectFixture
 from ghga_service_chassis_lib.s3_testing import s3_fixture_factory
 
 from .config import DEFAULT_CONFIG
-from .storage import EXISTING_OBJECTS
+from .data import FILE_FIXTURES
 
-EXISTING_BUCKETS = DEFAULT_EXISTING_BUCKETS.append(
-    DEFAULT_CONFIG.s3_out_stage_bucket_id
-)
+existing_buckets: List[str] = [
+    DEFAULT_CONFIG.s3_outbox_bucket_id,
+    DEFAULT_CONFIG.s3_inbox_bucket_id,
+]
+existing_objects: List[ObjectFixture] = []
+
+for file_fixture in FILE_FIXTURES.values():
+    for object_fixture in file_fixture.object_fixtures:
+        if object_fixture.bucket_id not in existing_buckets:
+            existing_buckets.append(object_fixture.bucket_id)
+        existing_objects.append(object_fixture)
+
 
 s3_fixture = s3_fixture_factory(
-    existing_buckets=EXISTING_BUCKETS,
-    non_existing_buckets=DEFAULT_NON_EXISTING_BUCKETS,
-    existing_objects=EXISTING_OBJECTS,
-    non_existing_objects=DEFAULT_NON_EXISTING_OBJECTS,
+    existing_buckets=existing_buckets,
+    existing_objects=existing_objects,
 )
