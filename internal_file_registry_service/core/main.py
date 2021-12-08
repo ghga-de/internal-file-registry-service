@@ -92,7 +92,8 @@ def stage_file(external_file_id: str, config: Config = CONFIG) -> None:
                 dest_bucket_id=config.s3_outbox_bucket_id,
                 dest_object_id=external_file_id,
             )
-        except ObjectNotFoundError:
+        except ObjectNotFoundError:  # pylint: disable=try-except-raise
+            # just to document what can happen here
             raise
         except ObjectAlreadyExistsError as error:
             raise FileAlreadyOnStageError(external_file_id=external_file_id) from error
