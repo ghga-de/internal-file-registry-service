@@ -34,11 +34,10 @@ class FileInfoNotFoundError(RuntimeError):
     """Thrown when trying to access info on a file with an external ID that doesn't
     exist in the database."""
 
-    def __init__(self, external_id: Optional[str]):
+    def __init__(self, external_id: str):
         message = (
-            "The information for the file"
-            + (f"with external ID '{external_id}' " if external_id else "")
-            + "does not exist in the database."
+            f"The information for the file with external ID '{external_id}' does not"
+            + " exist in the database."
         )
         super().__init__(message)
 
@@ -49,9 +48,8 @@ class FileInfoAlreadyExistsError(RuntimeError):
 
     def __init__(self, external_id: Optional[str]):
         message = (
-            "The information for the file"
-            + (f"with external ID '{external_id}' " if external_id else "")
-            + "already exist in the database."
+            f"The information for the file with external ID '{external_id}' already"
+            + " exist in the database."
         )
         super().__init__(message)
 

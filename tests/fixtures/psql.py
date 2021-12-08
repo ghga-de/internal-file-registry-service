@@ -44,16 +44,16 @@ from internal_file_registry_service import models
 from internal_file_registry_service.dao import db_models
 from internal_file_registry_service.dao.db import PostgresDatabase
 
-from .data import FILE_FIXTURES
+from . import state
 
 existing_file_infos: List[models.FileInfoExternal] = []
 non_existing_file_infos: List[models.FileInfoExternal] = []
 
-for file_fixture in FILE_FIXTURES.values():
-    if file_fixture.in_permanent_storage:
-        existing_file_infos.append(file_fixture.file_info)
+for file in state.FILES.values():
+    if file.in_permanent_storage and file.populate_db:
+        existing_file_infos.append(file.file_info)
     else:
-        non_existing_file_infos.append(file_fixture.file_info)
+        non_existing_file_infos.append(file.file_info)
 
 
 def populate_db(db_url: str, file_infos: List[models.FileInfoExternal]):
@@ -77,7 +77,7 @@ def populate_db(db_url: str, file_infos: List[models.FileInfoExternal]):
 
 
 @dataclass
-class PsqlFixture:
+class PsqlState:
     """Info yielded by the `psql_fixture` function"""
 
     config: PostgresqlConfigBase
@@ -87,7 +87,7 @@ class PsqlFixture:
 
 
 @pytest.fixture
-def psql_fixture() -> Generator[PsqlFixture, None, None]:
+def psql_fixture() -> Generator[PsqlState, None, None]:
     """Pytest fixture for tests of the Prostgres DAO implementation."""
 
     with PostgresContainer() as postgres:
@@ -95,7 +95,7 @@ def psql_fixture() -> Generator[PsqlFixture, None, None]:
         populate_db(config.db_url, file_infos=existing_file_infos)
 
         with PostgresDatabase(config) as database:
-            yield PsqlFixture(
+            yield PsqlState(
                 config=config,
                 database=database,
                 existing_file_infos=existing_file_infos,

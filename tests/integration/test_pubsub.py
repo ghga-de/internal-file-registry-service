@@ -20,11 +20,11 @@ from ghga_service_chassis_lib.utils import exec_with_timeout
 from internal_file_registry_service.pubsub import schemas, subscribe_stage_requests
 
 from ..fixtures import (  # noqa: F401
-    FILE_FIXTURES,
     amqp_fixture,
     get_config,
     psql_fixture,
     s3_fixture,
+    state,
 )
 
 
@@ -33,7 +33,7 @@ def test_subscribe_stage_requests(psql_fixture, s3_fixture, amqp_fixture):  # no
     config = get_config(
         sources=[psql_fixture.config, s3_fixture.config, amqp_fixture.config]
     )
-    upstream_message = FILE_FIXTURES["in_registry"].message
+    upstream_message = state.FILES["in_registry"].message
 
     # initialize upstream and downstream test services that will publish or receive
     # messages to or from this service:

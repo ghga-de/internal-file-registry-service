@@ -36,8 +36,8 @@ from typing import List
 from ghga_service_chassis_lib.object_storage_dao_testing import ObjectFixture
 from ghga_service_chassis_lib.s3_testing import s3_fixture_factory
 
+from . import state
 from .config import DEFAULT_CONFIG
-from .data import FILE_FIXTURES
 
 existing_buckets: List[str] = [
     DEFAULT_CONFIG.s3_outbox_bucket_id,
@@ -45,11 +45,12 @@ existing_buckets: List[str] = [
 ]
 existing_objects: List[ObjectFixture] = []
 
-for file_fixture in FILE_FIXTURES.values():
-    for object_fixture in file_fixture.object_fixtures:
-        if object_fixture.bucket_id not in existing_buckets:
-            existing_buckets.append(object_fixture.bucket_id)
-        existing_objects.append(object_fixture)
+for file in state.FILES.values():
+    if file.populate_storage:
+        for storage_object in file.storage_objects:
+            if storage_object.bucket_id not in existing_buckets:
+                existing_buckets.append(storage_object.bucket_id)
+            existing_objects.append(storage_object)
 
 
 s3_fixture = s3_fixture_factory(
