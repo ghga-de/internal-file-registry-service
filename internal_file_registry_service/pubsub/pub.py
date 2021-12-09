@@ -41,7 +41,7 @@ def publish_file_info_generic(
 
     message = {
         "request_id": request_id,
-        "file_id": file_info.external_id,
+        "file_id": file_info.file_id,
         "grouping_label": file_info.grouping_label,
         "md5_checksum": file_info.md5_checksum,
         "timestamp": datetime.now().isoformat(),

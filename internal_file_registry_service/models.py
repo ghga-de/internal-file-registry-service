@@ -33,14 +33,14 @@ class FileInfoExternal(BaseModel):
     this information shouldn't be shared with other services.
     """
 
-    external_id: str
+    file_id: str
     grouping_label: str
     md5_checksum: str
 
     # pylint: disable=no-self-argument,no-self-use
-    @validator("external_id")
-    def check_external_id(cls, value: str):
-        """Checks if the external_id is valid for use as a s3 object id."""
+    @validator("file_id")
+    def check_file_id(cls, value: str):
+        """Checks if the file_id is valid for use as a s3 object id."""
 
         try:
             validate_object_id(value)

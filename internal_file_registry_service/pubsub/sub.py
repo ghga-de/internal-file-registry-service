@@ -30,7 +30,7 @@ def message_to_file_info(message: Dict[str, Any]) -> models.FileInfoExternal:
     """Convert message to models.FileInfoExternal"""
 
     return models.FileInfoExternal(
-        external_id=message["file_id"],
+        file_id=message["file_id"],
         grouping_label=message["grouping_label"],
         md5_checksum=message["md5_checksum"],
     )
@@ -42,7 +42,7 @@ def handle_stage_request(message: Dict[str, Any], config: Config = CONFIG) -> No
     file_info = message_to_file_info(message)
 
     try:
-        stage_file(external_file_id=file_info.external_id, config=config)
+        stage_file(external_file_id=file_info.file_id, config=config)
     except FileAlreadyInOutboxError:
         # This is not really an error (it uccurs when multiple stage requests are
         # comming in shortly after each other) and there is nothing to do.

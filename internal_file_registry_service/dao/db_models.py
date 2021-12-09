@@ -39,7 +39,7 @@ class FileInfo(Base):
         primary_key=True,
         doc="Service-internal file ID.",
     )
-    external_id = Column(
+    file_id = Column(
         String,
         nullable=False,
         unique=True,
