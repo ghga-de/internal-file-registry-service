@@ -20,7 +20,7 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 from ghga_service_chassis_lib.object_storage_dao_testing import ObjectFixture, calc_md5
-from ghga_service_chassis_lib.utils import TEST_FILE_PATHS, create_fake_drs_uri
+from ghga_service_chassis_lib.utils import TEST_FILE_PATHS
 
 from internal_file_registry_service import models
 
@@ -71,7 +71,7 @@ class FileState:
 
         self.md5 = calc_md5(self.content)
         self.file_info = models.FileInfoExternal(
-            external_id=self.id,
+            file_id=self.id,
             grouping_label=self.grouping_label,
             md5_checksum=self.md5,
         )
@@ -112,7 +112,6 @@ FILES: Dict[str, FileState] = {
         in_inbox=False,
         in_outbox=False,
         message={
-            "drs_id": create_fake_drs_uri(get_file_id_example(0)),
             "file_id": get_file_id_example(0),
             "grouping_label": get_study_id_example(0),
             "md5_checksum": "3851c5cb7518a2ff67ab5581c3e01f2f",  # fake checksum
