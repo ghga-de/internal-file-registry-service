@@ -15,11 +15,20 @@
 
 """Main business-logic of this service"""
 
+from ghga_service_chassis_lib.object_storage_dao import ObjectNotFoundError
+
 from ..config import CONFIG, Config
-from ..dao import Database, ObjectAlreadyExistsError, ObjectStorage
+from ..dao import (
+    Database,
+    FileInfoAlreadyExistsError,
+    FileInfoNotFoundError,
+    ObjectAlreadyExistsError,
+    ObjectStorage,
+)
+from ..models import FileInfoExternal
 
 
-class FileAlreadyOnStageError(RuntimeError):
+class FileAlreadyInOutboxError(RuntimeError):
     """Thrown when there was a stage request for an already staged file."""
 
     def __init__(self, external_file_id: str):
@@ -27,13 +36,77 @@ class FileAlreadyOnStageError(RuntimeError):
         super().__init__(message)
 
 
+class FileAlreadyInRegistryError(RuntimeError):
+    """Thrown when trying to register file that is already in storage."""
+
+    def __init__(self, external_file_id: str):
+        message = (
+            f"The file with external id {external_file_id} is already in the"
+            + " internal file registry."
+        )
+        super().__init__(message)
+
+
+class FileNotInRegistryError(RuntimeError):
+    """Thrown when a file is requested that is not (yet) in the database."""
+
+    def __init__(self, external_file_id: str):
+        message = (
+            f"The file with external id {external_file_id} does not exist in the"
+            + " internal file registry."
+        )
+        super().__init__(message)
+
+
+class FileNotInInboxError(RuntimeError):
+    """Thrown when a file is expected in the inbox but isn't there."""
+
+    def __init__(self, external_file_id: str):
+        message = (
+            f"The file with external id {external_file_id} does not exist in the"
+            + " inbox."
+        )
+        super().__init__(message)
+
+
+class DbAndStorageInconsistencyError(RuntimeError):
+    """Thrown when the database and the storage are in an inconsistent state that
+    needs manual intervention."""
+
+    pass  # pylint: disable=unnecessary-pass
+
+
+class FileInDbButNotInStorageError(DbAndStorageInconsistencyError):
+    """Thrown if file is registered to the DB but is not in the storage."""
+
+    def __init__(self, external_file_id: str):
+        message = (
+            f"File with id {external_file_id} has been registered to the database but"
+            + " does not exist in the permanent object storage: "
+        )
+        super().__init__(message)
+
+
+class FileInStorageButNotInDbError(DbAndStorageInconsistencyError):
+    """Thrown if file is present in storage but is not registered to the DB."""
+
+    def __init__(self, external_file_id: str):
+        message = (
+            f"File with id {external_file_id} does exist in the storage but has not"
+            + " been registered to the database."
+        )
+        super().__init__(message)
+
+
 def stage_file(external_file_id: str, config: Config = CONFIG) -> None:
     """Copies a file into the stage bucket."""
 
     # get file info from the database:
-    # (will throw an error if file not in registry)
     with Database(config=config) as database:
-        file_info = database.get_file_info(external_file_id)
+        try:
+            file_info = database.get_file_info(external_file_id)
+        except FileInfoNotFoundError as error:
+            raise FileNotInRegistryError(external_file_id=external_file_id) from error
 
     # copy file object to the stage bucket:
     with ObjectStorage(config=config) as storage:
@@ -41,8 +114,55 @@ def stage_file(external_file_id: str, config: Config = CONFIG) -> None:
             storage.copy_object(
                 source_bucket_id=file_info.grouping_label,
                 source_object_id=external_file_id,
-                dest_bucket_id=config.s3_stage_bucket_id,
+                dest_bucket_id=config.s3_outbox_bucket_id,
                 dest_object_id=external_file_id,
             )
+        except ObjectNotFoundError as error:
+            raise FileInDbButNotInStorageError(
+                external_file_id=external_file_id
+            ) from error
         except ObjectAlreadyExistsError as error:
-            raise FileAlreadyOnStageError(external_file_id=external_file_id) from error
+            raise FileAlreadyInOutboxError(external_file_id=external_file_id) from error
+
+
+def register_file(file_info: FileInfoExternal, config: Config = CONFIG) -> None:
+    """Register a new file to the database and copy it from a stage bucket (e.g. inbox)
+    to the permanent file storage."""
+
+    # get file info from the database:
+    # (will throw an error if file not in registry)
+    with Database(config=config) as database:
+        with ObjectStorage(config=config) as storage:
+            try:
+                database.register_file_info(file_info)
+            except FileInfoAlreadyExistsError as error:
+                if not storage.does_object_exist(
+                    bucket_id=file_info.grouping_label, object_id=file_info.external_id
+                ):
+                    raise FileInDbButNotInStorageError(
+                        external_file_id=file_info.external_id
+                    ) from error
+                raise FileAlreadyInRegistryError(
+                    external_file_id=file_info.external_id
+                ) from error
+
+            # copy file object to the stage bucket:
+
+            if not storage.does_bucket_exist(bucket_id=file_info.grouping_label):
+                storage.create_bucket(bucket_id=file_info.grouping_label)
+
+            try:
+                storage.copy_object(
+                    source_bucket_id=config.s3_inbox_bucket_id,
+                    source_object_id=file_info.external_id,
+                    dest_bucket_id=file_info.grouping_label,
+                    dest_object_id=file_info.external_id,
+                )
+            except ObjectNotFoundError as error:
+                raise FileNotInInboxError(
+                    external_file_id=file_info.external_id
+                ) from error
+            except ObjectAlreadyExistsError as error:
+                raise FileInStorageButNotInDbError(
+                    external_file_id=file_info.external_id
+                ) from error

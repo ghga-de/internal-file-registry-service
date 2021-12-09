@@ -15,25 +15,8 @@
 
 """Pub sub fixtures"""
 
-from datetime import datetime
-
 from ghga_service_chassis_lib.pubsub_testing import amqp_fixture_factory
-from ghga_service_chassis_lib.utils import create_fake_drs_uri
 
 from .config import DEFAULT_CONFIG
-from .storage import EXISTING_OBJECTS
-
-TEST_MESSAGES = {
-    "non_staged_file_requested": [
-        {
-            "drs_id": create_fake_drs_uri(EXISTING_OBJECTS[0].object_id),
-            "file_id": EXISTING_OBJECTS[0].object_id,
-            "grouping_label": EXISTING_OBJECTS[0].object_id,
-            "request_id": "my_test_stage_request_001",
-            "timestamp": datetime.now().isoformat(),
-        }
-    ]
-}
-
 
 amqp_fixture = amqp_fixture_factory(service_name=DEFAULT_CONFIG.service_name)

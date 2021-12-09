@@ -20,7 +20,7 @@ from typing import Any, Dict
 from ghga_service_chassis_lib.pubsub import AmqpTopic
 
 from ..config import CONFIG, Config
-from ..core.main import FileAlreadyOnStageError, stage_file
+from ..core.main import FileAlreadyInOutboxError, stage_file
 from . import schemas
 from .pub import publish_file_staged
 
@@ -30,7 +30,7 @@ def handle_stage_request(message: Dict[str, Any], config: Config = CONFIG) -> No
 
     try:
         stage_file(external_file_id=message["file_id"], config=config)
-    except FileAlreadyOnStageError:
+    except FileAlreadyInOutboxError:
         # This is not really an error and there is nothing to do.
         return
 

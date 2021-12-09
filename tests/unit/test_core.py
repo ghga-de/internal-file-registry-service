@@ -15,22 +15,84 @@
 
 """Tests business-functionality of `core` subpackage"""
 
-from internal_file_registry_service.core.main import stage_file
+from typing import Optional, Type
 
-from ..fixtures import get_config, psql_fixture, s3_fixture  # noqa: F401
+import pytest
+
+from internal_file_registry_service.core.main import (
+    FileAlreadyInOutboxError,
+    FileAlreadyInRegistryError,
+    FileInDbButNotInStorageError,
+    FileInStorageButNotInDbError,
+    FileNotInInboxError,
+    FileNotInRegistryError,
+    register_file,
+    stage_file,
+)
+
+from ..fixtures import get_config, psql_fixture, s3_fixture, state  # noqa: F401
 
 
-def test_copy_file(psql_fixture, s3_fixture):  # noqa: F811
+@pytest.mark.parametrize(
+    "file_name,expected_exception",
+    [
+        ("in_registry", None),
+        ("in_registry_and_outbox", FileAlreadyInOutboxError),
+        ("storage_missing", FileInDbButNotInStorageError),
+        ("exists_nowhere", FileNotInRegistryError),
+    ],
+)
+def test_stage_file(
+    file_name: str,
+    expected_exception: Optional[Type[Exception]],
+    psql_fixture,  # noqa: F811
+    s3_fixture,  # noqa: F811
+):
+    """Test copying of file to the out stage"""
+    config = get_config(sources=[psql_fixture.config, s3_fixture.config])
+    file = state.FILES[file_name]
+
+    run = lambda: stage_file(external_file_id=file.id, config=config)
+
+    if expected_exception is None:
+        run()
+        assert s3_fixture.storage.does_object_exist(
+            object_id=file.id,
+            bucket_id=config.s3_outbox_bucket_id,
+        )
+    else:
+        with pytest.raises(expected_exception):
+            run()
+
+
+@pytest.mark.parametrize(
+    "file_name,expected_exception",
+    [
+        ("in_inbox_only", None),
+        ("exists_nowhere", FileNotInInboxError),
+        ("in_registry", FileAlreadyInRegistryError),
+        ("storage_missing", FileInDbButNotInStorageError),
+        ("in_inbox_and_reg_but_db_missing", FileInStorageButNotInDbError),
+    ],
+)
+def test_register_file(
+    file_name: str,
+    expected_exception: Optional[Type[BaseException]],
+    psql_fixture,  # noqa: F811
+    s3_fixture,  # noqa: F811
+):
     """Test copying of file"""
     config = get_config(sources=[psql_fixture.config, s3_fixture.config])
-    existing_object_id = psql_fixture.existing_file_infos[0].external_id
+    file = state.FILES[file_name]
 
-    stage_file(
-        external_file_id=existing_object_id,
-        config=config,
-    )
+    run = lambda: register_file(file_info=file.file_info, config=config)
 
-    assert s3_fixture.storage.does_object_exist(
-        object_id=existing_object_id,
-        bucket_id=config.s3_stage_bucket_id,
-    )
+    if expected_exception is None:
+        run()
+        assert s3_fixture.storage.does_object_exist(
+            object_id=file.id,
+            bucket_id=file.grouping_label,
+        )
+    else:
+        with pytest.raises(expected_exception):
+            run()
