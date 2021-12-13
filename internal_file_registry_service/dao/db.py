@@ -34,9 +34,9 @@ class FileInfoNotFoundError(RuntimeError):
     """Thrown when trying to access info on a file with an external ID that doesn't
     exist in the database."""
 
-    def __init__(self, external_id: str):
+    def __init__(self, file_id: str):
         message = (
-            f"The information for the file with external ID '{external_id}' does not"
+            f"The information for the file with external ID '{file_id}' does not"
             + " exist in the database."
         )
         super().__init__(message)
@@ -46,9 +46,9 @@ class FileInfoAlreadyExistsError(RuntimeError):
     """Thrown when trying to create info for a file with an external ID that already
     exist in the database."""
 
-    def __init__(self, external_id: Optional[str]):
+    def __init__(self, file_id: Optional[str]):
         message = (
-            f"The information for the file with external ID '{external_id}' already"
+            f"The information for the file with external ID '{file_id}' already"
             + " exist in the database."
         )
         super().__init__(message)
@@ -66,7 +66,7 @@ class DatabaseDao(DaoGenericBase):
         - FileInfoAlreadyExistsError
     """
 
-    def get_file_info(self, external_id: str) -> models.FileInfoComplete:
+    def get_file_info(self, file_id: str) -> models.FileInfoComplete:
         """Get information for a file by specifying its external ID"""
         ...
 
@@ -74,7 +74,7 @@ class DatabaseDao(DaoGenericBase):
         """Register information for a new to the database."""
         ...
 
-    def unregister_file_info(self, external_id: str) -> None:
+    def unregister_file_info(self, file_id: str) -> None:
         """
         Unregister information for a file with the specified external ID from the database.
         """
@@ -109,22 +109,22 @@ class PostgresDatabase(DatabaseDao):
         # pylint: disable=no-member
         self._session_cm.__exit__(error_type, error_value, error_traceback)
 
-    def _get_orm_file_info(self, external_id: str) -> db_models.FileInfo:
+    def _get_orm_file_info(self, file_id: str) -> db_models.FileInfo:
         """Internal method to get the ORM representation of a file info by specifying
         its external ID"""
 
-        statement = select(db_models.FileInfo).filter_by(external_id=external_id)
+        statement = select(db_models.FileInfo).filter_by(file_id=file_id)
         orm_file_info = self._session.execute(statement).scalars().one_or_none()
 
         if orm_file_info is None:
-            raise FileInfoNotFoundError(external_id=external_id)
+            raise FileInfoNotFoundError(file_id=file_id)
 
         return orm_file_info
 
-    def get_file_info(self, external_id: str) -> models.FileInfoComplete:
+    def get_file_info(self, file_id: str) -> models.FileInfoComplete:
         """Get information for a file by specifying its external ID"""
 
-        orm_file_info = self._get_orm_file_info(external_id=external_id)
+        orm_file_info = self._get_orm_file_info(file_id=file_id)
         return models.FileInfoComplete.from_orm(orm_file_info)
 
     def register_file_info(self, file_info: models.FileInfoExternal) -> None:
@@ -132,13 +132,13 @@ class PostgresDatabase(DatabaseDao):
 
         # check for collisions in the database:
         try:
-            self._get_orm_file_info(external_id=file_info.external_id)
+            self._get_orm_file_info(file_id=file_info.file_id)
         except FileInfoNotFoundError:
             # this is expected
             pass
         else:
             # this is a problem
-            raise FileInfoAlreadyExistsError(external_id=file_info.external_id)
+            raise FileInfoAlreadyExistsError(file_id=file_info.file_id)
 
         file_info_dict = {
             **file_info.dict(),
@@ -147,10 +147,10 @@ class PostgresDatabase(DatabaseDao):
         orm_file_info = db_models.FileInfo(**file_info_dict)
         self._session.add(orm_file_info)
 
-    def unregister_file_info(self, external_id: str) -> None:
+    def unregister_file_info(self, file_id: str) -> None:
         """
         Unregister information for a file with the specified external ID from the database.
         """
 
-        orm_file_info = self._get_orm_file_info(external_id=external_id)
+        orm_file_info = self._get_orm_file_info(file_id=file_id)
         self._session.delete(orm_file_info)

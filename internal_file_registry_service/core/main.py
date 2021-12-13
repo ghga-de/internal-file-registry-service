@@ -137,13 +137,13 @@ def register_file(file_info: FileInfoExternal, config: Config = CONFIG) -> None:
                 database.register_file_info(file_info)
             except FileInfoAlreadyExistsError as error:
                 if not storage.does_object_exist(
-                    bucket_id=file_info.grouping_label, object_id=file_info.external_id
+                    bucket_id=file_info.grouping_label, object_id=file_info.file_id
                 ):
                     raise FileInDbButNotInStorageError(
-                        external_file_id=file_info.external_id
+                        external_file_id=file_info.file_id
                     ) from error
                 raise FileAlreadyInRegistryError(
-                    external_file_id=file_info.external_id
+                    external_file_id=file_info.file_id
                 ) from error
 
             # copy file object to the stage bucket:
@@ -154,15 +154,13 @@ def register_file(file_info: FileInfoExternal, config: Config = CONFIG) -> None:
             try:
                 storage.copy_object(
                     source_bucket_id=config.s3_inbox_bucket_id,
-                    source_object_id=file_info.external_id,
+                    source_object_id=file_info.file_id,
                     dest_bucket_id=file_info.grouping_label,
-                    dest_object_id=file_info.external_id,
+                    dest_object_id=file_info.file_id,
                 )
             except ObjectNotFoundError as error:
-                raise FileNotInInboxError(
-                    external_file_id=file_info.external_id
-                ) from error
+                raise FileNotInInboxError(external_file_id=file_info.file_id) from error
             except ObjectAlreadyExistsError as error:
                 raise FileInStorageButNotInDbError(
-                    external_file_id=file_info.external_id
+                    external_file_id=file_info.file_id
                 ) from error

@@ -19,25 +19,54 @@ from typing import Any, Dict
 
 from ghga_service_chassis_lib.pubsub import AmqpTopic
 
+from .. import models
 from ..config import CONFIG, Config
-from ..core.main import FileAlreadyInOutboxError, stage_file
+from ..core import FileAlreadyInOutboxError, register_file, stage_file
 from . import schemas
-from .pub import publish_file_staged
+from .pub import publish_upon_file_stage, publish_upon_registration
+
+
+def message_to_file_info(message: Dict[str, Any]) -> models.FileInfoExternal:
+    """Convert message to models.FileInfoExternal"""
+
+    return models.FileInfoExternal(
+        file_id=message["file_id"],
+        grouping_label=message["grouping_label"],
+        md5_checksum=message["md5_checksum"],
+    )
 
 
 def handle_stage_request(message: Dict[str, Any], config: Config = CONFIG) -> None:
     """Work on a stage request coming from the corresponding messaging topic."""
 
+    file_info = message_to_file_info(message)
+
     try:
-        stage_file(external_file_id=message["file_id"], config=config)
+        stage_file(external_file_id=file_info.file_id, config=config)
     except FileAlreadyInOutboxError:
-        # This is not really an error and there is nothing to do.
+        # This is not really an error (it uccurs when multiple stage requests are
+        # comming in shortly after each other) and there is nothing to do.
         return
 
-    publish_file_staged(
+    publish_upon_file_stage(
+        file_info=file_info,
         request_id=message["request_id"],
-        external_file_id=message["file_id"],
-        grouping_label=message["grouping_label"],
+        config=config,
+    )
+
+
+def handle_registration_request(
+    message: Dict[str, Any], config: Config = CONFIG
+) -> None:
+    """Work on a registration request coming from the corresponding messaging topic."""
+
+    file_info = message_to_file_info(message)
+
+    register_file(file_info=file_info, config=config)
+
+    publish_upon_registration(
+        file_info=file_info,
+        request_id=message["request_id"],
         config=config,
     )
 
@@ -50,11 +79,32 @@ def subscribe_stage_requests(config: Config = CONFIG, run_forever: bool = True) 
 
     topic = AmqpTopic(
         config=config,
-        topic_name=config.topic_name_non_staged_file_requested,
-        json_schema=schemas.NON_STAGED_FILE_REQUESTED,
+        topic_name=config.topic_name_stage_request,
+        json_schema=schemas.STAGE_REQUEST,
     )
 
     topic.subscribe(
         exec_on_message=lambda message: handle_stage_request(message, config=config),
+        run_forever=run_forever,
+    )
+
+
+def subscribe_registration_request(
+    config: Config = CONFIG, run_forever: bool = True
+) -> None:
+    """
+    Subscribe to topic that informs whenever a new file should be registered.
+    """
+
+    topic = AmqpTopic(
+        config=config,
+        topic_name=config.topic_name_reg_request,
+        json_schema=schemas.REG_REQUEST,
+    )
+
+    topic.subscribe(
+        exec_on_message=lambda message: handle_registration_request(
+            message, config=config
+        ),
         run_forever=run_forever,
     )

@@ -15,12 +15,28 @@
 
 """Entrypoint of the package"""
 
+from typer import Typer
+
 from . import pubsub
+
+cli = Typer()
+
+
+@cli.command()
+def subscribe_stage_requests():
+    """wrapper for CLI"""
+    pubsub.subscribe_stage_requests()
+
+
+@cli.command()
+def subscribe_registration_request():
+    """wrapper for CLI"""
+    pubsub.subscribe_registration_request()
 
 
 def run():
     """Run the service"""
-    pubsub.subscribe_stage_requests()
+    cli()
 
 
 if __name__ == "__main__":

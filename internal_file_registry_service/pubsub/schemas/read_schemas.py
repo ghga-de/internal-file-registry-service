@@ -28,5 +28,7 @@ def read_schema(topic_name: str) -> Dict[str, object]:
         return json.load(schema_file)
 
 
-NON_STAGED_FILE_REQUESTED = read_schema("non_staged_file_requested")
-FILE_STAGED_FOR_DOWNLOAD = read_schema("file_staged_for_download")
+STAGE_REQUEST = read_schema("non_staged_file_requested")
+STAGED_TO_OUTBOX = read_schema("file_staged_for_download")
+REG_REQUEST = read_schema("file_upload_received")
+REGISTERED = read_schema("file_internally_registered")
