@@ -14,3 +14,5 @@
 # limitations under the License.
 
 """This sub-package contains the core functionality"""
+
+from .main import FileAlreadyInOutboxError, register_file, stage_file  # noqa: F401

@@ -13,9 +13,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Fixtures that can be used in both unit and integration tests"""
+"""Read in schemas from json files"""
 
-from .config import DEFAULT_CONFIG, get_config  # noqa: F401
-from .psql import psql_fixture  # noqa: F401
-from .pubsub import amqp_fixture  # noqa: F401
-from .s3 import s3_fixture  # noqa: F401
+import json
+from pathlib import Path
+from typing import Dict
+
+HERE = Path(__file__).parent.resolve()
+
+
+def read_schema(topic_name: str) -> Dict[str, object]:
+    """Read schemas from file"""
+    with open(HERE / f"{topic_name}.json", "r", encoding="utf8") as schema_file:
+        return json.load(schema_file)
+
+
+STAGE_REQUEST = read_schema("non_staged_file_requested")
+STAGED_TO_OUTBOX = read_schema("file_staged_for_download")
+REG_REQUEST = read_schema("file_upload_received")
+REGISTERED = read_schema("file_internally_registered")

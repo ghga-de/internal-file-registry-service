@@ -25,8 +25,16 @@ from ghga_service_chassis_lib.s3 import S3ConfigBase
 class Config(PubSubConfigBase, PostgresqlConfigBase, S3ConfigBase):
     """Config parameters and their defaults."""
 
-    # no custom params needed
-    pass  # pylint: disable=unnecessary-pass
+    # stage for outgoing objects (download):
+    s3_outbox_bucket_id: str
+    # stage for incomming objects (registration):
+    s3_inbox_bucket_id: str
+
+    service_name: str = "internal_file_registry"
+    topic_name_stage_request: str = "non_staged_file_requested"
+    topic_name_staged_to_outbox: str = "file_staged_for_download"
+    topic_name_reg_request: str = "file_upload_received"
+    topic_name_registered: str = "file_internally_registered"
 
 
-config = Config()
+CONFIG = Config()

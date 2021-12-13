@@ -13,4 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Consuming or Subscribing to Async Messaging Topics"""
+"""Package containing schemas."""
+
+from .read_schemas import (  # noqa: F401
+    REG_REQUEST,
+    REGISTERED,
+    STAGE_REQUEST,
+    STAGED_TO_OUTBOX,
+)

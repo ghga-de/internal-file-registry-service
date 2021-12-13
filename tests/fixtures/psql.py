@@ -29,52 +29,34 @@
 
 """Fixtures for testing the PostgreSQL functionalities"""
 
+from dataclasses import dataclass
 from datetime import datetime
-from hashlib import md5
+from typing import Generator, List
 
+import pytest
+from ghga_service_chassis_lib.postgresql import PostgresqlConfigBase
+from ghga_service_chassis_lib.postgresql_testing import config_from_psql_container
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from testcontainers.postgres import PostgresContainer
 
 from internal_file_registry_service import models
 from internal_file_registry_service.dao import db_models
+from internal_file_registry_service.dao.db import PostgresDatabase
 
-SOME_DATE = datetime.now()
+from . import state
 
+existing_file_infos: List[models.FileInfoExternal] = []
+non_existing_file_infos: List[models.FileInfoExternal] = []
 
-def hash_string(str_: str):
-    """md5 hashes a string"""
-    return md5(str_.encode("utf8")).hexdigest()
-
-
-PREPOPULATED_FILE_FIXTURES = [
-    models.FileObjectExternal(
-        external_id="GHGAF-02143324934345",
-        md5_checksum=hash_string("something to hash 1"),
-        size=1000,
-    ),
-    models.FileObjectExternal(
-        external_id="GHGAF-23429923423423",
-        md5_checksum=hash_string("something to hash 2"),
-        size=2000,
-    ),
-]
+for file in state.FILES.values():
+    if file.in_permanent_storage and file.populate_db:
+        existing_file_infos.append(file.file_info)
+    else:
+        non_existing_file_infos.append(file.file_info)
 
 
-ADDITIONAL_FILE_FIXTURES = [
-    models.FileObjectExternal(
-        external_id="GHGAF-29992342342234",
-        md5_checksum=hash_string("something to hash 3"),
-        size=3000,
-    ),
-    models.FileObjectExternal(
-        external_id="GHGAF-50098123865883",
-        md5_checksum=hash_string("something to hash 4"),
-        size=4000,
-    ),
-]
-
-
-def populate_db(db_url: str):
+def populate_db(db_url: str, file_infos: List[models.FileInfoExternal]):
     """Create and populates the DB"""
 
     # setup database and tables:
@@ -84,8 +66,38 @@ def populate_db(db_url: str):
     # populate with test data:
     session_factor = sessionmaker(engine)
     with session_factor() as session:
-        for entry in PREPOPULATED_FILE_FIXTURES:
-            param_dict = {**entry.dict(), "registration_date": datetime.now()}
-            orm_entry = db_models.FileObject(**param_dict)
+        for existing_file_info in file_infos:
+            param_dict = {
+                **existing_file_info.dict(),
+                "registration_date": datetime.now(),
+            }
+            orm_entry = db_models.FileInfo(**param_dict)
             session.add(orm_entry)
         session.commit()
+
+
+@dataclass
+class PsqlState:
+    """Info yielded by the `psql_fixture` function"""
+
+    config: PostgresqlConfigBase
+    database: PostgresDatabase
+    existing_file_infos: List[models.FileInfoExternal]
+    non_existing_file_infos: List[models.FileInfoExternal]
+
+
+@pytest.fixture
+def psql_fixture() -> Generator[PsqlState, None, None]:
+    """Pytest fixture for tests of the Prostgres DAO implementation."""
+
+    with PostgresContainer() as postgres:
+        config = config_from_psql_container(postgres)
+        populate_db(config.db_url, file_infos=existing_file_infos)
+
+        with PostgresDatabase(config) as database:
+            yield PsqlState(
+                config=config,
+                database=database,
+                existing_file_infos=existing_file_infos,
+                non_existing_file_infos=non_existing_file_infos,
+            )

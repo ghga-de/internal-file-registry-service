@@ -17,7 +17,7 @@
 
 import uuid
 
-from sqlalchemy import Column, DateTime, Integer, String
+from sqlalchemy import Column, DateTime, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm.decl_api import DeclarativeMeta
@@ -25,12 +25,12 @@ from sqlalchemy.orm.decl_api import DeclarativeMeta
 Base: DeclarativeMeta = declarative_base()
 
 
-class FileObject(Base):
+class FileInfo(Base):
     """
-    ORM model for a File Object.
+    ORM model for file info.
     """
 
-    __tablename__ = "fileobjects"
+    __tablename__ = "fileinfo"
     id = Column(
         UUID(
             as_uuid=True,
@@ -39,7 +39,7 @@ class FileObject(Base):
         primary_key=True,
         doc="Service-internal file ID.",
     )
-    external_id = Column(
+    file_id = Column(
         String,
         nullable=False,
         unique=True,
@@ -48,10 +48,18 @@ class FileObject(Base):
             + "May be presented to users."
         ),
     )
+    grouping_label = Column(
+        String,
+        nullable=False,
+        unique=False,
+        doc=(
+            "This is a label that might be use to group multiple files together. "
+            + "It is used as bucket_id for the storing files in the permanent storage."
+        ),
+    )
     md5_checksum = Column(
         String, nullable=False, doc="MD5 checksum of the file content."
     )
-    size = Column(Integer, nullable=False, doc="Size of the file content in bytes.")
     registration_date = Column(
         DateTime,
         nullable=False,
