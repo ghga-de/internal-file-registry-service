@@ -1,0 +1,17 @@
+aws_config_ini: null
+db_print_logs: false
+db_url: postgresql://postgres:postgres@internal_file_registry_service_db/postgres
+rabbitmq_host: rabbitmq
+rabbitmq_port: 5672
+s3_access_key_id: test
+s3_endpoint_url: http://internal_file_registry_service_s3:4566
+s3_inbox_bucket_id: inbox
+s3_outbox_bucket_id: outbox
+s3_secret_access_key: test
+s3_session_token: null
+service_name: internal_file_registry
+topic_name_reg_request: file_upload_received
+topic_name_registered: file_internally_registered
+topic_name_stage_request: non_staged_file_requested
+topic_name_staged_to_outbox: file_staged_for_download
+
