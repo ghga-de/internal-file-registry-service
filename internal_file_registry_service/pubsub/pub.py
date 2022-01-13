@@ -15,7 +15,7 @@
 
 """Publish messages/events to async messaging topics."""
 
-from datetime import datetime
+from datetime import datetime, timezone
 
 from ghga_service_chassis_lib.pubsub import AmqpTopic
 
@@ -44,7 +44,7 @@ def publish_file_info_generic(
         "file_id": file_info.file_id,
         "grouping_label": file_info.grouping_label,
         "md5_checksum": file_info.md5_checksum,
-        "timestamp": datetime.now().isoformat(),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
     }
 
     topic.publish(message)
