@@ -17,11 +17,11 @@
 
 from datetime import datetime, timezone
 
+from ghga_message_schemas import schemas
 from ghga_service_chassis_lib.pubsub import AmqpTopic
 
 from .. import models
 from ..config import CONFIG, Config
-from . import schemas
 
 
 def publish_file_info_generic(
@@ -57,7 +57,7 @@ def publish_upon_file_stage(
 
     publish_file_info_generic(
         topic_name=config.topic_name_staged_to_outbox,
-        message_schema=schemas.STAGED_TO_OUTBOX,
+        message_schema=schemas.FILE_STAGED_FOR_DOWNLOAD,
         file_info=file_info,
         request_id=request_id,
         config=config,
@@ -71,7 +71,7 @@ def publish_upon_registration(
 
     publish_file_info_generic(
         topic_name=config.topic_name_registered,
-        message_schema=schemas.REGISTERED,
+        message_schema=schemas.FILE_INTERNALLY_REGISTERED,
         file_info=file_info,
         request_id=request_id,
         config=config,
