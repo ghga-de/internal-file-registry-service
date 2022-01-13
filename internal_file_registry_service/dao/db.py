@@ -15,7 +15,6 @@
 
 """Database DAO"""
 
-from datetime import datetime, timezone
 from typing import Any, Optional
 
 from ghga_service_chassis_lib.postgresql import (
@@ -142,7 +141,6 @@ class PostgresDatabase(DatabaseDao):
 
         file_info_dict = {
             **file_info.dict(),
-            "registration_date": datetime.now(timezone.utc),
         }
         orm_file_info = db_models.FileInfo(**file_info_dict)
         self._session.add(orm_file_info)

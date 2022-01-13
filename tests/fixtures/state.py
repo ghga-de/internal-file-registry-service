@@ -15,7 +15,6 @@
 
 """Test data"""
 
-from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, List, Optional
 
@@ -116,7 +115,6 @@ FILES: Dict[str, FileState] = {
             "grouping_label": get_study_id_example(0),
             "md5_checksum": "3851c5cb7518a2ff67ab5581c3e01f2f",  # fake checksum
             "request_id": "my_test_stage_request_001",
-            "timestamp": datetime.now(timezone.utc).isoformat(),
         },
     ),
     "in_registry_and_outbox": FileState(
@@ -139,7 +137,6 @@ FILES: Dict[str, FileState] = {
             "grouping_label": get_study_id_example(1),
             "md5_checksum": "3851c5cb7518a2ff67ab5581c3e01f2f",  # fake checksum
             "request_id": "my_test_reg_request_001",
-            "timestamp": datetime.now(timezone.utc).isoformat(),
         },
     ),
     "db_missing": FileState(
