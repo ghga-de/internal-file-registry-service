@@ -33,6 +33,10 @@ def message_to_file_info(message: Dict[str, Any]) -> models.FileInfoExternal:
         file_id=message["file_id"],
         grouping_label=message["grouping_label"],
         md5_checksum=message["md5_checksum"],
+        creation_date=message["creation_date"],
+        update_date=message["update_date"],
+        size=message["size"],
+        format=message["format"],
     )
 
 
@@ -50,7 +54,6 @@ def handle_stage_request(message: Dict[str, Any], config: Config = CONFIG) -> No
 
     publish_upon_file_stage(
         file_info=file_info,
-        request_id=message["request_id"],
         config=config,
     )
 
@@ -66,7 +69,6 @@ def handle_registration_request(
 
     publish_upon_registration(
         file_info=file_info,
-        request_id=message["request_id"],
         config=config,
     )
 

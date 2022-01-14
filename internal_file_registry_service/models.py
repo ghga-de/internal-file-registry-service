@@ -36,6 +36,10 @@ class FileInfoExternal(BaseModel):
     file_id: str
     grouping_label: str
     md5_checksum: str
+    creation_date: datetime
+    update_date: datetime
+    size: int
+    format: str
 
     # pylint: disable=no-self-argument,no-self-use
     @validator("file_id")
