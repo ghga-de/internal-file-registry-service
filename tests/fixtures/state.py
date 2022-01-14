@@ -137,6 +137,7 @@ FILES: Dict[str, FileState] = {
             "update_date": test_time,
             "size": 0,
             "format": ".test",
+            "timestamp": test_time,
         },
     ),
     "in_registry_and_outbox": FileState(
@@ -170,6 +171,7 @@ FILES: Dict[str, FileState] = {
             "update_date": test_time,
             "size": 0,
             "format": ".test",
+            "timestamp": test_time,
         },
     ),
     "db_missing": FileState(
