@@ -15,6 +15,7 @@
 
 """Test data"""
 
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, List, Optional
 
@@ -41,6 +42,10 @@ class FileState:
         self,
         id: str,
         grouping_label: str,
+        creation_date: datetime,
+        update_date: datetime,
+        size: int,
+        format: str,
         file_path: Path,
         in_permanent_storage: bool,
         in_inbox: bool,
@@ -56,6 +61,10 @@ class FileState:
         """
         self.id = id
         self.grouping_label = grouping_label
+        self.creation_date = creation_date
+        self.update_date = update_date
+        self.size = size
+        self.format = format
         self.file_path = file_path
         self.in_permanent_storage = in_permanent_storage
         self.in_inbox = in_inbox
@@ -72,6 +81,10 @@ class FileState:
         self.file_info = models.FileInfoExternal(
             file_id=self.id,
             grouping_label=self.grouping_label,
+            creation_date=self.creation_date,
+            update_date=self.update_date,
+            size=self.size,
+            format=self.format,
             md5_checksum=self.md5,
         )
 
@@ -102,10 +115,16 @@ class FileState:
             )
 
 
+test_time = datetime.now(timezone.utc)
+
 FILES: Dict[str, FileState] = {
     "in_registry": FileState(
         id=get_file_id_example(0),
         grouping_label=get_study_id_example(0),
+        creation_date=test_time,
+        update_date=test_time,
+        size=0,
+        format=".test",
         file_path=TEST_FILE_PATHS[0],
         in_permanent_storage=True,
         in_inbox=False,
@@ -114,12 +133,19 @@ FILES: Dict[str, FileState] = {
             "file_id": get_file_id_example(0),
             "grouping_label": get_study_id_example(0),
             "md5_checksum": "3851c5cb7518a2ff67ab5581c3e01f2f",  # fake checksum
-            "request_id": "my_test_stage_request_001",
+            "creation_date": test_time,
+            "update_date": test_time,
+            "size": 0,
+            "format": ".test",
         },
     ),
     "in_registry_and_outbox": FileState(
         id=get_file_id_example(1),
         grouping_label=get_study_id_example(0),
+        creation_date=test_time,
+        update_date=test_time,
+        size=0,
+        format=".test",
         file_path=TEST_FILE_PATHS[1],
         in_permanent_storage=True,
         in_inbox=False,
@@ -128,6 +154,10 @@ FILES: Dict[str, FileState] = {
     "in_inbox_only": FileState(
         id=get_file_id_example(2),
         grouping_label=get_study_id_example(1),
+        creation_date=test_time,
+        update_date=test_time,
+        size=0,
+        format=".test",
         file_path=TEST_FILE_PATHS[2],
         in_permanent_storage=False,
         in_inbox=True,
@@ -136,12 +166,19 @@ FILES: Dict[str, FileState] = {
             "file_id": get_file_id_example(2),
             "grouping_label": get_study_id_example(1),
             "md5_checksum": "3851c5cb7518a2ff67ab5581c3e01f2f",  # fake checksum
-            "request_id": "my_test_reg_request_001",
+            "creation_date": test_time,
+            "update_date": test_time,
+            "size": 0,
+            "format": ".test",
         },
     ),
     "db_missing": FileState(
         id=get_file_id_example(100),
         grouping_label=get_study_id_example(0),
+        creation_date=test_time,
+        update_date=test_time,
+        size=0,
+        format=".test",
         file_path=TEST_FILE_PATHS[0],
         in_permanent_storage=True,
         in_inbox=False,
@@ -151,6 +188,10 @@ FILES: Dict[str, FileState] = {
     "in_inbox_and_reg_but_db_missing": FileState(
         id=get_file_id_example(101),
         grouping_label=get_study_id_example(0),
+        creation_date=test_time,
+        update_date=test_time,
+        size=0,
+        format=".test",
         file_path=TEST_FILE_PATHS[0],
         in_permanent_storage=True,
         in_inbox=True,
@@ -160,6 +201,10 @@ FILES: Dict[str, FileState] = {
     "storage_missing": FileState(
         id=get_file_id_example(102),
         grouping_label=get_study_id_example(0),
+        creation_date=test_time,
+        update_date=test_time,
+        size=0,
+        format=".test",
         file_path=TEST_FILE_PATHS[0],
         in_permanent_storage=True,
         in_inbox=False,
@@ -169,6 +214,10 @@ FILES: Dict[str, FileState] = {
     "exists_nowhere": FileState(
         id=get_file_id_example(200),
         grouping_label=get_study_id_example(100),
+        creation_date=test_time,
+        update_date=test_time,
+        size=0,
+        format=".test",
         file_path=TEST_FILE_PATHS[0],
         in_permanent_storage=False,
         in_inbox=False,

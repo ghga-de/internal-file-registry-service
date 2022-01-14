@@ -83,4 +83,3 @@ class FileInfoComplete(FileInfoExternal):
     """
 
     id: UUID4
-    registration_date: datetime
