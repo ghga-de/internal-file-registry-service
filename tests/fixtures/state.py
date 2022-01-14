@@ -135,9 +135,8 @@ FILES: Dict[str, FileState] = {
             "md5_checksum": "3851c5cb7518a2ff67ab5581c3e01f2f",  # fake checksum
             "creation_date": test_time,
             "update_date": test_time,
-            "size": 0,
+            "size": "0",
             "format": ".test",
-            "timestamp": test_time,
         },
     ),
     "in_registry_and_outbox": FileState(
@@ -169,9 +168,8 @@ FILES: Dict[str, FileState] = {
             "md5_checksum": "3851c5cb7518a2ff67ab5581c3e01f2f",  # fake checksum
             "creation_date": test_time,
             "update_date": test_time,
-            "size": 0,
+            "size": "0",
             "format": ".test",
-            "timestamp": test_time,
         },
     ),
     "db_missing": FileState(
