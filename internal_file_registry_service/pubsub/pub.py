@@ -42,7 +42,7 @@ def publish_file_info_generic(
         "md5_checksum": file_info.md5_checksum,
         "creation_date": file_info.creation_date.isoformat(),
         "update_date": file_info.update_date.isoformat(),
-        "size": str(file_info.size),
+        "size": file_info.size,
         "format": file_info.format,
     }
 

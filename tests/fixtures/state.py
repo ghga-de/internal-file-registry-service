@@ -136,7 +136,7 @@ FILES: Dict[str, FileState] = {
             "md5_checksum": "3851c5cb7518a2ff67ab5581c3e01f2f",  # fake checksum
             "creation_date": test_time_string,
             "update_date": test_time_string,
-            "size": "0",
+            "size": 0,
             "format": ".test",
         },
     ),
@@ -169,7 +169,7 @@ FILES: Dict[str, FileState] = {
             "md5_checksum": "3851c5cb7518a2ff67ab5581c3e01f2f",  # fake checksum
             "creation_date": test_time_string,
             "update_date": test_time_string,
-            "size": "0",
+            "size": 0,
             "format": ".test",
         },
     ),
