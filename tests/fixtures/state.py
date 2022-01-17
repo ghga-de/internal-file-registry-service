@@ -116,6 +116,7 @@ class FileState:
 
 
 test_time = datetime.now(timezone.utc)
+test_time_string = test_time.isoformat()
 
 FILES: Dict[str, FileState] = {
     "in_registry": FileState(
@@ -133,8 +134,8 @@ FILES: Dict[str, FileState] = {
             "file_id": get_file_id_example(0),
             "grouping_label": get_study_id_example(0),
             "md5_checksum": "3851c5cb7518a2ff67ab5581c3e01f2f",  # fake checksum
-            "creation_date": test_time,
-            "update_date": test_time,
+            "creation_date": test_time_string,
+            "update_date": test_time_string,
             "size": "0",
             "format": ".test",
         },
@@ -166,8 +167,8 @@ FILES: Dict[str, FileState] = {
             "file_id": get_file_id_example(2),
             "grouping_label": get_study_id_example(1),
             "md5_checksum": "3851c5cb7518a2ff67ab5581c3e01f2f",  # fake checksum
-            "creation_date": test_time,
-            "update_date": test_time,
+            "creation_date": test_time_string,
+            "update_date": test_time_string,
             "size": "0",
             "format": ".test",
         },
