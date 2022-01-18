@@ -1,0 +1,137 @@
+{
+  "title": "ModSettings",
+  "description": "Modifies the orginal Settings class provided by the user",
+  "type": "object",
+  "properties": {
+    "s3_endpoint_url": {
+      "title": "S3 Endpoint Url",
+      "env_names": [
+        "internal_file_registry_service_s3_endpoint_url"
+      ],
+      "type": "string"
+    },
+    "s3_access_key_id": {
+      "title": "S3 Access Key Id",
+      "env_names": [
+        "internal_file_registry_service_s3_access_key_id"
+      ],
+      "type": "string"
+    },
+    "s3_secret_access_key": {
+      "title": "S3 Secret Access Key",
+      "env_names": [
+        "internal_file_registry_service_s3_secret_access_key"
+      ],
+      "type": "string"
+    },
+    "s3_session_token": {
+      "title": "S3 Session Token",
+      "env_names": [
+        "internal_file_registry_service_s3_session_token"
+      ],
+      "type": "string"
+    },
+    "aws_config_ini": {
+      "title": "Aws Config Ini",
+      "env_names": [
+        "internal_file_registry_service_aws_config_ini"
+      ],
+      "type": "string",
+      "format": "path"
+    },
+    "db_url": {
+      "title": "Db Url",
+      "env_names": [
+        "internal_file_registry_service_db_url"
+      ],
+      "type": "string"
+    },
+    "db_print_logs": {
+      "title": "Db Print Logs",
+      "default": false,
+      "env_names": [
+        "internal_file_registry_service_db_print_logs"
+      ],
+      "type": "boolean"
+    },
+    "service_name": {
+      "title": "Service Name",
+      "default": "internal_file_registry",
+      "env_names": [
+        "internal_file_registry_service_service_name"
+      ],
+      "type": "string"
+    },
+    "rabbitmq_host": {
+      "title": "Rabbitmq Host",
+      "default": "rabbitmq",
+      "env_names": [
+        "internal_file_registry_service_rabbitmq_host"
+      ],
+      "type": "string"
+    },
+    "rabbitmq_port": {
+      "title": "Rabbitmq Port",
+      "default": 5672,
+      "env_names": [
+        "internal_file_registry_service_rabbitmq_port"
+      ],
+      "type": "integer"
+    },
+    "s3_outbox_bucket_id": {
+      "title": "S3 Outbox Bucket Id",
+      "env_names": [
+        "internal_file_registry_service_s3_outbox_bucket_id"
+      ],
+      "type": "string"
+    },
+    "s3_inbox_bucket_id": {
+      "title": "S3 Inbox Bucket Id",
+      "env_names": [
+        "internal_file_registry_service_s3_inbox_bucket_id"
+      ],
+      "type": "string"
+    },
+    "topic_name_stage_request": {
+      "title": "Topic Name Stage Request",
+      "default": "non_staged_file_requested",
+      "env_names": [
+        "internal_file_registry_service_topic_name_stage_request"
+      ],
+      "type": "string"
+    },
+    "topic_name_staged_to_outbox": {
+      "title": "Topic Name Staged To Outbox",
+      "default": "file_staged_for_download",
+      "env_names": [
+        "internal_file_registry_service_topic_name_staged_to_outbox"
+      ],
+      "type": "string"
+    },
+    "topic_name_reg_request": {
+      "title": "Topic Name Reg Request",
+      "default": "file_upload_received",
+      "env_names": [
+        "internal_file_registry_service_topic_name_reg_request"
+      ],
+      "type": "string"
+    },
+    "topic_name_registered": {
+      "title": "Topic Name Registered",
+      "default": "file_internally_registered",
+      "env_names": [
+        "internal_file_registry_service_topic_name_registered"
+      ],
+      "type": "string"
+    }
+  },
+  "required": [
+    "s3_endpoint_url",
+    "s3_access_key_id",
+    "s3_secret_access_key",
+    "db_url",
+    "s3_outbox_bucket_id",
+    "s3_inbox_bucket_id"
+  ],
+  "additionalProperties": false
+}

@@ -1,18 +1,4 @@
-# Copyright 2021 Universität Tübingen, DKFZ and EMBL
-# for the German Human Genome-Phenome Archive (GHGA)
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# Copyright 2021 Universität Tübingen, DKFZ and EMBL
+# Copyright 2021 - 2022 Universität Tübingen, DKFZ and EMBL
 # for the German Human Genome-Phenome Archive (GHGA)
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -30,7 +16,6 @@
 """Fixtures for testing the PostgreSQL functionalities"""
 
 from dataclasses import dataclass
-from datetime import datetime
 from typing import Generator, List
 
 import pytest
@@ -69,7 +54,6 @@ def populate_db(db_url: str, file_infos: List[models.FileInfoExternal]):
         for existing_file_info in file_infos:
             param_dict = {
                 **existing_file_info.dict(),
-                "registration_date": datetime.now(),
             }
             orm_entry = db_models.FileInfo(**param_dict)
             session.add(orm_entry)

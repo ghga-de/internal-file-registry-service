@@ -1,4 +1,4 @@
-# Copyright 2021 Universität Tübingen, DKFZ and EMBL
+# Copyright 2021 - 2022 Universität Tübingen, DKFZ and EMBL
 # for the German Human Genome-Phenome Archive (GHGA)
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,20 +15,17 @@
 
 """Publish messages/events to async messaging topics."""
 
-from datetime import datetime
-
+from ghga_message_schemas import schemas
 from ghga_service_chassis_lib.pubsub import AmqpTopic
 
 from .. import models
 from ..config import CONFIG, Config
-from . import schemas
 
 
 def publish_file_info_generic(
     topic_name: str,
     message_schema: dict,
     file_info: models.FileInfoExternal,
-    request_id: str,
     config: Config = CONFIG,
 ):
     """A generic function to publish file infos as message to specified topic name."""
@@ -40,39 +37,39 @@ def publish_file_info_generic(
     )
 
     message = {
-        "request_id": request_id,
         "file_id": file_info.file_id,
         "grouping_label": file_info.grouping_label,
         "md5_checksum": file_info.md5_checksum,
-        "timestamp": datetime.now().isoformat(),
+        "creation_date": file_info.creation_date.isoformat(),
+        "update_date": file_info.update_date.isoformat(),
+        "size": file_info.size,
+        "format": file_info.format,
     }
 
     topic.publish(message)
 
 
 def publish_upon_file_stage(
-    file_info: models.FileInfoExternal, request_id: str, config: Config = CONFIG
+    file_info: models.FileInfoExternal, config: Config = CONFIG
 ):
     """Publish an event/message informing that a new file was staged."""
 
     publish_file_info_generic(
         topic_name=config.topic_name_staged_to_outbox,
-        message_schema=schemas.STAGED_TO_OUTBOX,
+        message_schema=schemas.FILE_STAGED_FOR_DOWNLOAD,
         file_info=file_info,
-        request_id=request_id,
         config=config,
     )
 
 
 def publish_upon_registration(
-    file_info: models.FileInfoExternal, request_id: str, config: Config = CONFIG
+    file_info: models.FileInfoExternal, config: Config = CONFIG
 ):
     """Publish an event/message informing that a new file was successfully registered."""
 
     publish_file_info_generic(
         topic_name=config.topic_name_registered,
-        message_schema=schemas.REGISTERED,
+        message_schema=schemas.FILE_INTERNALLY_REGISTERED,
         file_info=file_info,
-        request_id=request_id,
         config=config,
     )
