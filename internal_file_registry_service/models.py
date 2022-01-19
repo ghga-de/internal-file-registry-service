@@ -53,6 +53,21 @@ class FileInfoExternal(BaseModel):
 
         return value
 
+    class Config:
+        """Additional pydantic configs."""
+
+        orm_mode = True
+
+
+class FileInfoInitial(FileInfoExternal):
+    """
+    A model for processing files, includes all file info needed to add a file
+    to the database and storage
+    """
+
+    grouping_label: str
+
+    # pylint: disable=no-self-argument,no-self-use
     @validator("grouping_label")
     def check_grouping_label(cls, value: str):
         """Checks if the grouping_label is valid for use as a (S3) bucket label."""
@@ -67,20 +82,6 @@ class FileInfoExternal(BaseModel):
             ) from error
 
         return value_casted
-
-    class Config:
-        """Additional pydantic configs."""
-
-        orm_mode = True
-
-
-class FileInfoInitial(FileInfoExternal):
-    """
-    A model for processing files, includes all file info needed to add a file
-    to the database and storage
-    """
-
-    grouping_label: str
 
 
 class FileInfoComplete(FileInfoInitial):
