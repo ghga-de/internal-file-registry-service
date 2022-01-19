@@ -78,7 +78,7 @@ class FileState:
             self.content = file.read()
 
         self.md5 = calc_md5(self.content)
-        self.file_info = models.FileInfoExternal(
+        self.file_info = models.FileInfoInitial(
             file_id=self.id,
             grouping_label=self.grouping_label,
             creation_date=self.creation_date,

@@ -26,12 +26,25 @@ from ..core import FileAlreadyInOutboxError, register_file, stage_file
 from .pub import publish_upon_file_stage, publish_upon_registration
 
 
-def message_to_file_info(message: Dict[str, Any]) -> models.FileInfoExternal:
-    """Convert message to models.FileInfoExternal"""
+def message_to_file_info(message: Dict[str, Any]) -> models.FileInfoInitial:
+    """Convert message to models.FileInfoInitial"""
+
+    return models.FileInfoInitial(
+        file_id=message["file_id"],
+        grouping_label=message["grouping_label"],
+        md5_checksum=message["md5_checksum"],
+        creation_date=message["creation_date"],
+        update_date=message["update_date"],
+        size=message["size"],
+        format=message["format"],
+    )
+
+
+def stage_message_to_file_info(message: Dict[str, Any]) -> models.FileInfoExternal:
+    """Convert message to models.FileInfoInitial"""
 
     return models.FileInfoExternal(
         file_id=message["file_id"],
-        grouping_label=message["grouping_label"],
         md5_checksum=message["md5_checksum"],
         creation_date=message["creation_date"],
         update_date=message["update_date"],
@@ -43,17 +56,19 @@ def message_to_file_info(message: Dict[str, Any]) -> models.FileInfoExternal:
 def handle_stage_request(message: Dict[str, Any], config: Config = CONFIG) -> None:
     """Work on a stage request coming from the corresponding messaging topic."""
 
-    file_info = message_to_file_info(message)
+    file_info = stage_message_to_file_info(message)
 
     try:
-        stage_file(external_file_id=file_info.file_id, config=config)
+        # The internal file registry is our singel source of truth, therefore
+        # we take the file info we publish from the database
+        file_info_new = stage_file(external_file_id=file_info.file_id, config=config)
     except FileAlreadyInOutboxError:
         # This is not really an error (it uccurs when multiple stage requests are
         # comming in shortly after each other) and there is nothing to do.
         return
 
     publish_upon_file_stage(
-        file_info=file_info,
+        file_info=file_info_new,
         config=config,
     )
 

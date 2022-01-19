@@ -25,7 +25,7 @@ from ..dao import (
     ObjectAlreadyExistsError,
     ObjectStorage,
 )
-from ..models import FileInfoExternal
+from ..models import FileInfoInitial
 
 
 class FileAlreadyInOutboxError(RuntimeError):
@@ -98,7 +98,7 @@ class FileInStorageButNotInDbError(DbAndStorageInconsistencyError):
         super().__init__(message)
 
 
-def stage_file(external_file_id: str, config: Config = CONFIG) -> None:
+def stage_file(external_file_id: str, config: Config = CONFIG) -> FileInfoInitial:
     """Copies a file into the stage bucket."""
 
     # get file info from the database:
@@ -124,8 +124,10 @@ def stage_file(external_file_id: str, config: Config = CONFIG) -> None:
         except ObjectAlreadyExistsError as error:
             raise FileAlreadyInOutboxError(external_file_id=external_file_id) from error
 
+    return file_info
 
-def register_file(file_info: FileInfoExternal, config: Config = CONFIG) -> None:
+
+def register_file(file_info: FileInfoInitial, config: Config = CONFIG) -> None:
     """Register a new file to the database and copy it from a stage bucket (e.g. inbox)
     to the permanent file storage."""
 
