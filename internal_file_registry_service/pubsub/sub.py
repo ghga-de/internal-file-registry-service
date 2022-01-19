@@ -82,7 +82,7 @@ def subscribe_stage_requests(config: Config = CONFIG, run_forever: bool = True) 
     topic = AmqpTopic(
         config=config,
         topic_name=config.topic_name_stage_request,
-        json_schema=schemas.NON_STAGED_FILE_REQUESTED,
+        json_schema=schemas.SCHEMAS["non_staged_file_requested"],
     )
 
     topic.subscribe(
@@ -101,7 +101,7 @@ def subscribe_registration_request(
     topic = AmqpTopic(
         config=config,
         topic_name=config.topic_name_reg_request,
-        json_schema=schemas.FILE_INTERNALLY_REGISTERED,
+        json_schema=schemas.SCHEMAS["file_internally_registered"],
     )
 
     topic.subscribe(

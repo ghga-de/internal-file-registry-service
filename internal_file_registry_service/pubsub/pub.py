@@ -56,7 +56,7 @@ def publish_upon_file_stage(
 
     publish_file_info_generic(
         topic_name=config.topic_name_staged_to_outbox,
-        message_schema=schemas.FILE_STAGED_FOR_DOWNLOAD,
+        message_schema=schemas.SCHEMAS["file_staged_for_download"],
         file_info=file_info,
         config=config,
     )
@@ -69,7 +69,7 @@ def publish_upon_registration(
 
     publish_file_info_generic(
         topic_name=config.topic_name_registered,
-        message_schema=schemas.FILE_INTERNALLY_REGISTERED,
+        message_schema=schemas.SCHEMAS["file_internally_registered"],
         file_info=file_info,
         config=config,
     )
