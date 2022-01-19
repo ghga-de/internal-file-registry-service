@@ -224,4 +224,24 @@ FILES: Dict[str, FileState] = {
         in_inbox=False,
         in_outbox=False,
     ),
+    "no_grouping_label_in_message": FileState(
+        id=get_file_id_example(300),
+        grouping_label=get_study_id_example(100),
+        creation_date=test_time,
+        update_date=test_time,
+        size=0,
+        format=".test",
+        file_path=TEST_FILE_PATHS[0],
+        in_permanent_storage=True,
+        in_inbox=False,
+        in_outbox=False,
+        message={
+            "file_id": get_file_id_example(0),
+            "md5_checksum": "3851c5cb7518a2ff67ab5581c3e01f2f",  # fake checksum
+            "creation_date": test_time_string,
+            "update_date": test_time_string,
+            "size": 0,
+            "format": ".test",
+        },
+    ),
 }
