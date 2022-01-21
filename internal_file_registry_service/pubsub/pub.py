@@ -25,7 +25,7 @@ from ..config import CONFIG, Config
 def publish_file_info_generic(
     topic_name: str,
     message_schema: dict,
-    file_info: models.FileInfoExternal,
+    file_info: models.FileInfoInitial,
     config: Config = CONFIG,
 ):
     """A generic function to publish file infos as message to specified topic name."""
@@ -49,27 +49,25 @@ def publish_file_info_generic(
     topic.publish(message)
 
 
-def publish_upon_file_stage(
-    file_info: models.FileInfoExternal, config: Config = CONFIG
-):
+def publish_upon_file_stage(file_info: models.FileInfoInitial, config: Config = CONFIG):
     """Publish an event/message informing that a new file was staged."""
 
     publish_file_info_generic(
         topic_name=config.topic_name_staged_to_outbox,
-        message_schema=schemas.FILE_STAGED_FOR_DOWNLOAD,
+        message_schema=schemas.SCHEMAS["file_staged_for_download"],
         file_info=file_info,
         config=config,
     )
 
 
 def publish_upon_registration(
-    file_info: models.FileInfoExternal, config: Config = CONFIG
+    file_info: models.FileInfoInitial, config: Config = CONFIG
 ):
     """Publish an event/message informing that a new file was successfully registered."""
 
     publish_file_info_generic(
         topic_name=config.topic_name_registered,
-        message_schema=schemas.FILE_INTERNALLY_REGISTERED,
+        message_schema=schemas.SCHEMAS["file_internally_registered"],
         file_info=file_info,
         config=config,
     )

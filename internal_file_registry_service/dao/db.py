@@ -69,7 +69,7 @@ class DatabaseDao(DaoGenericBase):
         """Get information for a file by specifying its external ID"""
         ...
 
-    def register_file_info(self, file_info: models.FileInfoExternal) -> None:
+    def register_file_info(self, file_info: models.FileInfoInitial) -> None:
         """Register information for a new to the database."""
         ...
 
@@ -126,7 +126,7 @@ class PostgresDatabase(DatabaseDao):
         orm_file_info = self._get_orm_file_info(file_id=file_id)
         return models.FileInfoComplete.from_orm(orm_file_info)
 
-    def register_file_info(self, file_info: models.FileInfoExternal) -> None:
+    def register_file_info(self, file_info: models.FileInfoInitial) -> None:
         """Register information for a new file to the database."""
 
         # check for collisions in the database:

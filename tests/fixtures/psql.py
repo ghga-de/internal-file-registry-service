@@ -31,8 +31,8 @@ from internal_file_registry_service.dao.db import PostgresDatabase
 
 from . import state
 
-existing_file_infos: List[models.FileInfoExternal] = []
-non_existing_file_infos: List[models.FileInfoExternal] = []
+existing_file_infos: List[models.FileInfoInitial] = []
+non_existing_file_infos: List[models.FileInfoInitial] = []
 
 for file in state.FILES.values():
     if file.in_permanent_storage and file.populate_db:
@@ -41,7 +41,7 @@ for file in state.FILES.values():
         non_existing_file_infos.append(file.file_info)
 
 
-def populate_db(db_url: str, file_infos: List[models.FileInfoExternal]):
+def populate_db(db_url: str, file_infos: List[models.FileInfoInitial]):
     """Create and populates the DB"""
 
     # setup database and tables:
@@ -66,8 +66,8 @@ class PsqlState:
 
     config: PostgresqlConfigBase
     database: PostgresDatabase
-    existing_file_infos: List[models.FileInfoExternal]
-    non_existing_file_infos: List[models.FileInfoExternal]
+    existing_file_infos: List[models.FileInfoInitial]
+    non_existing_file_infos: List[models.FileInfoInitial]
 
 
 @pytest.fixture

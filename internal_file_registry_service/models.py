@@ -29,12 +29,10 @@ from pydantic import UUID4, BaseModel, validator
 class FileInfoExternal(BaseModel):
     """
     A model for communicating file info to external services.
-    This is missing the internal file ID `id` as well as the registration date as
-    this information shouldn't be shared with other services.
+    This is missing the internal file ID `id` and the grouping label
     """
 
     file_id: str
-    grouping_label: str
     md5_checksum: str
     creation_date: datetime
     update_date: datetime
@@ -55,6 +53,21 @@ class FileInfoExternal(BaseModel):
 
         return value
 
+    class Config:
+        """Additional pydantic configs."""
+
+        orm_mode = True
+
+
+class FileInfoInitial(FileInfoExternal):
+    """
+    A model for processing files, includes all file info needed to add a file
+    to the database and storage
+    """
+
+    grouping_label: str
+
+    # pylint: disable=no-self-argument,no-self-use
     @validator("grouping_label")
     def check_grouping_label(cls, value: str):
         """Checks if the grouping_label is valid for use as a (S3) bucket label."""
@@ -70,13 +83,8 @@ class FileInfoExternal(BaseModel):
 
         return value_casted
 
-    class Config:
-        """Additional pydantic configs."""
 
-        orm_mode = True
-
-
-class FileInfoComplete(FileInfoExternal):
+class FileInfoComplete(FileInfoInitial):
     """
     A model for describing all file info.
     Only intended for service-internal use.
