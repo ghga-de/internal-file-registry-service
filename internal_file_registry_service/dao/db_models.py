@@ -1,4 +1,4 @@
-# Copyright 2021 Universität Tübingen, DKFZ and EMBL
+# Copyright 2021 - 2022 Universität Tübingen, DKFZ and EMBL
 # for the German Human Genome-Phenome Archive (GHGA)
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,7 +17,7 @@
 
 import uuid
 
-from sqlalchemy import Column, DateTime, String
+from sqlalchemy import Column, DateTime, Integer, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm.decl_api import DeclarativeMeta
@@ -60,8 +60,25 @@ class FileInfo(Base):
     md5_checksum = Column(
         String, nullable=False, doc="MD5 checksum of the file content."
     )
-    registration_date = Column(
+    creation_date = Column(
         DateTime,
         nullable=False,
-        doc="Date/time when the file was internally registered.",
+        doc="Timestamp (in ISO 8601 format) when the entity was created.",
+    )
+    update_date = Column(
+        DateTime,
+        nullable=False,
+        doc="Timestamp (in ISO 8601 format) when the entity was updated.",
+    )
+    format = Column(
+        String,
+        nullable=False,
+        unique=False,
+        doc="The format of the file: BAM, SAM, CRAM, BAI, etc.",
+    )
+    size = Column(
+        Integer,
+        nullable=False,
+        unique=False,
+        doc="The size of the file in bytes.",
     )

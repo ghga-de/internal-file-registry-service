@@ -1,4 +1,4 @@
-# Copyright 2021 Universität Tübingen, DKFZ and EMBL
+# Copyright 2021 - 2022 Universität Tübingen, DKFZ and EMBL
 # for the German Human Genome-Phenome Archive (GHGA)
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,7 +15,6 @@
 
 """Database DAO"""
 
-from datetime import datetime
 from typing import Any, Optional
 
 from ghga_service_chassis_lib.postgresql import (
@@ -70,7 +69,7 @@ class DatabaseDao(DaoGenericBase):
         """Get information for a file by specifying its external ID"""
         ...
 
-    def register_file_info(self, file_info: models.FileInfoExternal) -> None:
+    def register_file_info(self, file_info: models.FileInfoInitial) -> None:
         """Register information for a new to the database."""
         ...
 
@@ -127,7 +126,7 @@ class PostgresDatabase(DatabaseDao):
         orm_file_info = self._get_orm_file_info(file_id=file_id)
         return models.FileInfoComplete.from_orm(orm_file_info)
 
-    def register_file_info(self, file_info: models.FileInfoExternal) -> None:
+    def register_file_info(self, file_info: models.FileInfoInitial) -> None:
         """Register information for a new file to the database."""
 
         # check for collisions in the database:
@@ -142,7 +141,6 @@ class PostgresDatabase(DatabaseDao):
 
         file_info_dict = {
             **file_info.dict(),
-            "registration_date": datetime.now(),
         }
         orm_file_info = db_models.FileInfo(**file_info_dict)
         self._session.add(orm_file_info)

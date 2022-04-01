@@ -1,4 +1,4 @@
-# Copyright 2021 Universität Tübingen, DKFZ and EMBL
+# Copyright 2021 - 2022 Universität Tübingen, DKFZ and EMBL
 # for the German Human Genome-Phenome Archive (GHGA)
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,10 +17,10 @@
 
 from typing import Any, Callable, Dict
 
+from ghga_message_schemas import schemas
 from ghga_service_chassis_lib.utils import exec_with_timeout
 
 from internal_file_registry_service.pubsub import (
-    schemas,
     subscribe_registration_request,
     subscribe_stage_requests,
 )
@@ -84,9 +84,9 @@ def test_subscribe_stage_requests(psql_fixture, s3_fixture, amqp_fixture):  # no
     sub_and_pub_test_generic(
         upstream_topic_name=DEFAULT_CONFIG.topic_name_stage_request,
         downstream_topic_name=DEFAULT_CONFIG.topic_name_staged_to_outbox,
-        upstream_message=state.FILES["in_registry"].message,
-        upstream_msg_schema=schemas.STAGE_REQUEST,
-        downstream_msg_schema=schemas.STAGED_TO_OUTBOX,
+        upstream_message=state.FILES["no_grouping_label_in_message"].message,
+        upstream_msg_schema=schemas.SCHEMAS["non_staged_file_requested"],
+        downstream_msg_schema=schemas.SCHEMAS["file_staged_for_download"],
         subscribe_func=subscribe_stage_requests,
         psql_fixture=psql_fixture,
         s3_fixture=s3_fixture,
@@ -103,8 +103,8 @@ def test_subscribe_registration_request(
         upstream_topic_name=DEFAULT_CONFIG.topic_name_reg_request,
         downstream_topic_name=DEFAULT_CONFIG.topic_name_registered,
         upstream_message=state.FILES["in_inbox_only"].message,
-        upstream_msg_schema=schemas.REG_REQUEST,
-        downstream_msg_schema=schemas.REGISTERED,
+        upstream_msg_schema=schemas.SCHEMAS["file_upload_received"],
+        downstream_msg_schema=schemas.SCHEMAS["file_internally_registered"],
         subscribe_func=subscribe_registration_request,
         psql_fixture=psql_fixture,
         s3_fixture=s3_fixture,

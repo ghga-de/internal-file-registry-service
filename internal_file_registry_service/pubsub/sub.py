@@ -1,4 +1,4 @@
-# Copyright 2021 Universität Tübingen, DKFZ and EMBL
+# Copyright 2021 - 2022 Universität Tübingen, DKFZ and EMBL
 # for the German Human Genome-Phenome Archive (GHGA)
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,40 +17,58 @@
 
 from typing import Any, Dict
 
+from ghga_message_schemas import schemas
 from ghga_service_chassis_lib.pubsub import AmqpTopic
 
 from .. import models
 from ..config import CONFIG, Config
 from ..core import FileAlreadyInOutboxError, register_file, stage_file
-from . import schemas
 from .pub import publish_upon_file_stage, publish_upon_registration
 
 
-def message_to_file_info(message: Dict[str, Any]) -> models.FileInfoExternal:
-    """Convert message to models.FileInfoExternal"""
+def message_to_file_info(message: Dict[str, Any]) -> models.FileInfoInitial:
+    """Convert message to models.FileInfoInitial"""
 
-    return models.FileInfoExternal(
+    return models.FileInfoInitial(
         file_id=message["file_id"],
         grouping_label=message["grouping_label"],
         md5_checksum=message["md5_checksum"],
+        creation_date=message["creation_date"],
+        update_date=message["update_date"],
+        size=message["size"],
+        format=message["format"],
+    )
+
+
+def stage_message_to_file_info(message: Dict[str, Any]) -> models.FileInfoExternal:
+    """Convert message to models.FileInfoInitial"""
+
+    return models.FileInfoExternal(
+        file_id=message["file_id"],
+        md5_checksum=message["md5_checksum"],
+        creation_date=message["creation_date"],
+        update_date=message["update_date"],
+        size=message["size"],
+        format=message["format"],
     )
 
 
 def handle_stage_request(message: Dict[str, Any], config: Config = CONFIG) -> None:
     """Work on a stage request coming from the corresponding messaging topic."""
 
-    file_info = message_to_file_info(message)
+    file_info = stage_message_to_file_info(message)
 
     try:
-        stage_file(external_file_id=file_info.file_id, config=config)
+        # The internal file registry is our singel source of truth, therefore
+        # we take the file info we publish from the database
+        file_info_new = stage_file(external_file_id=file_info.file_id, config=config)
     except FileAlreadyInOutboxError:
         # This is not really an error (it uccurs when multiple stage requests are
         # comming in shortly after each other) and there is nothing to do.
         return
 
     publish_upon_file_stage(
-        file_info=file_info,
-        request_id=message["request_id"],
+        file_info=file_info_new,
         config=config,
     )
 
@@ -66,7 +84,6 @@ def handle_registration_request(
 
     publish_upon_registration(
         file_info=file_info,
-        request_id=message["request_id"],
         config=config,
     )
 
@@ -80,7 +97,7 @@ def subscribe_stage_requests(config: Config = CONFIG, run_forever: bool = True) 
     topic = AmqpTopic(
         config=config,
         topic_name=config.topic_name_stage_request,
-        json_schema=schemas.STAGE_REQUEST,
+        json_schema=schemas.SCHEMAS["non_staged_file_requested"],
     )
 
     topic.subscribe(
@@ -99,7 +116,7 @@ def subscribe_registration_request(
     topic = AmqpTopic(
         config=config,
         topic_name=config.topic_name_reg_request,
-        json_schema=schemas.REG_REQUEST,
+        json_schema=schemas.SCHEMAS["file_internally_registered"],
     )
 
     topic.subscribe(
