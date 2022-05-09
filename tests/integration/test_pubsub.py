@@ -84,7 +84,7 @@ def test_subscribe_stage_requests(psql_fixture, s3_fixture, amqp_fixture):  # no
     sub_and_pub_test_generic(
         upstream_topic_name=DEFAULT_CONFIG.topic_name_stage_request,
         downstream_topic_name=DEFAULT_CONFIG.topic_name_staged_to_outbox,
-        upstream_message=state.FILES["no_grouping_label_in_message"].message,
+        upstream_message=state.FILES["no_grouping_label_in_message"].message,  # type: ignore
         upstream_msg_schema=schemas.SCHEMAS["non_staged_file_requested"],
         downstream_msg_schema=schemas.SCHEMAS["file_staged_for_download"],
         subscribe_func=subscribe_stage_requests,
@@ -102,7 +102,7 @@ def test_subscribe_registration_request(
     sub_and_pub_test_generic(
         upstream_topic_name=DEFAULT_CONFIG.topic_name_reg_request,
         downstream_topic_name=DEFAULT_CONFIG.topic_name_registered,
-        upstream_message=state.FILES["in_inbox_only"].message,
+        upstream_message=state.FILES["in_inbox_only"].message,  # type: ignore
         upstream_msg_schema=schemas.SCHEMAS["file_upload_received"],
         downstream_msg_schema=schemas.SCHEMAS["file_internally_registered"],
         subscribe_func=subscribe_registration_request,
