@@ -5,6 +5,8 @@
   "properties": {
     "s3_endpoint_url": {
       "title": "S3 Endpoint Url",
+      "description": "URL to the S3 API.",
+      "example": "http://localhost:4566",
       "env_names": [
         "internal_file_registry_service_s3_endpoint_url"
       ],
@@ -12,6 +14,8 @@
     },
     "s3_access_key_id": {
       "title": "S3 Access Key Id",
+      "description": "Part of credentials for login into the S3 service. See: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/credentials.html",
+      "example": "my-access-key-id",
       "env_names": [
         "internal_file_registry_service_s3_access_key_id"
       ],
@@ -19,6 +23,8 @@
     },
     "s3_secret_access_key": {
       "title": "S3 Secret Access Key",
+      "description": "Part of credentials for login into the S3 service. See: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/credentials.html",
+      "example": "my-secret-access-key",
       "env_names": [
         "internal_file_registry_service_s3_secret_access_key"
       ],
@@ -26,6 +32,8 @@
     },
     "s3_session_token": {
       "title": "S3 Session Token",
+      "description": "Part of credentials for login into the S3 service. See: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/credentials.html",
+      "example": "my-session-token",
       "env_names": [
         "internal_file_registry_service_s3_session_token"
       ],
@@ -33,6 +41,8 @@
     },
     "aws_config_ini": {
       "title": "Aws Config Ini",
+      "description": "Path to a config file for specifying more advanced S3 parameters. This should follow the format described here: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html#using-a-configuration-file",
+      "example": "~/.aws/config",
       "env_names": [
         "internal_file_registry_service_aws_config_ini"
       ],
@@ -41,6 +51,8 @@
     },
     "db_url": {
       "title": "Db Url",
+      "description": "A URL to a PostgreSQL database.",
+      "example": "postgresql://user:password@mydbserver/dbname",
       "env_names": [
         "internal_file_registry_service_db_url"
       ],
@@ -48,6 +60,7 @@
     },
     "db_print_logs": {
       "title": "Db Print Logs",
+      "description": "Print DB/ORM logs.",
       "default": false,
       "env_names": [
         "internal_file_registry_service_db_print_logs"
@@ -64,7 +77,8 @@
     },
     "rabbitmq_host": {
       "title": "Rabbitmq Host",
-      "default": "rabbitmq",
+      "description": "Name or IP address of the host running the RabbitMQ broker.",
+      "example": "rabbitmq",
       "env_names": [
         "internal_file_registry_service_rabbitmq_host"
       ],
@@ -72,6 +86,7 @@
     },
     "rabbitmq_port": {
       "title": "Rabbitmq Port",
+      "description": "Port of the RabbitMQ broker running on the specified host.",
       "default": 5672,
       "env_names": [
         "internal_file_registry_service_rabbitmq_port"
@@ -130,6 +145,7 @@
     "s3_access_key_id",
     "s3_secret_access_key",
     "db_url",
+    "rabbitmq_host",
     "s3_outbox_bucket_id",
     "s3_inbox_bucket_id"
   ],

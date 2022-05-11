@@ -1,10 +1,10 @@
 aws_config_ini: null
 db_print_logs: false
-db_url: postgresql://postgres:postgres@internal_file_registry_service_db/postgres
+db_url: postgresql://postgres:postgres@postgresql/postgres
 rabbitmq_host: rabbitmq
 rabbitmq_port: 5672
 s3_access_key_id: test
-s3_endpoint_url: http://internal_file_registry_service_s3:4566
+s3_endpoint_url: http://localstack:4566
 s3_inbox_bucket_id: inbox
 s3_outbox_bucket_id: outbox
 s3_secret_access_key: test
