@@ -17,12 +17,11 @@
 
 from ghga_service_chassis_lib.config import config_from_yaml
 from ghga_service_chassis_lib.postgresql import PostgresqlConfigBase
-from ghga_service_chassis_lib.pubsub import PubSubConfigBase
 from ghga_service_chassis_lib.s3 import S3ConfigBase
 
 
-@config_from_yaml(prefix="internal_file_registry_service")
-class Config(PubSubConfigBase, PostgresqlConfigBase, S3ConfigBase):
+@config_from_yaml(prefix="ifrs")
+class Config(PostgresqlConfigBase, S3ConfigBase):
     """Config parameters and their defaults."""
 
     # stage for outgoing objects (download):

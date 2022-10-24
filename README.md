@@ -43,9 +43,9 @@ internal-file-registry-service
 
 ### Configuration:
 The [`./example_config.yaml`](./example_config.yaml) gives an overview of the available configuration options.
-Please adapt it, rename it to `.internal_file_registry_service.yaml`, and place it to one of the following locations:
-- in the current working directory were you are execute the service (on unix: `./.internal_file_registry_service.yaml`)
-- in your home directory (on unix: `~/.internal_file_registry_service.yaml`)
+Please adapt it, rename it to `.ifrs.yaml`, and place it to one of the following locations:
+- in the current working directory were you are execute the service (on unix: `./.ifrs.yaml`)
+- in your home directory (on unix: `~/.ifrs.yaml`)
 
 The config yaml will be automatically parsed by the service.
 
