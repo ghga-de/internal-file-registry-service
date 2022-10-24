@@ -8,7 +8,7 @@
       "description": "URL to the S3 API.",
       "example": "http://localhost:4566",
       "env_names": [
-        "internal_file_registry_service_s3_endpoint_url"
+        "ifrs_s3_endpoint_url"
       ],
       "type": "string"
     },
@@ -17,7 +17,7 @@
       "description": "Part of credentials for login into the S3 service. See: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/credentials.html",
       "example": "my-access-key-id",
       "env_names": [
-        "internal_file_registry_service_s3_access_key_id"
+        "ifrs_s3_access_key_id"
       ],
       "type": "string"
     },
@@ -26,7 +26,7 @@
       "description": "Part of credentials for login into the S3 service. See: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/credentials.html",
       "example": "my-secret-access-key",
       "env_names": [
-        "internal_file_registry_service_s3_secret_access_key"
+        "ifrs_s3_secret_access_key"
       ],
       "type": "string"
     },
@@ -35,7 +35,7 @@
       "description": "Part of credentials for login into the S3 service. See: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/credentials.html",
       "example": "my-session-token",
       "env_names": [
-        "internal_file_registry_service_s3_session_token"
+        "ifrs_s3_session_token"
       ],
       "type": "string"
     },
@@ -44,7 +44,7 @@
       "description": "Path to a config file for specifying more advanced S3 parameters. This should follow the format described here: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html#using-a-configuration-file",
       "example": "~/.aws/config",
       "env_names": [
-        "internal_file_registry_service_aws_config_ini"
+        "ifrs_aws_config_ini"
       ],
       "type": "string",
       "format": "path"
@@ -54,7 +54,7 @@
       "description": "A URL to a PostgreSQL database.",
       "example": "postgresql://user:password@mydbserver/dbname",
       "env_names": [
-        "internal_file_registry_service_db_url"
+        "ifrs_db_url"
       ],
       "type": "string"
     },
@@ -63,47 +63,29 @@
       "description": "Print DB/ORM logs.",
       "default": false,
       "env_names": [
-        "internal_file_registry_service_db_print_logs"
+        "ifrs_db_print_logs"
       ],
       "type": "boolean"
-    },
-    "service_name": {
-      "title": "Service Name",
-      "default": "internal_file_registry",
-      "env_names": [
-        "internal_file_registry_service_service_name"
-      ],
-      "type": "string"
-    },
-    "rabbitmq_host": {
-      "title": "Rabbitmq Host",
-      "description": "Name or IP address of the host running the RabbitMQ broker.",
-      "example": "rabbitmq",
-      "env_names": [
-        "internal_file_registry_service_rabbitmq_host"
-      ],
-      "type": "string"
-    },
-    "rabbitmq_port": {
-      "title": "Rabbitmq Port",
-      "description": "Port of the RabbitMQ broker running on the specified host.",
-      "default": 5672,
-      "env_names": [
-        "internal_file_registry_service_rabbitmq_port"
-      ],
-      "type": "integer"
     },
     "s3_outbox_bucket_id": {
       "title": "S3 Outbox Bucket Id",
       "env_names": [
-        "internal_file_registry_service_s3_outbox_bucket_id"
+        "ifrs_s3_outbox_bucket_id"
       ],
       "type": "string"
     },
     "s3_inbox_bucket_id": {
       "title": "S3 Inbox Bucket Id",
       "env_names": [
-        "internal_file_registry_service_s3_inbox_bucket_id"
+        "ifrs_s3_inbox_bucket_id"
+      ],
+      "type": "string"
+    },
+    "service_name": {
+      "title": "Service Name",
+      "default": "internal_file_registry",
+      "env_names": [
+        "ifrs_service_name"
       ],
       "type": "string"
     },
@@ -111,7 +93,7 @@
       "title": "Topic Name Stage Request",
       "default": "non_staged_file_requested",
       "env_names": [
-        "internal_file_registry_service_topic_name_stage_request"
+        "ifrs_topic_name_stage_request"
       ],
       "type": "string"
     },
@@ -119,7 +101,7 @@
       "title": "Topic Name Staged To Outbox",
       "default": "file_staged_for_download",
       "env_names": [
-        "internal_file_registry_service_topic_name_staged_to_outbox"
+        "ifrs_topic_name_staged_to_outbox"
       ],
       "type": "string"
     },
@@ -127,7 +109,7 @@
       "title": "Topic Name Reg Request",
       "default": "file_upload_received",
       "env_names": [
-        "internal_file_registry_service_topic_name_reg_request"
+        "ifrs_topic_name_reg_request"
       ],
       "type": "string"
     },
@@ -135,7 +117,7 @@
       "title": "Topic Name Registered",
       "default": "file_internally_registered",
       "env_names": [
-        "internal_file_registry_service_topic_name_registered"
+        "ifrs_topic_name_registered"
       ],
       "type": "string"
     }
@@ -145,7 +127,6 @@
     "s3_access_key_id",
     "s3_secret_access_key",
     "db_url",
-    "rabbitmq_host",
     "s3_outbox_bucket_id",
     "s3_inbox_bucket_id"
   ],

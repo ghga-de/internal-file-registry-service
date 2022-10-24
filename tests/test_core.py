@@ -19,7 +19,7 @@ from typing import Optional, Type
 
 import pytest
 
-from internal_file_registry_service.core.main import (
+from ifrs.core.main import (
     FileAlreadyInOutboxError,
     FileAlreadyInRegistryError,
     FileInDbButNotInStorageError,
@@ -30,7 +30,7 @@ from internal_file_registry_service.core.main import (
     stage_file,
 )
 
-from ..fixtures import get_config, psql_fixture, s3_fixture, state  # noqa: F401
+from .fixtures import get_config, psql_fixture, s3_fixture, state  # noqa: F401
 
 
 @pytest.mark.parametrize(

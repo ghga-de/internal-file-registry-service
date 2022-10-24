@@ -20,7 +20,7 @@ from typing import Dict, List, Optional
 
 from pydantic.env_settings import BaseSettings
 
-from internal_file_registry_service.config import Config
+from ifrs.config import Config
 
 from .utils import BASE_DIR
 

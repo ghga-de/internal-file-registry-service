@@ -25,9 +25,9 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from testcontainers.postgres import PostgresContainer
 
-from internal_file_registry_service import models
-from internal_file_registry_service.dao import db_models
-from internal_file_registry_service.dao.db import PostgresDatabase
+from ifrs import models
+from ifrs.dao import db_models
+from ifrs.dao.db import PostgresDatabase
 
 from . import state
 

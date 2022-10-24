@@ -1,8 +1,6 @@
 aws_config_ini: null
 db_print_logs: false
 db_url: postgresql://postgres:postgres@postgresql/postgres
-rabbitmq_host: rabbitmq
-rabbitmq_port: 5672
 s3_access_key_id: test
 s3_endpoint_url: http://localstack:4566
 s3_inbox_bucket_id: inbox
@@ -14,4 +12,3 @@ topic_name_reg_request: file_upload_received
 topic_name_registered: file_internally_registered
 topic_name_stage_request: non_staged_file_requested
 topic_name_staged_to_outbox: file_staged_for_download
-

@@ -1,7 +1,7 @@
 version: '3'
 
 services:
-  internal_file_registry_service:
+  ifrs:
     build:
       context: .
       dockerfile: ./Dockerfile
@@ -12,7 +12,7 @@ services:
         INSTALL_NODE: "true"
         NODE_VERSION: "lts/*"
         # Please adapt to package name:
-        PACKAGE_NAME: "internal_file_registry_service"
+        PACKAGE_NAME: "ifrs"
         # On Linux, you may need to update USER_UID and USER_GID below if not your local UID is not 1000.
         USER_UID: 1000
         USER_GID: 1000
@@ -31,16 +31,9 @@ services:
 
     # define environment variables
     environment:
-      INTERNAL_FILE_REGISTRY_SERVICE_CONFIG_YAML: /workspace/.devcontainer/.dev_config.yaml
-      DB_URL: postgresql://postgres:postgres@postgresql/postgres
+      IFRS_CONFIG_YAML: /workspace/.devcontainer/.dev_config.yaml
     # Use "forwardPorts" in **devcontainer.json** to forward an app port locally.
     # (Adding the "ports" property to this file will not forward from a Codespace.)
-
-  internal_file_registry_service_rabbitmq:
-    image: rabbitmq:3-management
-    # useful ports:
-      # 5672 - broker
-      # 15672 - dashboard
 
   postgresql:
     image: postgres:latest
