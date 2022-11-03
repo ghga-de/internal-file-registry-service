@@ -25,7 +25,7 @@ from ..dao import (
     ObjectAlreadyExistsError,
     ObjectStorage,
 )
-from ..models import FileInfoInitial
+from .models import FileInfoInitial
 
 
 class FileAlreadyInOutboxError(RuntimeError):
