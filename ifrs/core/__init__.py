@@ -15,4 +15,8 @@
 
 """This sub-package contains the core functionality"""
 
-from .main import FileAlreadyInOutboxError, register_file, stage_file  # noqa: F401
+from .file_registry import (
+    FileAlreadyInOutboxError,
+    register_file,
+    stage_file,
+)  # noqa: F401
