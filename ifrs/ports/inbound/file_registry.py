@@ -18,13 +18,38 @@
 from abc import ABC, abstractmethod
 
 from ifrs.core import models
+from ifrs.core.interfaces import IContentCopyService
 
 
 class FileRegistryPort(ABC):
     """The interface of a service that manages a registry files stored on a permanent
     object storage."""
 
-    class FileUpdateError(RuntimeError):
+    class InvalidRequestError(RuntimeError, ABC):
+        """A base for exceptions that are thrown when the request to this port was
+        invalid due to a client mistake.
+        """
+
+    class FatalError(RuntimeError, ABC):
+        """A base for exceptions that thrown for errors that are not a client mistake
+        but likely a bug in the application. Exceptions of this kind should not be
+        handeled but let the application terminate.
+        """
+
+        def __init__(self, file_id: str):
+            message = (
+                f"The file with the ID '{file_id}' has already been registered and the "
+                + " provided metadata is not identical to the existing one. Updates are"
+                + " not permitted."
+            )
+            super().__init__(message)
+
+    class FileContentNotInInboxError(
+        InvalidRequestError, IContentCopyService.ContentNotInInboxError
+    ):
+        """Thrown when the content of a file is unexpectedly not in the inbox storage."""
+
+    class FileUpdateError(InvalidRequestError):
         """Thrown when attempting to update metadata of an existing file."""
 
         def __init__(self, file_id: str):
@@ -35,21 +60,28 @@ class FileRegistryPort(ABC):
             )
             super().__init__(message)
 
-    class FileNotInInboxError(RuntimeError):
-        """Thrown when a file is unexpectedly not in the inbox storage."""
+    class ChecksumMissmatchError(InvalidRequestError):
+        """Thrown when the checksum of the decrypted content of a file did not match the
+        expectations."""
 
-        def __init__(self, file_id: str):
-            message = f"The file with id '{file_id}' does not exist in the inbox."
+        def __init__(
+            self, file_id: str, provided_checksum: str, expected_checksum: str
+        ):
+            message = (
+                "The checksum of the decrypted content of the file with the ID"
+                + f" '{file_id}' did not match the expectation: expected"
+                + f" '{expected_checksum}' but '{provided_checksum}' was provided."
+            )
             super().__init__(message)
 
-    class FileNotInRegistryError(RuntimeError):
+    class FileNotInRegistryError(InvalidRequestError):
         """Thrown when a file is requested that has not (yet) been registered."""
 
         def __init__(self, file_id: str):
             message = f"The file with the ID '{file_id}' has not (yet) been registered."
             super().__init__(message)
 
-    class FileInRegistryButNotInStorageError(RuntimeError):
+    class FileInRegistryButNotInStorageError(FatalError):
         """Thrown if a file is registered (metadata is present in the database) but its
         content is not present in the permanent storage."""
 
@@ -61,7 +93,7 @@ class FileRegistryPort(ABC):
             super().__init__(message)
 
     @abstractmethod
-    async def register_file(self, *, file: models.FileMetadata):
+    async def register_file(self, *, file: models.FileMetadata) -> None:
         """Registers a file and moves its content from the inbox into the permanent
         storage. If the file with that exact metadata has already been registered,
         nothing is done.
@@ -70,17 +102,18 @@ class FileRegistryPort(ABC):
             file: metadata on the file to register.
 
         Raises:
-            self.FileUploadError:
+            self.FileUpdateError:
                 When the file already been registered but its metadata differes from the
                 provided one.
-            self.FileNotInInboxError:
-                When the content of the file to be registered cannot be found in the
-                storage inbox.
+            self.FileContentNotInInboxError:
+                When the file content is not present in the storage inbox.
         """
         ...
 
     @abstractmethod
-    async def stage_registered_file(self, *, file_id: str, decrypted_sha256: str):
+    async def stage_registered_file(
+        self, *, file_id: str, decrypted_sha256: str
+    ) -> None:
         """Stage a registered file to the outbox.
 
         Args:
@@ -93,9 +126,10 @@ class FileRegistryPort(ABC):
         Raises:
             self.FileNotInRegistryError:
                 When a file is requested that has not (yet) been registered.
+            self.ChecksumMissmatchError:
+                When the provided checksum did not match the expectations.
             self.FileInRegistryButNotInStorageError:
                 When encountering inconsistency between the registry (the database) and
-                the permanent storage. This is an internal service error, which should
-                not happen, and not the fault of the client.
+                the permanent storage. This a fatal error.
         """
         ...

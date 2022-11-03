@@ -16,36 +16,48 @@
 """Main business-logic of this service"""
 
 from ifrs.core import models
+from ifrs.core.interfaces import IContentCopyService
 from ifrs.ports.inbound.file_registry import FileRegistryPort
+from ifrs.ports.outbound.dao import FileMetadataDaoPort, ResourceNotFoundError
+from ifrs.ports.outbound.event_broadcast import EventBroadcasterPort
 
 
-class DataRepositoryConfig(BaseSettings):
-    """Config parameters needed for the DataRepository."""
-
-    outbox_bucket: str
-    inbox_bucket: str
-    permanent_bucket: str
-
-
-class FileRegistryPort(FileRegistryPort):
+class FileRegistry(FileRegistryPort):
     """A service that manages a registry files stored on a permanent object storage."""
 
     def __init__(
         self,
         *,
-        config: DataRepositoryConfig,
-        drs_object_dao: DrsObjectDaoPort,
-        object_storage: ObjectStoragePort,
-        event_broadcaster: DrsEventBroadcasterPort,
+        content_copy_svc: IContentCopyService,
+        file_metadata_dao: FileMetadataDaoPort,
+        event_broadcaster: EventBroadcasterPort,
     ):
         """Initialize with essential config params and outbound adapters."""
 
-        self._config = config
+        self._content_copy_svc = content_copy_svc
         self._event_broadcaster = event_broadcaster
-        self._drs_object_dao = drs_object_dao
-        self._object_storage = object_storage
+        self._file_metadata_dao = file_metadata_dao
 
-    async def register_file(self, *, file: models.FileMetadata):
+    async def _is_file_registered(self, *, file: models.FileMetadata) -> bool:
+        """Checks if the specified file is already registered. There are three possible
+        outcomes:
+            - Yes, the file has been registered with metadata that is identical to the
+              provided one => returns `True`
+            - Yes, however, the metadata differs => raises self.FileUpdateError
+            - No, the file has not been registered, yet => returns `False`
+        """
+
+        try:
+            registered_file = await self._file_metadata_dao.get_by_id(file.file_id)
+        except ResourceNotFoundError:
+            return False
+
+        if file == registered_file:
+            return True
+
+        raise self.FileUpdateError(file_id=file.file_id)
+
+    async def register_file(self, *, file: models.FileMetadata) -> None:
         """Registers a file and moves its content from the inbox into the permanent
         storage. If the file with that exact metadata has already been registered,
         nothing is done.
@@ -54,16 +66,25 @@ class FileRegistryPort(FileRegistryPort):
             file: metadata on the file to register.
 
         Raises:
-            self.FileUploadError:
+            self.FileUpdateError:
                 When the file already been registered but its metadata differes from the
                 provided one.
-            self.FileNotInInboxError:
-                When the content of the file to be registered cannot be found in the
-                storage inbox.
+            self.FileContentNotInInboxError:
+                When the file content is not present in the storage inbox.
         """
-        ...
 
-    async def stage_registered_file(self, *, file_id: str, decrypted_sha256: str):
+        if await self._is_file_registered(file=file):
+            # There is nothing to do:
+            return
+
+        try:
+            await self._content_copy_svc.inbox_to_permanent(file=file)
+        except IContentCopyService.ContentNotInInboxError as error:
+            raise self.FileContentNotInInboxError(file_id=file.file_id) from error
+
+    async def stage_registered_file(
+        self, *, file_id: str, decrypted_sha256: str
+    ) -> None:
         """Stage a registered file to the outbox.
 
         Args:
@@ -76,79 +97,27 @@ class FileRegistryPort(FileRegistryPort):
         Raises:
             self.FileNotInRegistryError:
                 When a file is requested that has not (yet) been registered.
+            self.ChecksumMissmatchError:
+                When the provided checksum did not match the expectations.
             self.FileInRegistryButNotInStorageError:
                 When encountering inconsistency between the registry (the database) and
                 the permanent storage. This is an internal service error, which should
                 not happen, and not the fault of the client.
         """
-        ...
 
-
-def stage_file(external_file_id: str, config: Config = CONFIG) -> FileInfoInitial:
-    """Copies a file into the stage bucket."""
-
-    # get file info from the database:
-    with Database(config=config) as database:
         try:
-            file_info = database.get_file_info(external_file_id)
-        except FileInfoNotFoundError as error:
-            raise FileNotInRegistryError(external_file_id=external_file_id) from error
+            file = await self._file_metadata_dao.get_by_id(file_id)
+        except ResourceNotFoundError as error:
+            raise self.FileNotInRegistryError(file_id=file_id) from error
 
-    # copy file object to the stage bucket:
-    with ObjectStorage(config=config) as storage:
-        try:
-            storage.copy_object(
-                source_bucket_id=file_info.grouping_label,
-                source_object_id=external_file_id,
-                dest_bucket_id=config.s3_outbox_bucket_id,
-                dest_object_id=external_file_id,
+        if decrypted_sha256 != file.decrypted_sha256:
+            raise self.ChecksumMissmatchError(
+                file_id=file_id,
+                provided_checksum=decrypted_sha256,
+                expected_checksum=file.decrypted_sha256,
             )
-        except ObjectNotFoundError as error:
-            raise FileInDbButNotInStorageError(
-                external_file_id=external_file_id
-            ) from error
-        except ObjectAlreadyExistsError as error:
-            raise FileAlreadyInOutboxError(external_file_id=external_file_id) from error
 
-    return file_info
-
-
-def register_file(file_info: FileInfoInitial, config: Config = CONFIG) -> None:
-    """Register a new file to the database and copy it from a stage bucket (e.g. inbox)
-    to the permanent file storage."""
-
-    # get file info from the database:
-    # (will throw an error if file not in registry)
-    with Database(config=config) as database:
-        with ObjectStorage(config=config) as storage:
-            try:
-                database.register_file_info(file_info)
-            except FileInfoAlreadyExistsError as error:
-                if not storage.does_object_exist(
-                    bucket_id=file_info.grouping_label, object_id=file_info.file_id
-                ):
-                    raise FileInDbButNotInStorageError(
-                        external_file_id=file_info.file_id
-                    ) from error
-                raise FileAlreadyInRegistryError(
-                    external_file_id=file_info.file_id
-                ) from error
-
-            # copy file object to the stage bucket:
-
-            if not storage.does_bucket_exist(bucket_id=file_info.grouping_label):
-                storage.create_bucket(bucket_id=file_info.grouping_label)
-
-            try:
-                storage.copy_object(
-                    source_bucket_id=config.s3_inbox_bucket_id,
-                    source_object_id=file_info.file_id,
-                    dest_bucket_id=file_info.grouping_label,
-                    dest_object_id=file_info.file_id,
-                )
-            except ObjectNotFoundError as error:
-                raise FileNotInInboxError(external_file_id=file_info.file_id) from error
-            except ObjectAlreadyExistsError as error:
-                raise FileInStorageButNotInDbError(
-                    external_file_id=file_info.file_id
-                ) from error
+        try:
+            await self._content_copy_svc.permanent_to_outbox(file=file)
+        except IContentCopyService.ContentNotInPermanentStorageError as error:
+            raise self.FileInRegistryButNotInStorageError(file_id=file_id) from error
