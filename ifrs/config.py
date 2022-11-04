@@ -16,13 +16,14 @@
 """Config Parameter Modeling and Parsing"""
 
 from hexkit.config import config_from_yaml
+from hexkit.providers.mongodb import MongoDbConfig
 from hexkit.providers.s3 import S3Config
 
 from ifrs.core.content_copy import StorageEnitiesConfig
 
 
 @config_from_yaml(prefix="ifrs")
-class Config(S3Config, StorageEnitiesConfig):
+class Config(S3Config, MongoDbConfig, StorageEnitiesConfig):
     """Config parameters and their defaults."""
 
     service_name: str = "internal_file_registry"

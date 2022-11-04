@@ -15,4 +15,4 @@
 
 """This service acts as a registry for the internal location and representation of files."""
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
