@@ -82,6 +82,10 @@ class FileRegistry(FileRegistryPort):
         except IContentCopyService.ContentNotInInboxError as error:
             raise self.FileContentNotInInboxError(file_id=file.file_id) from error
 
+        await self._file_metadata_dao.insert(file)
+
+        await self._event_broadcaster.file_internally_registered(file=file)
+
     async def stage_registered_file(
         self, *, file_id: str, decrypted_sha256: str
     ) -> None:

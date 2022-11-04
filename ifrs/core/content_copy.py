@@ -66,7 +66,7 @@ class ContentCopyService(IContentCopyService):
     async def inbox_to_permanent(self, *, file: models.FileMetadata) -> None:
         """Copy a file from an inbox stage to the permanent storage."""
 
-        if not await self._object_storage.does_object_exist(
+        if await self._object_storage.does_object_exist(
             bucket_id=self._config.permanent_bucket, object_id=file.file_id
         ):
             # the content is already where it should go, there is nothing to do
@@ -87,7 +87,7 @@ class ContentCopyService(IContentCopyService):
     async def permanent_to_outbox(self, *, file: models.FileMetadata) -> None:
         """Copy a file from an inbox stage to the permanent storage."""
 
-        if not await self._object_storage.does_object_exist(
+        if await self._object_storage.does_object_exist(
             bucket_id=self._config.outbox_bucket, object_id=file.file_id
         ):
             # the content is already where it should go, there is nothing to do
