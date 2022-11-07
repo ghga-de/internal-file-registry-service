@@ -37,7 +37,7 @@ async def test_register_with_empty_inbox(
     s3_fixture: S3Fixture,  # noqa: F811
     mongodb_fixture: MongoDbFixture,  # noqa: F811
 ):
-    """Test registration of a file when the file content is missing from the outbox."""
+    """Test registration of a file when the file content is missing from the inbox."""
 
     # populate the storage with empty storage entities:
     config = StorageEnitiesConfig(
