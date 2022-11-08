@@ -258,9 +258,9 @@ async def test_storage_db_inconsistency(
     s3_fixture: S3Fixture,  # noqa: F811
     mongodb_fixture: MongoDbFixture,  # noqa: F811
 ):
-    """Check that a inconsistency between the database and the storage, whereby the
+    """Check that an inconsistency between the database and the storage, whereby the
     database contains a file metadata registration but the storage is missing the
-    corresponding content, results the expected exception."""
+    corresponding content, results in the expected exception."""
 
     # populate the storage with empty entities:
     config = StorageEnitiesConfig(
