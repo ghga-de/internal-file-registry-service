@@ -13,4 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Fixtures that can be used in tests"""
+"""DAO interface for accessing the database."""
+
+# pylint: disable=unused-import
+from hexkit.protocols.dao import DaoNaturalId, ResourceNotFoundError  # noqa: F401
+
+from ifrs.core import models
+
+# port described by a type alias:
+FileMetadataDaoPort = DaoNaturalId[models.FileMetadata]

@@ -3,6 +3,53 @@
   "description": "Modifies the orginal Settings class provided by the user",
   "type": "object",
   "properties": {
+    "outbox_bucket": {
+      "title": "Outbox Bucket",
+      "description": "The ID of the object storage bucket that is serving as download area.",
+      "example": "outbox",
+      "env_names": [
+        "ifrs_outbox_bucket"
+      ],
+      "type": "string"
+    },
+    "inbox_bucket": {
+      "title": "Inbox Bucket",
+      "description": "The ID of the object storage bucket that is serving as upload area.",
+      "example": "inbox",
+      "env_names": [
+        "ifrs_inbox_bucket"
+      ],
+      "type": "string"
+    },
+    "permanent_bucket": {
+      "title": "Permanent Bucket",
+      "description": "The ID of the object storage bucket that is serving as permanent storage.",
+      "example": "permanent",
+      "env_names": [
+        "ifrs_permanent_bucket"
+      ],
+      "type": "string"
+    },
+    "db_connection_str": {
+      "title": "Db Connection Str",
+      "description": "MongoDB connection string. Might include credentials. For more information see: https://naiveskill.com/mongodb-connection-string/",
+      "example": "mongodb://localhost:27017",
+      "env_names": [
+        "ifrs_db_connection_str"
+      ],
+      "type": "string",
+      "writeOnly": true,
+      "format": "password"
+    },
+    "db_name": {
+      "title": "Db Name",
+      "description": "Name of the database located on the MongoDB server.",
+      "example": "my-database",
+      "env_names": [
+        "ifrs_db_name"
+      ],
+      "type": "string"
+    },
     "s3_endpoint_url": {
       "title": "S3 Endpoint Url",
       "description": "URL to the S3 API.",
@@ -28,7 +75,9 @@
       "env_names": [
         "ifrs_s3_secret_access_key"
       ],
-      "type": "string"
+      "type": "string",
+      "writeOnly": true,
+      "format": "password"
     },
     "s3_session_token": {
       "title": "S3 Session Token",
@@ -37,7 +86,9 @@
       "env_names": [
         "ifrs_s3_session_token"
       ],
-      "type": "string"
+      "type": "string",
+      "writeOnly": true,
+      "format": "password"
     },
     "aws_config_ini": {
       "title": "Aws Config Ini",
@@ -49,38 +100,6 @@
       "type": "string",
       "format": "path"
     },
-    "db_url": {
-      "title": "Db Url",
-      "description": "A URL to a PostgreSQL database.",
-      "example": "postgresql://user:password@mydbserver/dbname",
-      "env_names": [
-        "ifrs_db_url"
-      ],
-      "type": "string"
-    },
-    "db_print_logs": {
-      "title": "Db Print Logs",
-      "description": "Print DB/ORM logs.",
-      "default": false,
-      "env_names": [
-        "ifrs_db_print_logs"
-      ],
-      "type": "boolean"
-    },
-    "s3_outbox_bucket_id": {
-      "title": "S3 Outbox Bucket Id",
-      "env_names": [
-        "ifrs_s3_outbox_bucket_id"
-      ],
-      "type": "string"
-    },
-    "s3_inbox_bucket_id": {
-      "title": "S3 Inbox Bucket Id",
-      "env_names": [
-        "ifrs_s3_inbox_bucket_id"
-      ],
-      "type": "string"
-    },
     "service_name": {
       "title": "Service Name",
       "default": "internal_file_registry",
@@ -88,47 +107,17 @@
         "ifrs_service_name"
       ],
       "type": "string"
-    },
-    "topic_name_stage_request": {
-      "title": "Topic Name Stage Request",
-      "default": "non_staged_file_requested",
-      "env_names": [
-        "ifrs_topic_name_stage_request"
-      ],
-      "type": "string"
-    },
-    "topic_name_staged_to_outbox": {
-      "title": "Topic Name Staged To Outbox",
-      "default": "file_staged_for_download",
-      "env_names": [
-        "ifrs_topic_name_staged_to_outbox"
-      ],
-      "type": "string"
-    },
-    "topic_name_reg_request": {
-      "title": "Topic Name Reg Request",
-      "default": "file_upload_received",
-      "env_names": [
-        "ifrs_topic_name_reg_request"
-      ],
-      "type": "string"
-    },
-    "topic_name_registered": {
-      "title": "Topic Name Registered",
-      "default": "file_internally_registered",
-      "env_names": [
-        "ifrs_topic_name_registered"
-      ],
-      "type": "string"
     }
   },
   "required": [
+    "outbox_bucket",
+    "inbox_bucket",
+    "permanent_bucket",
+    "db_connection_str",
+    "db_name",
     "s3_endpoint_url",
     "s3_access_key_id",
-    "s3_secret_access_key",
-    "db_url",
-    "s3_outbox_bucket_id",
-    "s3_inbox_bucket_id"
+    "s3_secret_access_key"
   ],
   "additionalProperties": false
 }

@@ -13,4 +13,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Fixtures that can be used in tests"""
+"""Interface for broadcasting events to other services."""
+
+from abc import ABC, abstractmethod
+
+from ifrs.core import models
+
+
+class EventBroadcasterPort(ABC):
+    """A port through which service-internal events are communicated with the outside."""
+
+    @abstractmethod
+    async def file_internally_registered(self, *, file: models.FileMetadata) -> None:
+        """Communicates the event that a new file has been internally registered."""
+        ...
