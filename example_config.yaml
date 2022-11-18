@@ -1,11 +1,18 @@
 aws_config_ini: null
 db_connection_str: '**********'
 db_name: dev_db
+file_registered_event_topic: internal_file_registry
+file_registered_event_type: donwload_served
+files_to_register_topic: file_ingestion
+files_to_register_type: files_to_register
 inbox_bucket: inbox
+kafka_servers:
+- kafka:9092
 outbox_bucket: outbox
 permanent_bucket: permanent
 s3_access_key_id: test
 s3_endpoint_url: http://localstack:4566
 s3_secret_access_key: '**********'
 s3_session_token: null
+service_instance_id: '1'
 service_name: internal_file_registry

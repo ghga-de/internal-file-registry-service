@@ -28,7 +28,7 @@ class FileMetadata(BaseModel):
     file_id: str = Field(
         ..., description="The public ID of the file as present in the metadata catalog."
     )
-    ingestion_date: datetime = Field(
+    upload_date: datetime = Field(
         ...,
         description="The date and time when this file was ingested into the system.",
     )

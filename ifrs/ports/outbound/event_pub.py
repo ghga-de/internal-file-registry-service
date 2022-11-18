@@ -20,7 +20,7 @@ from abc import ABC, abstractmethod
 from ifrs.core import models
 
 
-class EventBroadcasterPort(ABC):
+class EventPublisherPort(ABC):
     """A port through which service-internal events are communicated with the outside."""
 
     @abstractmethod

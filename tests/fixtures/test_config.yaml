@@ -1,8 +1,10 @@
+s3_access_key_id: test
+s3_endpoint_url: http://localhost:4566
+s3_secret_access_key: test
+s3_session_token: test
+service_name: ifrs
 db_connection_str: "mongodb://mongodb:27017"
 db_name: "dev_db"
-s3_endpoint_url: http://localstack:4566
-s3_access_key_id: test
-s3_secret_access_key: test
 permanent_bucket: permanent
 outbox_bucket: outbox
 inbox_bucket: inbox
