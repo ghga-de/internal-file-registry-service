@@ -44,7 +44,7 @@ class EventSubTranslatorConfig(BaseSettings):
 
 class EventSubTranslator(EventSubscriberProtocol):
     """A triple hexagonal translator compatible with the EventSubscriberProtocol that
-    is used to received metadata on new files to register."""
+    is used to receive metadata on new files to register."""
 
     def __init__(
         self,
