@@ -25,6 +25,7 @@ from ifrs.adapters.outbound.event_pub import EventPubTranslatorConfig
 from ifrs.core.content_copy import StorageEnitiesConfig
 
 
+# pylint: disable=too-many-ancestors
 @config_from_yaml(prefix="ifrs")
 class Config(
     S3Config,
