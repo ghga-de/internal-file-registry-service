@@ -19,7 +19,7 @@ from ifrs.core import models
 from ifrs.core.interfaces import IContentCopyService
 from ifrs.ports.inbound.file_registry import FileRegistryPort
 from ifrs.ports.outbound.dao import FileMetadataDaoPort, ResourceNotFoundError
-from ifrs.ports.outbound.event_broadcast import EventBroadcasterPort
+from ifrs.ports.outbound.event_pub import EventPublisherPort
 
 
 class FileRegistry(FileRegistryPort):
@@ -30,12 +30,12 @@ class FileRegistry(FileRegistryPort):
         *,
         content_copy_svc: IContentCopyService,
         file_metadata_dao: FileMetadataDaoPort,
-        event_broadcaster: EventBroadcasterPort,
+        event_publisher: EventPublisherPort,
     ):
         """Initialize with essential config params and outbound adapters."""
 
         self._content_copy_svc = content_copy_svc
-        self._event_broadcaster = event_broadcaster
+        self._event_publisher = event_publisher
         self._file_metadata_dao = file_metadata_dao
 
     async def _is_file_registered(self, *, file: models.FileMetadata) -> bool:
@@ -84,7 +84,7 @@ class FileRegistry(FileRegistryPort):
 
         await self._file_metadata_dao.insert(file)
 
-        await self._event_broadcaster.file_internally_registered(file=file)
+        await self._event_publisher.file_internally_registered(file=file)
 
     async def stage_registered_file(
         self, *, file_id: str, decrypted_sha256: str

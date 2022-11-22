@@ -28,7 +28,7 @@ class FileMetadata(BaseModel):
     file_id: str = Field(
         ..., description="The public ID of the file as present in the metadata catalog."
     )
-    ingestion_date: datetime = Field(
+    upload_date: datetime = Field(
         ...,
         description="The date and time when this file was ingested into the system.",
     )
@@ -54,8 +54,8 @@ class FileMetadata(BaseModel):
         ...,
         description=(
             "The size of the file parts of the encrypted content (excluding the"
-            + " crypt4GH) as used for the encryption_parts_md5 and the"
-            + " encryption_parts_sha256 in bytes. The same part size is recommended for"
+            + " crypt4gh envelope) as used for the encrypted_parts_md5 and the"
+            + " encrypted_parts_sha256 in bytes. The same part size is recommended for"
             + " moving that content."
         ),
     )
@@ -63,14 +63,14 @@ class FileMetadata(BaseModel):
         ...,
         description=(
             "MD5 checksums of file parts of the encrypted content (excluding the"
-            + " crypt4gh envelope."
+            + " crypt4gh envelope)."
         ),
     )
     encrypted_parts_sha256: list[str] = Field(
         ...,
         description=(
             "SHA-256 checksums of file parts of the encrypted content (excluding the"
-            + " crypt4gh envelope."
+            + " crypt4gh envelope)."
         ),
     )
     decrypted_sha256: str = Field(

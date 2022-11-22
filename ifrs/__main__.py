@@ -13,6 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""This service acts as a registry for the internal location and representation of files."""
+"""Entrypoint of the package"""
 
-__version__ = "0.3.0"
+import asyncio
+
+from ifrs.main import consume_events
+
+if __name__ == "__main__":
+    asyncio.run(consume_events(run_forever=True))

@@ -16,14 +16,25 @@
 """Config Parameter Modeling and Parsing"""
 
 from hexkit.config import config_from_yaml
+from hexkit.providers.akafka import KafkaConfig
 from hexkit.providers.mongodb import MongoDbConfig
 from hexkit.providers.s3 import S3Config
 
+from ifrs.adapters.inbound.event_sub import EventSubTranslatorConfig
+from ifrs.adapters.outbound.event_pub import EventPubTranslatorConfig
 from ifrs.core.content_copy import StorageEnitiesConfig
 
 
+# pylint: disable=too-many-ancestors
 @config_from_yaml(prefix="ifrs")
-class Config(S3Config, MongoDbConfig, StorageEnitiesConfig):
+class Config(
+    S3Config,
+    MongoDbConfig,
+    KafkaConfig,
+    EventSubTranslatorConfig,
+    EventPubTranslatorConfig,
+    StorageEnitiesConfig,
+):
     """Config parameters and their defaults."""
 
     service_name: str = "internal_file_registry"

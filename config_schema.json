@@ -30,6 +30,73 @@
       ],
       "type": "string"
     },
+    "file_registered_event_topic": {
+      "title": "File Registered Event Topic",
+      "description": "Name of the topic used for events indicating that a new file has been internally registered.",
+      "default": "internal_file_registry",
+      "env_names": [
+        "ifrs_file_registered_event_topic"
+      ],
+      "type": "string"
+    },
+    "file_registered_event_type": {
+      "title": "File Registered Event Type",
+      "description": "The type used for events indicating that a new file has been internally registered.",
+      "default": "donwload_served",
+      "env_names": [
+        "ifrs_file_registered_event_type"
+      ],
+      "type": "string"
+    },
+    "files_to_register_topic": {
+      "title": "Files To Register Topic",
+      "description": "The name of the topic to receive events informing about new files to register.",
+      "example": "file_ingestion",
+      "env_names": [
+        "ifrs_files_to_register_topic"
+      ],
+      "type": "string"
+    },
+    "files_to_register_type": {
+      "title": "Files To Register Type",
+      "description": "The type used for events informing about new files to register.",
+      "example": "files_to_register",
+      "env_names": [
+        "ifrs_files_to_register_type"
+      ],
+      "type": "string"
+    },
+    "service_name": {
+      "title": "Service Name",
+      "default": "internal_file_registry",
+      "env_names": [
+        "ifrs_service_name"
+      ],
+      "type": "string"
+    },
+    "service_instance_id": {
+      "title": "Service Instance Id",
+      "description": "A string that uniquely identifies this instance across all instances of this service. A globally unique Kafka client ID will be created by concatenating the service_name and the service_instance_id.",
+      "example": "germany-bw-instance-001",
+      "env_names": [
+        "ifrs_service_instance_id"
+      ],
+      "type": "string"
+    },
+    "kafka_servers": {
+      "title": "Kafka Servers",
+      "description": "A list of connection strings to connect to Kafka bootstrap servers.",
+      "example": [
+        "localhost:9092"
+      ],
+      "env_names": [
+        "ifrs_kafka_servers"
+      ],
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
     "db_connection_str": {
       "title": "Db Connection Str",
       "description": "MongoDB connection string. Might include credentials. For more information see: https://naiveskill.com/mongodb-connection-string/",
@@ -99,20 +166,16 @@
       ],
       "type": "string",
       "format": "path"
-    },
-    "service_name": {
-      "title": "Service Name",
-      "default": "internal_file_registry",
-      "env_names": [
-        "ifrs_service_name"
-      ],
-      "type": "string"
     }
   },
   "required": [
     "outbox_bucket",
     "inbox_bucket",
     "permanent_bucket",
+    "files_to_register_topic",
+    "files_to_register_type",
+    "service_instance_id",
+    "kafka_servers",
     "db_connection_str",
     "db_name",
     "s3_endpoint_url",
