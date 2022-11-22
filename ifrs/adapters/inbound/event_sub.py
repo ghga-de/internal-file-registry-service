@@ -72,7 +72,7 @@ class EventSubTranslator(EventSubscriberProtocol):
             decrypted_size=validated_payload.decrypted_size,
             upload_date=validated_payload.upload_date,
             decryption_secret_id=validated_payload.decryption_secret_id,
-            encrypted_part_sizes=validated_payload.encrypted_part_sizes,
+            encrypted_part_size=validated_payload.encrypted_part_size,
             encrypted_parts_md5=validated_payload.encrypted_parts_md5,
             encrypted_parts_sha256=validated_payload.encrypted_parts_sha256,
             content_offset=validated_payload.content_offset,
