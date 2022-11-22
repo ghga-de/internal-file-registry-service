@@ -65,7 +65,7 @@ class EventPubTranslator(EventPublisherPort):
             decrypted_size=file.decrypted_size,
             decryption_secret_id=file.decryption_secret_id,
             content_offset=file.content_offset,
-            encrypted_part_sizes=file.encrypted_part_sizes,
+            encrypted_part_size=file.encrypted_part_size,
             encrypted_parts_md5=file.encrypted_parts_md5,
             encrypted_parts_sha256=file.encrypted_parts_sha256,
             upload_date=file.upload_date,
