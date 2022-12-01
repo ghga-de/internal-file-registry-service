@@ -21,7 +21,7 @@ from ifrs.core import models
 
 EXAMPLE_FILE = models.FileMetadata(
     file_id="examplefile001",
-    upload_date=datetime.now(),
+    upload_date=datetime.utcnow().isoformat(),
     decryption_secret_id="some-secret-id",
     decrypted_size=64 * 1024**2,
     encrypted_part_size=16 * 1024**2,
