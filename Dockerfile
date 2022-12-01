@@ -41,4 +41,4 @@ USER appuser
 # set environment
 ENV PYTHONUNBUFFERED=1
 # Please adapt to package name:
-ENTRYPOINT ["internal-file-registry-service"]
+ENTRYPOINT ["ifrs"]
