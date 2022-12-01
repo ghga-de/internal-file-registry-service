@@ -15,8 +15,6 @@
 
 """Defines dataclasses for holding business-logic data"""
 
-from datetime import datetime
-
 from pydantic import BaseModel, Field
 
 
@@ -28,7 +26,7 @@ class FileMetadata(BaseModel):
     file_id: str = Field(
         ..., description="The public ID of the file as present in the metadata catalog."
     )
-    upload_date: datetime = Field(
+    upload_date: str = Field(
         ...,
         description="The date and time when this file was ingested into the system.",
     )
