@@ -19,5 +19,11 @@ import asyncio
 
 from ifrs.main import consume_events
 
-if __name__ == "__main__":
+
+def run_forever():
+    """Main entrypoint for setup.cfg"""
     asyncio.run(consume_events(run_forever=True))
+
+
+if __name__ == "__main__":
+    run_forever()
