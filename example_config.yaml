@@ -4,7 +4,7 @@ db_name: dev_db
 file_registered_event_topic: internal_file_registry
 file_registered_event_type: file_registered
 file_staged_event_topic: internal_file_registry
-file_staged_event_type: file_staged
+file_staged_event_type: file_staged_for_download
 files_to_register_topic: file_ingestion
 files_to_register_type: files_to_register
 files_to_stage_topic: file_downloads

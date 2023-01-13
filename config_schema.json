@@ -60,7 +60,7 @@
     "file_staged_event_type": {
       "title": "File Staged Event Type",
       "description": "The type used for events indicating that a new file has been internally registered.",
-      "default": "file_staged",
+      "default": "file_staged_for_download",
       "env_names": [
         "ifrs_file_staged_event_type"
       ],
