@@ -36,7 +36,21 @@ class EventPubTranslatorConfig(BaseSettings):
         ),
     )
     file_registered_event_type: str = Field(
-        "donwload_served",
+        "file_registered",
+        description=(
+            "The type used for events indicating that a new file has"
+            + " been internally registered."
+        ),
+    )
+    file_staged_event_topic: str = Field(
+        "internal_file_registry",
+        description=(
+            "Name of the topic used for events indicating that a new file has"
+            + " been internally registered."
+        ),
+    )
+    file_staged_event_type: str = Field(
+        "file_staged",
         description=(
             "The type used for events indicating that a new file has"
             + " been internally registered."
@@ -77,4 +91,22 @@ class EventPubTranslator(EventPublisherPort):
             type_=self._config.file_registered_event_type,
             topic=self._config.file_registered_event_topic,
             key=file.file_id,
+        )
+
+    async def file_staged_for_download(
+        self, *, file_id: str, decrypted_sha256: str
+    ) -> None:
+        """Communicates the event that a new file has been internally registered."""
+
+        payload = event_schemas.FileStagedForDownload(
+            file_id=file_id,
+            decrypted_sha256=decrypted_sha256,
+        )
+        payload_dict = json.loads(payload.json())
+
+        await self._provider.publish(
+            payload=payload_dict,
+            type_=self._config.file_staged_event_type,
+            topic=self._config.file_staged_event_topic,
+            key=file_id,
         )

@@ -29,16 +29,25 @@ class EventSubTranslatorConfig(BaseSettings):
     """Config for receiving events providing metadata on new files to register."""
 
     files_to_register_topic: str = Field(
-        ...,
+        "file_ingestion",
         description=(
             "The name of the topic to receive events informing about new files to register."
         ),
-        example="file_ingestion",
     )
     files_to_register_type: str = Field(
-        ...,
+        "files_to_register",
         description=("The type used for events informing about new files to register."),
-        example="files_to_register",
+    )
+
+    files_to_stage_topic: str = Field(
+        "file_downloads",
+        description=(
+            "The name of the topic to receive events informing about files to stage."
+        ),
+    )
+    files_to_stage_type: str = Field(
+        "file_stage_requested",
+        description=("The type used for events informing about a file to be staged."),
     )
 
 
@@ -53,8 +62,14 @@ class EventSubTranslator(EventSubscriberProtocol):
     ):
         """Initialize with config parameters and core dependencies."""
 
-        self.topics_of_interest = [config.files_to_register_topic]
-        self.types_of_interest = [config.files_to_register_type]
+        self.topics_of_interest = [
+            config.files_to_register_topic,
+            config.files_to_stage_topic,
+        ]
+        self.types_of_interest = [
+            config.files_to_register_type,
+            config.files_to_stage_type,
+        ]
 
         self._file_registry = file_registry
         self._config = config
@@ -80,6 +95,18 @@ class EventSubTranslator(EventSubscriberProtocol):
 
         await self._file_registry.register_file(file=file)
 
+    async def _consume_file_downloads(self, *, payload: JsonObject) -> None:
+        """Consume file download events."""
+
+        validated_payload = get_validated_payload(
+            payload=payload, schema=event_schemas.NonStagedFileRequested
+        )
+
+        await self._file_registry.stage_registered_file(
+            file_id=validated_payload.file_id,
+            decrypted_sha256=validated_payload.decrypted_sha256,
+        )
+
     async def _consume_validated(
         self,
         *,
@@ -91,5 +118,7 @@ class EventSubTranslator(EventSubscriberProtocol):
 
         if type_ == self._config.files_to_register_type:
             await self._consume_files_to_register(payload=payload)
+        if type_ == self._config.files_to_stage_type:
+            await self._consume_file_downloads(payload=payload)
         else:
             raise RuntimeError(f"Unexpected event of type: {type_}")

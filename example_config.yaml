@@ -2,9 +2,13 @@ aws_config_ini: null
 db_connection_str: '**********'
 db_name: dev_db
 file_registered_event_topic: internal_file_registry
-file_registered_event_type: donwload_served
+file_registered_event_type: file_registered
+file_staged_event_topic: internal_file_registry
+file_staged_event_type: file_staged
 files_to_register_topic: file_ingestion
 files_to_register_type: files_to_register
+files_to_stage_topic: file_downloads
+files_to_stage_type: file_stage_requested
 inbox_bucket: inbox
 kafka_servers:
 - kafka:9092

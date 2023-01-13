@@ -42,16 +42,34 @@
     "file_registered_event_type": {
       "title": "File Registered Event Type",
       "description": "The type used for events indicating that a new file has been internally registered.",
-      "default": "donwload_served",
+      "default": "file_registered",
       "env_names": [
         "ifrs_file_registered_event_type"
+      ],
+      "type": "string"
+    },
+    "file_staged_event_topic": {
+      "title": "File Staged Event Topic",
+      "description": "Name of the topic used for events indicating that a new file has been internally registered.",
+      "default": "internal_file_registry",
+      "env_names": [
+        "ifrs_file_staged_event_topic"
+      ],
+      "type": "string"
+    },
+    "file_staged_event_type": {
+      "title": "File Staged Event Type",
+      "description": "The type used for events indicating that a new file has been internally registered.",
+      "default": "file_staged",
+      "env_names": [
+        "ifrs_file_staged_event_type"
       ],
       "type": "string"
     },
     "files_to_register_topic": {
       "title": "Files To Register Topic",
       "description": "The name of the topic to receive events informing about new files to register.",
-      "example": "file_ingestion",
+      "default": "file_ingestion",
       "env_names": [
         "ifrs_files_to_register_topic"
       ],
@@ -60,9 +78,27 @@
     "files_to_register_type": {
       "title": "Files To Register Type",
       "description": "The type used for events informing about new files to register.",
-      "example": "files_to_register",
+      "default": "files_to_register",
       "env_names": [
         "ifrs_files_to_register_type"
+      ],
+      "type": "string"
+    },
+    "files_to_stage_topic": {
+      "title": "Files To Stage Topic",
+      "description": "The name of the topic to receive events informing about files to stage.",
+      "default": "file_downloads",
+      "env_names": [
+        "ifrs_files_to_stage_topic"
+      ],
+      "type": "string"
+    },
+    "files_to_stage_type": {
+      "title": "Files To Stage Type",
+      "description": "The type used for events informing about a file to be staged.",
+      "default": "file_stage_requested",
+      "env_names": [
+        "ifrs_files_to_stage_type"
       ],
       "type": "string"
     },
@@ -172,8 +208,6 @@
     "outbox_bucket",
     "inbox_bucket",
     "permanent_bucket",
-    "files_to_register_topic",
-    "files_to_register_type",
     "service_instance_id",
     "kafka_servers",
     "db_connection_str",

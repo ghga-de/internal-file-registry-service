@@ -27,3 +27,10 @@ class EventPublisherPort(ABC):
     async def file_internally_registered(self, *, file: models.FileMetadata) -> None:
         """Communicates the event that a new file has been internally registered."""
         ...
+
+    @abstractmethod
+    async def file_staged_for_download(
+        self, *, file_id: str, decrypted_sha256: str
+    ) -> None:
+        """Communicates the event that a file has been staged for download"""
+        ...

@@ -12,3 +12,5 @@ service_instance_id: 001
 kafka_servers: ["kafka:9092"]
 files_to_register_topic: file_ingestion
 files_to_register_type: files_to_register
+files_to_stage_topic: file_download
+files_to_stage_type: file_stage_requested
