@@ -69,7 +69,10 @@ async def test_happy(
     async with joint_fixture.kafka.expect_events(
         events=[
             ExpectedEvent(
-                payload=json.loads(EXAMPLE_FILE.json()),
+                payload={
+                    "file_id": EXAMPLE_FILE.file_id,
+                    "decrypted_sha256": EXAMPLE_FILE.decrypted_sha256,
+                },
                 type_=joint_fixture.config.file_staged_event_type,
             )
         ],

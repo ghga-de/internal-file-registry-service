@@ -50,7 +50,7 @@ class EventPubTranslatorConfig(BaseSettings):
         ),
     )
     file_staged_event_type: str = Field(
-        "file_staged",
+        "file_staged_for_download",
         description=(
             "The type used for events indicating that a new file has"
             + " been internally registered."
