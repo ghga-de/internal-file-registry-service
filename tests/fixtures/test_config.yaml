@@ -10,8 +10,8 @@ outbox_bucket: outbox
 inbox_bucket: inbox
 service_instance_id: 001
 kafka_servers: ["kafka:9092"]
-files_to_register_topic: file_interogation
-files_to_register_type: files_interrogation_success
+files_to_register_topic: file_interrogation
+files_to_register_type: file_interrogation_success
 files_to_stage_topic: file_downloads
 files_to_stage_type: file_stage_requested
 file_registered_event_topic: internal_file_registry

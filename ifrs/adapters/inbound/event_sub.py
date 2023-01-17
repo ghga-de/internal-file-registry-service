@@ -32,12 +32,12 @@ class EventSubTranslatorConfig(BaseSettings):
         ...,
         description="The name of the topic to receive events informing about new files "
         + "to register.",
-        example="file_interogation",
+        example="file_interrogation",
     )
     files_to_register_type: str = Field(
         ...,
         description="The type used for events informing about new files to register.",
-        example="files_interrogation_success",
+        example="file_interrogation_success",
     )
 
     files_to_stage_topic: str = Field(
