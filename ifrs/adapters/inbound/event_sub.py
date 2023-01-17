@@ -1,4 +1,4 @@
-# Copyright 2021 - 2022 Universität Tübingen, DKFZ and EMBL
+# Copyright 2021 - 2023 Universität Tübingen, DKFZ and EMBL
 # for the German Human Genome-Phenome Archive (GHGA)
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,25 +29,26 @@ class EventSubTranslatorConfig(BaseSettings):
     """Config for receiving events providing metadata on new files to register."""
 
     files_to_register_topic: str = Field(
-        "file_ingestion",
-        description=(
-            "The name of the topic to receive events informing about new files to register."
-        ),
+        ...,
+        description="The name of the topic to receive events informing about new files "
+        + "to register.",
+        example="file_interrogation",
     )
     files_to_register_type: str = Field(
-        "files_to_register",
-        description=("The type used for events informing about new files to register."),
+        ...,
+        description="The type used for events informing about new files to register.",
+        example="file_interrogation_success",
     )
 
     files_to_stage_topic: str = Field(
-        "file_downloads",
-        description=(
-            "The name of the topic to receive events informing about files to stage."
-        ),
+        ...,
+        description="The name of the topic to receive events informing about files to stage.",
+        example="file_downloads",
     )
     files_to_stage_type: str = Field(
-        "file_stage_requested",
-        description=("The type used for events informing about a file to be staged."),
+        ...,
+        description="The type used for events informing about a file to be staged.",
+        example="file_stage_requested",
     )
 
 
