@@ -1,4 +1,4 @@
-# Copyright 2021 - 2022 Universität Tübingen, DKFZ and EMBL
+# Copyright 2021 - 2023 Universität Tübingen, DKFZ and EMBL
 # for the German Human Genome-Phenome Archive (GHGA)
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -123,5 +123,10 @@ class FileRegistry(FileRegistryPort):
 
         try:
             await self._content_copy_svc.permanent_to_outbox(file=file)
+
+            await self._event_publisher.file_staged_for_download(
+                file_id=file_id, decrypted_sha256=decrypted_sha256
+            )
+
         except IContentCopyService.ContentNotInPermanentStorageError as error:
             raise self.FileInRegistryButNotInStorageError(file_id=file_id) from error

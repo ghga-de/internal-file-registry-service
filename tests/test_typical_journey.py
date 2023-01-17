@@ -1,4 +1,4 @@
-# Copyright 2021 - 2022 Universität Tübingen, DKFZ and EMBL
+# Copyright 2021 - 2023 Universität Tübingen, DKFZ and EMBL
 # for the German Human Genome-Phenome Archive (GHGA)
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -66,9 +66,21 @@ async def test_happy(
     )
 
     # request a stage to the outbox:
-    await file_registry.stage_registered_file(
-        file_id=EXAMPLE_FILE.file_id, decrypted_sha256=EXAMPLE_FILE.decrypted_sha256
-    )
+    async with joint_fixture.kafka.expect_events(
+        events=[
+            ExpectedEvent(
+                payload={
+                    "file_id": EXAMPLE_FILE.file_id,
+                    "decrypted_sha256": EXAMPLE_FILE.decrypted_sha256,
+                },
+                type_=joint_fixture.config.file_staged_event_type,
+            )
+        ],
+        in_topic=joint_fixture.config.file_staged_event_topic,
+    ):
+        await file_registry.stage_registered_file(
+            file_id=EXAMPLE_FILE.file_id, decrypted_sha256=EXAMPLE_FILE.decrypted_sha256
+        )
 
     # check that the file content is now in all three storage entities:
     assert await joint_fixture.s3.storage.does_object_exist(

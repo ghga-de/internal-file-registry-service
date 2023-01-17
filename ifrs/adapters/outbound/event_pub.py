@@ -1,4 +1,4 @@
-# Copyright 2021 - 2022 Universität Tübingen, DKFZ and EMBL
+# Copyright 2021 - 2023 Universität Tübingen, DKFZ and EMBL
 # for the German Human Genome-Phenome Archive (GHGA)
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,18 +29,28 @@ class EventPubTranslatorConfig(BaseSettings):
     """Config for publishing internal events to the outside."""
 
     file_registered_event_topic: str = Field(
-        "internal_file_registry",
-        description=(
-            "Name of the topic used for events indicating that a new file has"
-            + " been internally registered."
-        ),
+        ...,
+        description="Name of the topic used for events indicating that a new file has"
+        + " been internally registered.",
+        example="internal_file_registry",
     )
     file_registered_event_type: str = Field(
-        "donwload_served",
-        description=(
-            "The type used for events indicating that a new file has"
-            + " been internally registered."
-        ),
+        ...,
+        description="The type used for events indicating that a new file has"
+        + " been internally registered.",
+        example="file_registered",
+    )
+    file_staged_event_topic: str = Field(
+        ...,
+        description="Name of the topic used for events indicating that a new file has"
+        + " been internally registered.",
+        example="internal_file_registry",
+    )
+    file_staged_event_type: str = Field(
+        ...,
+        description="The type used for events indicating that a new file has"
+        + " been internally registered.",
+        example="file_staged_for_download",
     )
 
 
@@ -77,4 +87,22 @@ class EventPubTranslator(EventPublisherPort):
             type_=self._config.file_registered_event_type,
             topic=self._config.file_registered_event_topic,
             key=file.file_id,
+        )
+
+    async def file_staged_for_download(
+        self, *, file_id: str, decrypted_sha256: str
+    ) -> None:
+        """Communicates the event that a new file has been internally registered."""
+
+        payload = event_schemas.FileStagedForDownload(
+            file_id=file_id,
+            decrypted_sha256=decrypted_sha256,
+        )
+        payload_dict = json.loads(payload.json())
+
+        await self._provider.publish(
+            payload=payload_dict,
+            type_=self._config.file_staged_event_type,
+            topic=self._config.file_staged_event_topic,
+            key=file_id,
         )

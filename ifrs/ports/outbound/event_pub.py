@@ -1,4 +1,4 @@
-# Copyright 2021 - 2022 Universität Tübingen, DKFZ and EMBL
+# Copyright 2021 - 2023 Universität Tübingen, DKFZ and EMBL
 # for the German Human Genome-Phenome Archive (GHGA)
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,4 +26,11 @@ class EventPublisherPort(ABC):
     @abstractmethod
     async def file_internally_registered(self, *, file: models.FileMetadata) -> None:
         """Communicates the event that a new file has been internally registered."""
+        ...
+
+    @abstractmethod
+    async def file_staged_for_download(
+        self, *, file_id: str, decrypted_sha256: str
+    ) -> None:
+        """Communicates the event that a file has been staged for download"""
         ...
