@@ -29,32 +29,36 @@ class EventPubTranslatorConfig(BaseSettings):
     """Config for publishing internal events to the outside."""
 
     file_registered_event_topic: str = Field(
-        "internal_file_registry",
+        ...,
         description=(
             "Name of the topic used for events indicating that a new file has"
             + " been internally registered."
         ),
+        example="internal_file_registry",
     )
     file_registered_event_type: str = Field(
-        "file_registered",
+        ...,
         description=(
             "The type used for events indicating that a new file has"
             + " been internally registered."
         ),
+        example="file_registered",
     )
     file_staged_event_topic: str = Field(
-        "internal_file_registry",
+        ...,
         description=(
             "Name of the topic used for events indicating that a new file has"
             + " been internally registered."
         ),
+        example="internal_file_registry",
     )
     file_staged_event_type: str = Field(
-        "file_staged_for_download",
+        ...,
         description=(
             "The type used for events indicating that a new file has"
             + " been internally registered."
         ),
+        example="file_staged_for_download",
     )
 
 
