@@ -13,7 +13,7 @@
       "type": "string"
     },
     "staging_bucket": {
-      "title": "staging Bucket",
+      "title": "Staging Bucket",
       "description": "The ID of the object storage bucket that is serving as upload area.",
       "example": "staging",
       "env_names": [
