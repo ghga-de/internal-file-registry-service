@@ -1,4 +1,4 @@
-# Copyright 2021 - 2023 Universität Tübingen, DKFZ and EMBL
+# Copyright 2021 - 2023 Universität Tübingen, DKFZ, EMBL, and Universität zu Köln
 # for the German Human Genome-Phenome Archive (GHGA)
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -44,10 +44,10 @@ class FileRegistryPort(ABC):
             )
             super().__init__(message)
 
-    class FileContentNotInInboxError(
-        InvalidRequestError, IContentCopyService.ContentNotInInboxError
+    class FileContentNotInstagingError(
+        InvalidRequestError, IContentCopyService.ContentNotInstagingError
     ):
-        """Thrown when the content of a file is unexpectedly not in the inbox storage."""
+        """Thrown when the content of a file is unexpectedly not in the staging storage."""
 
     class FileUpdateError(InvalidRequestError):
         """Thrown when attempting to update metadata of an existing file."""
@@ -94,7 +94,7 @@ class FileRegistryPort(ABC):
 
     @abstractmethod
     async def register_file(self, *, file: models.FileMetadata) -> None:
-        """Registers a file and moves its content from the inbox into the permanent
+        """Registers a file and moves its content from the staging into the permanent
         storage. If the file with that exact metadata has already been registered,
         nothing is done.
 
@@ -105,8 +105,8 @@ class FileRegistryPort(ABC):
             self.FileUpdateError:
                 When the file already been registered but its metadata differes from the
                 provided one.
-            self.FileContentNotInInboxError:
-                When the file content is not present in the storage inbox.
+            self.FileContentNotInstagingError:
+                When the file content is not present in the storage staging.
         """
         ...
 

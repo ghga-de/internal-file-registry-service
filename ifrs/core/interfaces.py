@@ -1,4 +1,4 @@
-# Copyright 2021 - 2023 Universität Tübingen, DKFZ and EMBL
+# Copyright 2021 - 2023 Universität Tübingen, DKFZ, EMBL, and Universität zu Köln
 # for the German Human Genome-Phenome Archive (GHGA)
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,13 +24,13 @@ class IContentCopyService(ABC):
     """Interface for a service that copies the content of a file between storage
     entities."""
 
-    class ContentNotInInboxError(RuntimeError):
-        """Thrown when the content of a file is unexpectedly not in the inbox storage."""
+    class ContentNotInstagingError(RuntimeError):
+        """Thrown when the content of a file is unexpectedly not in the staging storage."""
 
         def __init__(self, file_id: str):
             message = (
                 f"The content of the file with id '{file_id}' does not exist in the"
-                + " inbox."
+                + " staging."
             )
             super().__init__(message)
 
@@ -41,16 +41,16 @@ class IContentCopyService(ABC):
         def __init__(self, file_id: str):
             message = (
                 f"The content of the file with id '{file_id}' does not exist in the"
-                + " inbox."
+                + " staging."
             )
             super().__init__(message)
 
     @abstractmethod
-    async def inbox_to_permanent(self, *, file: models.FileMetadata) -> None:
-        """Copy a file from an inbox stage to the permanent storage."""
+    async def staging_to_permanent(self, *, file: models.FileMetadata) -> None:
+        """Copy a file from an staging stage to the permanent storage."""
         ...
 
     @abstractmethod
     async def permanent_to_outbox(self, *, file: models.FileMetadata) -> None:
-        """Copy a file from an inbox stage to the permanent storage."""
+        """Copy a file from an staging stage to the permanent storage."""
         ...

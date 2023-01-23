@@ -9,7 +9,6 @@ files_to_register_topic: file_interrogation
 files_to_register_type: file_interrogation_success
 files_to_stage_topic: file_downloads
 files_to_stage_type: file_stage_requested
-inbox_bucket: inbox
 kafka_servers:
 - kafka:9092
 outbox_bucket: outbox
@@ -20,3 +19,4 @@ s3_secret_access_key: '**********'
 s3_session_token: null
 service_instance_id: '1'
 service_name: internal_file_registry
+staging_bucket: staging

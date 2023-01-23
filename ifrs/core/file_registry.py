@@ -1,4 +1,4 @@
-# Copyright 2021 - 2023 Universität Tübingen, DKFZ and EMBL
+# Copyright 2021 - 2023 Universität Tübingen, DKFZ, EMBL, and Universität zu Köln
 # for the German Human Genome-Phenome Archive (GHGA)
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -58,7 +58,7 @@ class FileRegistry(FileRegistryPort):
         raise self.FileUpdateError(file_id=file.file_id)
 
     async def register_file(self, *, file: models.FileMetadata) -> None:
-        """Registers a file and moves its content from the inbox into the permanent
+        """Registers a file and moves its content from the staging into the permanent
         storage. If the file with that exact metadata has already been registered,
         nothing is done.
 
@@ -69,8 +69,8 @@ class FileRegistry(FileRegistryPort):
             self.FileUpdateError:
                 When the file already been registered but its metadata differes from the
                 provided one.
-            self.FileContentNotInInboxError:
-                When the file content is not present in the storage inbox.
+            self.FileContentNotInstagingError:
+                When the file content is not present in the storage staging.
         """
 
         if await self._is_file_registered(file=file):
@@ -78,9 +78,9 @@ class FileRegistry(FileRegistryPort):
             return
 
         try:
-            await self._content_copy_svc.inbox_to_permanent(file=file)
-        except IContentCopyService.ContentNotInInboxError as error:
-            raise self.FileContentNotInInboxError(file_id=file.file_id) from error
+            await self._content_copy_svc.staging_to_permanent(file=file)
+        except IContentCopyService.ContentNotInstagingError as error:
+            raise self.FileContentNotInstagingError(file_id=file.file_id) from error
 
         await self._file_metadata_dao.insert(file)
 

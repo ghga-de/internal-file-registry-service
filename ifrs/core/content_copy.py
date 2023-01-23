@@ -1,4 +1,4 @@
-# Copyright 2021 - 2023 Universität Tübingen, DKFZ and EMBL
+# Copyright 2021 - 2023 Universität Tübingen, DKFZ, EMBL, and Universität zu Köln
 # for the German Human Genome-Phenome Archive (GHGA)
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -32,12 +32,12 @@ class StorageEnitiesConfig(BaseSettings):
         ),
         example="outbox",
     )
-    inbox_bucket: str = Field(
+    staging_bucket: str = Field(
         ...,
         description=(
-            "The ID of the object storage bucket that is serving as upload area."
+            "The ID of the object storage bucket that is serving as staging area."
         ),
-        example="inbox",
+        example="staging",
     )
     permanent_bucket: str = Field(
         ...,
@@ -63,8 +63,8 @@ class ContentCopyService(IContentCopyService):
         self._config = config
         self._object_storage = object_storage
 
-    async def inbox_to_permanent(self, *, file: models.FileMetadata) -> None:
-        """Copy a file from an inbox stage to the permanent storage."""
+    async def staging_to_permanent(self, *, file: models.FileMetadata) -> None:
+        """Copy a file from an staging stage to the permanent storage."""
 
         if await self._object_storage.does_object_exist(
             bucket_id=self._config.permanent_bucket, object_id=file.file_id
@@ -73,19 +73,19 @@ class ContentCopyService(IContentCopyService):
             return
 
         if not await self._object_storage.does_object_exist(
-            bucket_id=self._config.inbox_bucket, object_id=file.file_id
+            bucket_id=self._config.staging_bucket, object_id=file.file_id
         ):
-            raise self.ContentNotInInboxError(file_id=file.file_id)
+            raise self.ContentNotInstagingError(file_id=file.file_id)
 
         await self._object_storage.copy_object(
-            source_bucket_id=self._config.inbox_bucket,
+            source_bucket_id=self._config.staging_bucket,
             source_object_id=file.file_id,
             dest_bucket_id=self._config.permanent_bucket,
             dest_object_id=file.file_id,
         )
 
     async def permanent_to_outbox(self, *, file: models.FileMetadata) -> None:
-        """Copy a file from an inbox stage to the permanent storage."""
+        """Copy a file from an staging stage to the permanent storage."""
 
         if await self._object_storage.does_object_exist(
             bucket_id=self._config.outbox_bucket, object_id=file.file_id

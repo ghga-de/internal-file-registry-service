@@ -1,4 +1,4 @@
-# Copyright 2021 - 2023 Universität Tübingen, DKFZ and EMBL
+# Copyright 2021 - 2023 Universität Tübingen, DKFZ, EMBL, and Universität zu Köln
 # for the German Human Genome-Phenome Archive (GHGA)
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -73,7 +73,11 @@ async def joint_fixture(
 
         # create storage entities:
         await s3_fixture.populate_buckets(
-            buckets=[config.outbox_bucket, config.inbox_bucket, config.permanent_bucket]
+            buckets=[
+                config.outbox_bucket,
+                config.staging_bucket,
+                config.permanent_bucket,
+            ]
         )
 
         yield JointFixture(
