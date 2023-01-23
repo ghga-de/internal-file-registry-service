@@ -12,12 +12,12 @@
       ],
       "type": "string"
     },
-    "inbox_bucket": {
-      "title": "Inbox Bucket",
+    "staging_bucket": {
+      "title": "staging Bucket",
       "description": "The ID of the object storage bucket that is serving as upload area.",
-      "example": "inbox",
+      "example": "staging",
       "env_names": [
-        "ifrs_inbox_bucket"
+        "ifrs_staging_bucket"
       ],
       "type": "string"
     },
@@ -206,7 +206,7 @@
   },
   "required": [
     "outbox_bucket",
-    "inbox_bucket",
+    "staging_bucket",
     "permanent_bucket",
     "file_registered_event_topic",
     "file_registered_event_type",

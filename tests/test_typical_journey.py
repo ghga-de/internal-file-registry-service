@@ -34,16 +34,16 @@ async def test_happy(
 ):
     """Simulates a typical, successful API journey."""
 
-    # place example content in the inbox:
+    # place example content in the staging:
     file_object = file_fixture.copy(
         update={
-            "bucket_id": joint_fixture.config.inbox_bucket,
+            "bucket_id": joint_fixture.config.staging_bucket,
             "object_id": EXAMPLE_FILE.file_id,
         }
     )
     await joint_fixture.s3.populate_file_objects(file_objects=[file_object])
 
-    # register new file from the inbox:
+    # register new file from the staging:
     # (And check if an event informing about the new registration has been published.)
     file_registry = await joint_fixture.container.file_registry()
     async with joint_fixture.kafka.expect_events(
@@ -57,9 +57,9 @@ async def test_happy(
     ):
         await file_registry.register_file(file=EXAMPLE_FILE)
 
-    # check that the file content is now in both the inbox and the permanent storage:
+    # check that the file content is now in both the staging and the permanent storage:
     assert await joint_fixture.s3.storage.does_object_exist(
-        bucket_id=joint_fixture.config.inbox_bucket, object_id=EXAMPLE_FILE.file_id
+        bucket_id=joint_fixture.config.staging_bucket, object_id=EXAMPLE_FILE.file_id
     )
     assert await joint_fixture.s3.storage.does_object_exist(
         bucket_id=joint_fixture.config.permanent_bucket, object_id=EXAMPLE_FILE.file_id
@@ -84,7 +84,7 @@ async def test_happy(
 
     # check that the file content is now in all three storage entities:
     assert await joint_fixture.s3.storage.does_object_exist(
-        bucket_id=joint_fixture.config.inbox_bucket, object_id=EXAMPLE_FILE.file_id
+        bucket_id=joint_fixture.config.staging_bucket, object_id=EXAMPLE_FILE.file_id
     )
     assert await joint_fixture.s3.storage.does_object_exist(
         bucket_id=joint_fixture.config.permanent_bucket, object_id=EXAMPLE_FILE.file_id
@@ -94,7 +94,7 @@ async def test_happy(
     )
 
     # check that the file content in the outbox is identical to the content in the
-    # inbox:
+    # staging:
     download_url = await joint_fixture.s3.storage.get_object_download_url(
         bucket_id=joint_fixture.config.outbox_bucket, object_id=EXAMPLE_FILE.file_id
     )

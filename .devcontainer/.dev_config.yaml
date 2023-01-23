@@ -5,7 +5,7 @@ s3_access_key_id: test
 s3_secret_access_key: test
 permanent_bucket: permanent
 outbox_bucket: outbox
-inbox_bucket: inbox
+staging_bucket: staging
 service_instance_id: 001
 kafka_servers: ["kafka:9092"]
 files_to_register_topic: file_interrogation

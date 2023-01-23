@@ -28,13 +28,13 @@ from tests.fixtures.joint import *  # noqa: F403
 
 
 @pytest.mark.asyncio
-async def test_register_with_empty_inbox(
+async def test_register_with_empty_staging(
     joint_fixture: JointFixture,  # noqa: F811, F405
 ):
-    """Test registration of a file when the file content is missing from the inbox."""
+    """Test registration of a file when the file content is missing from the staging."""
 
     file_registry = await joint_fixture.container.file_registry()
-    with pytest.raises(FileRegistryPort.FileContentNotInInboxError):
+    with pytest.raises(FileRegistryPort.FileContentNotInstagingError):
         await file_registry.register_file(file=EXAMPLE_FILE)
 
 
@@ -46,16 +46,16 @@ async def test_reregistration(
     """Test the re-registration of a file with identical metadata (should not result in
     an exception)."""
 
-    # place example content in the inbox:
+    # place example content in the staging:
     file_object = file_fixture.copy(
         update={
-            "bucket_id": joint_fixture.config.inbox_bucket,
+            "bucket_id": joint_fixture.config.staging_bucket,
             "object_id": EXAMPLE_FILE.file_id,
         }
     )
     await joint_fixture.s3.populate_file_objects(file_objects=[file_object])
 
-    # register new file from the inbox:
+    # register new file from the staging:
     # (And check if an event informing about the new registration has been published.)
     file_registry = await joint_fixture.container.file_registry()
     async with joint_fixture.kafka.expect_events(
@@ -69,7 +69,7 @@ async def test_reregistration(
     ):
         await file_registry.register_file(file=EXAMPLE_FILE)
 
-    # re-register the same file from the inbox:
+    # re-register the same file from the staging:
     # (A second event is not expected.)
     async with joint_fixture.kafka.expect_events(
         events=[],
@@ -86,16 +86,16 @@ async def test_reregistration_with_updated_metadata(
     """Check that a re-registration of a file with updated metadata fails with the
     exptected exception."""
 
-    # place example content in the inbox:
+    # place example content in the staging:
     file_object = file_fixture.copy(
         update={
-            "bucket_id": joint_fixture.config.inbox_bucket,
+            "bucket_id": joint_fixture.config.staging_bucket,
             "object_id": EXAMPLE_FILE.file_id,
         }
     )
     await joint_fixture.s3.populate_file_objects(file_objects=[file_object])
 
-    # register new file from the inbox:
+    # register new file from the staging:
     # (And check if an event informing about the new registration has been published.)
     file_registry = await joint_fixture.container.file_registry()
     async with joint_fixture.kafka.expect_events(
@@ -144,7 +144,7 @@ async def test_stage_checksum_missmatch(
     # place the content for an example file in the permanent storage:
     file_object = file_fixture.copy(
         update={
-            "bucket_id": joint_fixture.config.inbox_bucket,
+            "bucket_id": joint_fixture.config.staging_bucket,
             "object_id": EXAMPLE_FILE.file_id,
         }
     )
