@@ -35,7 +35,7 @@ class StorageEnitiesConfig(BaseSettings):
     staging_bucket: str = Field(
         ...,
         description=(
-            "The ID of the object storage bucket that is serving as upload area."
+            "The ID of the object storage bucket that is serving as staging area."
         ),
         example="staging",
     )

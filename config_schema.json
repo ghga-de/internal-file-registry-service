@@ -14,7 +14,7 @@
     },
     "staging_bucket": {
       "title": "Staging Bucket",
-      "description": "The ID of the object storage bucket that is serving as upload area.",
+      "description": "The ID of the object storage bucket that is serving as staging area.",
       "example": "staging",
       "env_names": [
         "ifrs_staging_bucket"
