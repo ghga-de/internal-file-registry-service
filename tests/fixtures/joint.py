@@ -70,7 +70,6 @@ async def joint_fixture(
 
     # create a DI container instance:translators
     async with get_configured_container(config=config) as container:
-
         # create storage entities:
         await s3_fixture.populate_buckets(
             buckets=[
