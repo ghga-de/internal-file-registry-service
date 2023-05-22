@@ -10,7 +10,7 @@ Internal-File-Registry-Service - This service acts as a registry for the interna
 
 <!-- Please provide a short overview of the features of this service.-->
 
-This service provides an infrastructure to administer files stored in an S3-compatible
+This service provides functionality to administer files stored in an S3-compatible
 object storage.
 All file-related metadata is stored in an internal mongodb database, owned and controlled
 by this service.
@@ -21,11 +21,11 @@ It exposes no API enpoints and communicates with other services via events.
 #### files_to_register
 This event signals that there is a file to register in the database.
 The file-related metadata from this event gets saved in the database and the file is
-pulled from the staging bucket dto the permanent storage.
+moved from the incoming staging bucket to the permanent storage.
 
 #### files_to_stage
 This event signals that there is a file that needs to be staged for download.
-The file is then copied over from the permanent storage to the outbox.
+The file is then copied from the permanent storage to the outbox for the actual download.
 ### Events published:
 
 #### file_internally_registered
