@@ -20,6 +20,7 @@ from ifrs.core.interfaces import IContentCopyService
 from ifrs.ports.inbound.file_registry import FileRegistryPort
 from ifrs.ports.outbound.dao import FileMetadataDaoPort, ResourceNotFoundError
 from ifrs.ports.outbound.event_pub import EventPublisherPort
+from ifrs.ports.outbound.storage import ObjectStoragePort
 
 
 class FileRegistry(FileRegistryPort):
@@ -37,6 +38,7 @@ class FileRegistry(FileRegistryPort):
         self._content_copy_svc = content_copy_svc
         self._event_publisher = event_publisher
         self._file_metadata_dao = file_metadata_dao
+        self._object_storage: ObjectStoragePort
 
     async def _is_file_registered(self, *, file: models.FileMetadata) -> bool:
         """Checks if the specified file is already registered. There are three possible
@@ -130,3 +132,27 @@ class FileRegistry(FileRegistryPort):
 
         except IContentCopyService.ContentNotInPermanentStorageError as error:
             raise self.FileInRegistryButNotInStorageError(file_id=file_id) from error
+
+    async def delete_file(self, *, file_id: str) -> None:
+        """Deletes a file from the permanent storage and the internal database.
+        If no file with that id exists, do nothing.
+
+        Args:
+            file_id: id for the file file to delete.
+        """
+
+        # Try to remove file from S3
+        try:
+            self._object_storage.delete_object(file_id)
+        except self._object_storage.ObjectNotFoundError:
+            # If file does not exist anyways, we are done.
+            pass
+
+        # Try to remove file from database
+        try:
+            self._file_metadata_dao.delete(file_id)
+        except ResourceNotFoundError:
+            # If file does not exist anyways, we are done.
+            pass
+
+        await self._event_publisher.file_deleted(file_id=file_id)

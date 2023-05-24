@@ -52,10 +52,22 @@ class EventPubTranslatorConfig(BaseSettings):
         + " been internally registered.",
         example="file_staged_for_download",
     )
+    file_deleted_event_topic: str = Field(
+        ...,
+        description="Name of the topic used for events indicating that a file has"
+        + " been deleted.",
+        example="internal_file_registry",
+    )
+    file_deleted_event_type: str = Field(
+        ...,
+        description="The type used for events indicating that a file has"
+        + " been deleted.",
+        example="file_deleted",
+    )
 
 
 class EventPubTranslator(EventPublisherPort):
-    """A translator according to  the triple hexagonal architecture implementing
+    """A translator according to the triple hexagonal architecture implementing
     the EventPublisherPort."""
 
     def __init__(
@@ -104,5 +116,20 @@ class EventPubTranslator(EventPublisherPort):
             payload=payload_dict,
             type_=self._config.file_staged_event_type,
             topic=self._config.file_staged_event_topic,
+            key=file_id,
+        )
+
+    async def file_deleted(self, *, file_id: str) -> None:
+        """Communicates the event that a file has been successfully deleted."""
+
+        payload = event_schemas.FileDeletionSuccess(
+            file_id=file_id,
+        )
+        payload_dict = json.loads(payload.json())
+
+        await self._provider.publish(
+            payload=payload_dict,
+            type_=self._config.file_deleted_event_type,
+            topic=self._config.file_deleted_event_topic,
             key=file_id,
         )

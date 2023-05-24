@@ -51,6 +51,17 @@ class EventSubTranslatorConfig(BaseSettings):
         example="file_stage_requested",
     )
 
+    files_to_delete_topic: str = Field(
+        ...,
+        description="The name of the topic to receive events informing about files to delete.",
+        example="file_deletions",
+    )
+    files_to_delete_type: str = Field(
+        ...,
+        description="The type used for events informing about a file to be deleted.",
+        example="file_deletion_requested",
+    )
+
 
 class EventSubTranslator(EventSubscriberProtocol):
     """A triple hexagonal translator compatible with the EventSubscriberProtocol that
@@ -108,6 +119,17 @@ class EventSubTranslator(EventSubscriberProtocol):
             decrypted_sha256=validated_payload.decrypted_sha256,
         )
 
+    async def _consume_file_deletions(self, *, payload: JsonObject) -> None:
+        """Consume file deletion events."""
+
+        validated_payload = get_validated_payload(
+            payload=payload, schema=event_schemas.FileDeletionRequested
+        )
+
+        await self._file_registry.delete_file(
+            file_id=validated_payload.file_id,
+        )
+
     async def _consume_validated(
         self,
         *,
@@ -121,5 +143,7 @@ class EventSubTranslator(EventSubscriberProtocol):
             await self._consume_files_to_register(payload=payload)
         if type_ == self._config.files_to_stage_type:
             await self._consume_file_downloads(payload=payload)
+        if type_ == self._config.files_to_delete_type:
+            await self._consume_file_deletions(payload=payload)
         else:
             raise RuntimeError(f"Unexpected event of type: {type_}")
