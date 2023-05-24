@@ -66,6 +66,24 @@
       ],
       "type": "string"
     },
+    "file_deleted_event_topic": {
+      "title": "File Deleted Event Topic",
+      "description": "Name of the topic used for events indicating that a file has been deleted.",
+      "example": "internal_file_registry",
+      "env_names": [
+        "ifrs_file_deleted_event_topic"
+      ],
+      "type": "string"
+    },
+    "file_deleted_event_type": {
+      "title": "File Deleted Event Type",
+      "description": "The type used for events indicating that a file has been deleted.",
+      "example": "file_deleted",
+      "env_names": [
+        "ifrs_file_deleted_event_type"
+      ],
+      "type": "string"
+    },
     "files_to_register_topic": {
       "title": "Files To Register Topic",
       "description": "The name of the topic to receive events informing about new files to register.",
@@ -99,6 +117,24 @@
       "example": "file_stage_requested",
       "env_names": [
         "ifrs_files_to_stage_type"
+      ],
+      "type": "string"
+    },
+    "files_to_delete_topic": {
+      "title": "Files To Delete Topic",
+      "description": "The name of the topic to receive events informing about files to delete.",
+      "example": "file_deletions",
+      "env_names": [
+        "ifrs_files_to_delete_topic"
+      ],
+      "type": "string"
+    },
+    "files_to_delete_type": {
+      "title": "Files To Delete Type",
+      "description": "The type used for events informing about a file to be deleted.",
+      "example": "file_deletion_requested",
+      "env_names": [
+        "ifrs_files_to_delete_type"
       ],
       "type": "string"
     },
@@ -212,10 +248,14 @@
     "file_registered_event_type",
     "file_staged_event_topic",
     "file_staged_event_type",
+    "file_deleted_event_topic",
+    "file_deleted_event_type",
     "files_to_register_topic",
     "files_to_register_type",
     "files_to_stage_topic",
     "files_to_stage_type",
+    "files_to_delete_topic",
+    "files_to_delete_type",
     "service_instance_id",
     "kafka_servers",
     "db_connection_str",

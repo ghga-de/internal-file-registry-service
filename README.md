@@ -85,6 +85,10 @@ The service requires the following configuration parameters:
 
 - **`file_staged_event_type`** *(string)*: The type used for events indicating that a new file has been internally registered.
 
+- **`file_deleted_event_topic`** *(string)*: Name of the topic used for events indicating that a file has been deleted.
+
+- **`file_deleted_event_type`** *(string)*: The type used for events indicating that a file has been deleted.
+
 - **`files_to_register_topic`** *(string)*: The name of the topic to receive events informing about new files to register.
 
 - **`files_to_register_type`** *(string)*: The type used for events informing about new files to register.
@@ -92,6 +96,10 @@ The service requires the following configuration parameters:
 - **`files_to_stage_topic`** *(string)*: The name of the topic to receive events informing about files to stage.
 
 - **`files_to_stage_type`** *(string)*: The type used for events informing about a file to be staged.
+
+- **`files_to_delete_topic`** *(string)*: The name of the topic to receive events informing about files to delete.
+
+- **`files_to_delete_type`** *(string)*: The type used for events informing about a file to be deleted.
 
 - **`service_name`** *(string)*: Default: `internal_file_registry`.
 
