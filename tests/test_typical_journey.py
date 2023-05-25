@@ -28,11 +28,11 @@ from tests.fixtures.joint import *  # noqa: F403
 
 
 @pytest.mark.asyncio
-async def test_happy(
+async def test_happy_journey(
     joint_fixture: JointFixture,  # noqa: F811, F405
     file_fixture: FileObject,  # noqa: F811
 ):
-    """Simulates a typical, successful API journey."""
+    """Simulates a typical, successful journey for upload and download."""
 
     # place example content in the staging:
     file_object = file_fixture.copy(
@@ -101,3 +101,40 @@ async def test_happy(
     response = requests.get(download_url)
     response.raise_for_status()
     assert response.content == file_object.content
+
+
+@pytest.mark.asyncio
+async def test_happy_deletion(
+    joint_fixture: JointFixture,  # noqa: F811, F405
+    file_fixture: FileObject,  # noqa: F811
+):
+    """Simulates a typical, successful journey for file deletion."""
+
+    # place example content in the staging:
+    file_object = file_fixture.copy(
+        update={
+            "bucket_id": joint_fixture.config.permanent_bucket,
+            "object_id": EXAMPLE_FILE.file_id,
+        }
+    )
+    await joint_fixture.s3.populate_file_objects(file_objects=[file_object])
+
+    file_registry = await joint_fixture.container.file_registry()
+
+    # request a stage to the outbox:
+    async with joint_fixture.kafka.expect_events(
+        events=[
+            ExpectedEvent(
+                payload={
+                    "file_id": EXAMPLE_FILE.file_id,
+                },
+                type_=joint_fixture.config.file_deleted_event_type,
+            )
+        ],
+        in_topic=joint_fixture.config.file_staged_event_topic,
+    ):
+        await file_registry.delete_file(file_id=EXAMPLE_FILE.file_id)
+
+    assert not await joint_fixture.s3.storage.does_object_exist(
+        bucket_id=joint_fixture.config.permanent_bucket, object_id=EXAMPLE_FILE.file_id
+    )
