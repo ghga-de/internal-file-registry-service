@@ -131,7 +131,7 @@ async def test_happy_deletion(
                 type_=joint_fixture.config.file_deleted_event_type,
             )
         ],
-        in_topic=joint_fixture.config.file_staged_event_topic,
+        in_topic=joint_fixture.config.file_deleted_event_topic,
     ):
         await file_registry.delete_file(file_id=EXAMPLE_FILE.file_id)
 
