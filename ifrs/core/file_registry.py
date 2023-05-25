@@ -32,13 +32,14 @@ class FileRegistry(FileRegistryPort):
         content_copy_svc: IContentCopyService,
         file_metadata_dao: FileMetadataDaoPort,
         event_publisher: EventPublisherPort,
+        object_storage: ObjectStoragePort,
     ):
         """Initialize with essential config params and outbound adapters."""
 
         self._content_copy_svc = content_copy_svc
         self._event_publisher = event_publisher
         self._file_metadata_dao = file_metadata_dao
-        self._object_storage: ObjectStoragePort
+        self._object_storage = object_storage
 
     async def _is_file_registered(self, *, file: models.FileMetadata) -> bool:
         """Checks if the specified file is already registered. There are three possible
