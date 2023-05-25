@@ -15,6 +15,7 @@
 
 """Main business-logic of this service"""
 
+from ifrs.config import CONFIG, Config
 from ifrs.core import models
 from ifrs.core.interfaces import IContentCopyService
 from ifrs.ports.inbound.file_registry import FileRegistryPort
@@ -33,13 +34,14 @@ class FileRegistry(FileRegistryPort):
         file_metadata_dao: FileMetadataDaoPort,
         event_publisher: EventPublisherPort,
         object_storage: ObjectStoragePort,
+        config: Config = CONFIG,
     ):
         """Initialize with essential config params and outbound adapters."""
-
         self._content_copy_svc = content_copy_svc
         self._event_publisher = event_publisher
         self._file_metadata_dao = file_metadata_dao
         self._object_storage = object_storage
+        self._config = config
 
     async def _is_file_registered(self, *, file: models.FileMetadata) -> bool:
         """Checks if the specified file is already registered. There are three possible
@@ -144,7 +146,9 @@ class FileRegistry(FileRegistryPort):
 
         # Try to remove file from S3
         try:
-            self._object_storage.delete_object(file_id)
+            self._object_storage.delete_object(
+                bucket_id=self._config.permanent_bucket, object_id=file_id
+            )
         except self._object_storage.ObjectNotFoundError:
             # If file does not exist anyways, we are done.
             pass
