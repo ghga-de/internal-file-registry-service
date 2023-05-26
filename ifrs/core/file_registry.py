@@ -15,7 +15,7 @@
 
 """Main business-logic of this service"""
 
-from ifrs.config import CONFIG, Config
+from ifrs.config import Config
 from ifrs.core import models
 from ifrs.core.interfaces import IContentCopyService
 from ifrs.ports.inbound.file_registry import FileRegistryPort
@@ -34,7 +34,7 @@ class FileRegistry(FileRegistryPort):
         file_metadata_dao: FileMetadataDaoPort,
         event_publisher: EventPublisherPort,
         object_storage: ObjectStoragePort,
-        config: Config = CONFIG,
+        config: Config,
     ):
         """Initialize with essential config params and outbound adapters."""
         self._content_copy_svc = content_copy_svc
