@@ -146,16 +146,17 @@ class FileRegistry(FileRegistryPort):
 
         # Try to remove file from S3
         try:
-            self._object_storage.delete_object(
+            await self._object_storage.delete_object(
                 bucket_id=self._config.permanent_bucket, object_id=file_id
             )
+
         except self._object_storage.ObjectNotFoundError:
             # If file does not exist anyways, we are done.
             pass
 
         # Try to remove file from database
         try:
-            self._file_metadata_dao.delete(file_id)
+            self._file_metadata_dao.delete(id_=file_id)
         except ResourceNotFoundError:
             # If file does not exist anyways, we are done.
             pass
