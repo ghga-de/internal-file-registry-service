@@ -59,6 +59,8 @@ class Container(ContainerBase):
         content_copy_svc=content_copy_svc,
         file_metadata_dao=file_metadata_dao,
         event_publisher=event_publisher,
+        object_storage=object_storage,
+        config=config,
     )
 
     # inbound translators:

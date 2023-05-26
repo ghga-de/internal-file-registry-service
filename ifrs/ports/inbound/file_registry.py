@@ -133,3 +133,13 @@ class FileRegistryPort(ABC):
                 the permanent storage. This a fatal error.
         """
         ...
+
+    @abstractmethod
+    async def delete_file(self, *, file_id: str) -> None:
+        """Deletes a file from the permanent storage and the internal database.
+        If no file with that id exists, do nothing.
+
+        Args:
+            file_id: id for the file to delete.
+        """
+        ...
