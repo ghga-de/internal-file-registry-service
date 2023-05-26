@@ -141,7 +141,7 @@ class FileRegistry(FileRegistryPort):
         If no file with that id exists, do nothing.
 
         Args:
-            file_id: id for the file file to delete.
+            file_id: id for the file to delete.
         """
 
         # Try to remove file from S3
