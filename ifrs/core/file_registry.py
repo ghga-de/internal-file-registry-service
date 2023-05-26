@@ -156,7 +156,7 @@ class FileRegistry(FileRegistryPort):
 
         # Try to remove file from database
         try:
-            self._file_metadata_dao.delete(id_=file_id)
+            await self._file_metadata_dao.delete(id_=file_id)
         except ResourceNotFoundError:
             # If file does not exist anyways, we are done.
             pass
