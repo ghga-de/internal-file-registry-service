@@ -110,7 +110,7 @@ async def test_happy_deletion(
 ):
     """Simulates a typical, successful journey for file deletion."""
 
-    # place example content in the staging:
+    # place example content in the permanent storage bucket:
     file_object = file_fixture.copy(
         update={
             "bucket_id": joint_fixture.config.permanent_bucket,
