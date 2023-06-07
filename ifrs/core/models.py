@@ -26,6 +26,7 @@ class FileMetadata(BaseModel):
     file_id: str = Field(
         ..., description="The public ID of the file as present in the metadata catalog."
     )
+    object_id: str = Field(..., description="The S3-specific ID for a given bucket.")
     upload_date: str = Field(
         ...,
         description="The date and time when this file was ingested into the system.",
