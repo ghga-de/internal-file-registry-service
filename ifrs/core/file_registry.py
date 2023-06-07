@@ -62,7 +62,9 @@ class FileRegistry(FileRegistryPort):
 
         raise self.FileUpdateError(file_id=file.file_id)
 
-    async def register_file(self, *, file: models.FileMetadata) -> None:
+    async def register_file(
+        self, *, file: models.FileMetadata, source_object_id: str, source_bucket_id: str
+    ) -> None:
         """Registers a file and moves its content from the staging into the permanent
         storage. If the file with that exact metadata has already been registered,
         nothing is done.
@@ -83,7 +85,11 @@ class FileRegistry(FileRegistryPort):
             return
 
         try:
-            await self._content_copy_svc.staging_to_permanent(file=file)
+            await self._content_copy_svc.staging_to_permanent(
+                file=file,
+                source_object_id=source_object_id,
+                source_bucket_id=source_bucket_id,
+            )
         except IContentCopyService.ContentNotInstagingError as error:
             raise self.FileContentNotInstagingError(file_id=file.file_id) from error
 
