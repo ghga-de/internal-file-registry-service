@@ -71,10 +71,6 @@ ifrs --help
 ### Parameters
 
 The service requires the following configuration parameters:
-- **`outbox_bucket`** *(string)*: The ID of the object storage bucket that is serving as download area.
-
-- **`staging_bucket`** *(string)*: The ID of the object storage bucket that is serving as staging area.
-
 - **`permanent_bucket`** *(string)*: The ID of the object storage bucket that is serving as permanent storage.
 
 - **`file_registered_event_topic`** *(string)*: Name of the topic used for events indicating that a new file has been internally registered.

@@ -3,24 +3,6 @@
   "description": "Modifies the orginal Settings class provided by the user",
   "type": "object",
   "properties": {
-    "outbox_bucket": {
-      "title": "Outbox Bucket",
-      "description": "The ID of the object storage bucket that is serving as download area.",
-      "example": "outbox",
-      "env_names": [
-        "ifrs_outbox_bucket"
-      ],
-      "type": "string"
-    },
-    "staging_bucket": {
-      "title": "Staging Bucket",
-      "description": "The ID of the object storage bucket that is serving as staging area.",
-      "example": "staging",
-      "env_names": [
-        "ifrs_staging_bucket"
-      ],
-      "type": "string"
-    },
     "permanent_bucket": {
       "title": "Permanent Bucket",
       "description": "The ID of the object storage bucket that is serving as permanent storage.",
@@ -241,8 +223,6 @@
     }
   },
   "required": [
-    "outbox_bucket",
-    "staging_bucket",
     "permanent_bucket",
     "file_registered_event_topic",
     "file_registered_event_type",

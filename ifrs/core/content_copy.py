@@ -23,22 +23,8 @@ from ifrs.ports.outbound.storage import ObjectStoragePort
 
 
 class StorageEnitiesConfig(BaseSettings):
-    """A config for specifying the location of the major storage enities."""
+    """A config for specifying the location of permanent storage"""
 
-    outbox_bucket: str = Field(
-        ...,
-        description=(
-            "The ID of the object storage bucket that is serving as download area."
-        ),
-        example="outbox",
-    )
-    staging_bucket: str = Field(
-        ...,
-        description=(
-            "The ID of the object storage bucket that is serving as staging area."
-        ),
-        example="staging",
-    )
     permanent_bucket: str = Field(
         ...,
         description=(
