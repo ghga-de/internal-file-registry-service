@@ -94,9 +94,6 @@ class EventSubTranslator(EventSubscriberProtocol):
             payload=payload, schema=event_schemas.FileUploadValidationSuccess
         )
 
-        source_object_id = validated_payload.source_object_id
-        source_bucket_id = validated_payload.source_bucket_id
-
         object_id = str(uuid.uuid4())
 
         file = models.FileMetadata(
@@ -114,8 +111,8 @@ class EventSubTranslator(EventSubscriberProtocol):
 
         await self._file_registry.register_file(
             file=file,
-            source_object_id=source_object_id,
-            source_bucket_id=source_bucket_id,
+            source_object_id=validated_payload.source_object_id,
+            source_bucket_id=validated_payload.source_bucket_id,
         )
 
     async def _consume_file_downloads(self, *, payload: JsonObject) -> None:
@@ -128,6 +125,8 @@ class EventSubTranslator(EventSubscriberProtocol):
         await self._file_registry.stage_registered_file(
             file_id=validated_payload.file_id,
             decrypted_sha256=validated_payload.decrypted_sha256,
+            target_object_id=validated_payload.target_object_id,
+            target_bucket_id=validated_payload.target_bucket_id,
         )
 
     async def _consume_file_deletions(self, *, payload: JsonObject) -> None:

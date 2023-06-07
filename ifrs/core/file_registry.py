@@ -98,7 +98,12 @@ class FileRegistry(FileRegistryPort):
         await self._event_publisher.file_internally_registered(file=file)
 
     async def stage_registered_file(
-        self, *, file_id: str, decrypted_sha256: str
+        self,
+        *,
+        file_id: str,
+        decrypted_sha256: str,
+        target_object_id: str,
+        target_bucket_id: str,
     ) -> None:
         """Stage a registered file to the outbox.
 
@@ -108,6 +113,10 @@ class FileRegistry(FileRegistryPort):
             decrypted_sha256:
                 The checksum of the decrypted content. This is used to make sure that
                 this service and the outside client are talking about the same file.
+            target_object_id:
+                The S3 object ID for the outbox bucket.
+            target_bucket_id:
+                The S3 bucket ID for the outbox.
 
         Raises:
             self.FileNotInRegistryError:
@@ -133,7 +142,11 @@ class FileRegistry(FileRegistryPort):
             )
 
         try:
-            await self._content_copy_svc.permanent_to_outbox(file=file)
+            await self._content_copy_svc.permanent_to_outbox(
+                file=file,
+                target_object_id=target_object_id,
+                target_bucket_id=target_bucket_id,
+            )
 
             await self._event_publisher.file_staged_for_download(
                 file_id=file_id, decrypted_sha256=decrypted_sha256

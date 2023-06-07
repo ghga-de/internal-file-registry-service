@@ -114,7 +114,12 @@ class FileRegistryPort(ABC):
 
     @abstractmethod
     async def stage_registered_file(
-        self, *, file_id: str, decrypted_sha256: str
+        self,
+        *,
+        file_id: str,
+        decrypted_sha256: str,
+        target_object_id: str,
+        target_bucket_id: str,
     ) -> None:
         """Stage a registered file to the outbox.
 
@@ -124,6 +129,10 @@ class FileRegistryPort(ABC):
             decrypted_sha256:
                 The checksum of the decrypted content. This is used to make sure that
                 this service and the outside client are talking about the same file.
+            target_object_id:
+                The S3 object ID for the outbox bucket.
+            target_bucket_id:
+                The S3 bucket ID for the outbox.
 
         Raises:
             self.FileNotInRegistryError:

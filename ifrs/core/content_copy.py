@@ -86,23 +86,25 @@ class ContentCopyService(IContentCopyService):
             dest_object_id=file.object_id,
         )
 
-    async def permanent_to_outbox(self, *, file: models.FileMetadata) -> None:
+    async def permanent_to_outbox(
+        self, *, file: models.FileMetadata, target_object_id: str, target_bucket_id: str
+    ) -> None:
         """Copy a file from an staging stage to the permanent storage."""
 
         if await self._object_storage.does_object_exist(
-            bucket_id=self._config.outbox_bucket, object_id=file.file_id
+            bucket_id=target_bucket_id, object_id=target_object_id
         ):
             # the content is already where it should go, there is nothing to do
             return
 
         if not await self._object_storage.does_object_exist(
-            bucket_id=self._config.permanent_bucket, object_id=file.file_id
+            bucket_id=self._config.permanent_bucket, object_id=file.object_id
         ):
             raise self.ContentNotInPermanentStorageError(file_id=file.file_id)
 
         await self._object_storage.copy_object(
             source_bucket_id=self._config.permanent_bucket,
-            source_object_id=file.file_id,
-            dest_bucket_id=self._config.outbox_bucket,
-            dest_object_id=file.file_id,
+            source_object_id=file.object_id,
+            dest_bucket_id=target_bucket_id,
+            dest_object_id=target_object_id,
         )
