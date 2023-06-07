@@ -71,6 +71,10 @@ class FileRegistry(FileRegistryPort):
 
         Args:
             file: metadata on the file to register.
+            source_object_id:
+                The S3 object ID for the staging bucket.
+            source_bucket_id:
+                The S3 bucket ID for staging.
 
         Raises:
             self.FileUpdateError:
