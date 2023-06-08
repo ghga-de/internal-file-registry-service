@@ -106,13 +106,20 @@ class EventPubTranslator(EventPublisherPort):
         )
 
     async def file_staged_for_download(
-        self, *, file_id: str, decrypted_sha256: str
+        self,
+        *,
+        file_id: str,
+        decrypted_sha256: str,
+        target_object_id: str,
+        target_bucket_id: str,
     ) -> None:
         """Communicates the event that a new file has been internally registered."""
 
         payload = event_schemas.FileStagedForDownload(
             file_id=file_id,
             decrypted_sha256=decrypted_sha256,
+            target_object_id=target_object_id,
+            target_bucket_id=target_bucket_id,
         )
         payload_dict = json.loads(payload.json())
 

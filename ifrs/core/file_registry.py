@@ -155,7 +155,10 @@ class FileRegistry(FileRegistryPort):
             )
 
             await self._event_publisher.file_staged_for_download(
-                file_id=file_id, decrypted_sha256=decrypted_sha256
+                file_id=file_id,
+                decrypted_sha256=decrypted_sha256,
+                target_object_id=target_object_id,
+                target_bucket_id=target_bucket_id,
             )
 
         except IContentCopyService.ContentNotInPermanentStorageError as error:
