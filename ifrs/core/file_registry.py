@@ -99,7 +99,9 @@ class FileRegistry(FileRegistryPort):
 
         await self._file_metadata_dao.insert(file)
 
-        await self._event_publisher.file_internally_registered(file=file)
+        await self._event_publisher.file_internally_registered(
+            file=file, source_bucket_id=self._config.permanent_bucket
+        )
 
     async def stage_registered_file(
         self,
