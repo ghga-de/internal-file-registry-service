@@ -46,8 +46,8 @@ async def test_happy_journey(
     file_registry = await joint_fixture.container.file_registry()
 
     event_details = EXAMPLE_FILE.dict()
-    event_details["source_object_id"] = event_details.pop("object_id")
-    event_details["source_bucket_id"] = joint_fixture.config.permanent_bucket
+    event_details["object_id"] = event_details.pop("object_id")
+    event_details["bucket_id"] = joint_fixture.config.permanent_bucket
     async with joint_fixture.kafka.expect_events(
         events=[
             ExpectedEvent(

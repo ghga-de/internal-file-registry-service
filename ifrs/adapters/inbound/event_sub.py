@@ -111,8 +111,8 @@ class EventSubTranslator(EventSubscriberProtocol):
 
         await self._file_registry.register_file(
             file=file,
-            source_object_id=validated_payload.source_object_id,
-            source_bucket_id=validated_payload.source_bucket_id,
+            source_object_id=validated_payload.object_id,
+            source_bucket_id=validated_payload.bucket_id,
         )
 
     async def _consume_file_downloads(self, *, payload: JsonObject) -> None:

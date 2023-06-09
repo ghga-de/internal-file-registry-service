@@ -85,8 +85,8 @@ class EventPubTranslator(EventPublisherPort):
 
         payload = event_schemas.FileInternallyRegistered(
             file_id=file.file_id,
-            source_object_id=file.object_id,
-            source_bucket_id=source_bucket_id,
+            object_id=file.object_id,
+            bucket_id=source_bucket_id,
             decrypted_sha256=file.decrypted_sha256,
             decrypted_size=file.decrypted_size,
             decryption_secret_id=file.decryption_secret_id,
