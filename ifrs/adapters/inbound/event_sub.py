@@ -14,7 +14,6 @@
 # limitations under the License.
 
 """Adapter for receiving events providing metadata on files"""
-import uuid
 
 from ghga_event_schemas import pydantic_ as event_schemas
 from ghga_event_schemas.validation import get_validated_payload
@@ -94,11 +93,8 @@ class EventSubTranslator(EventSubscriberProtocol):
             payload=payload, schema=event_schemas.FileUploadValidationSuccess
         )
 
-        object_id = str(uuid.uuid4())
-
-        file = models.FileMetadata(
+        file = models.FileMetadataBase(
             file_id=validated_payload.file_id,
-            object_id=object_id,
             decrypted_sha256=validated_payload.decrypted_sha256,
             decrypted_size=validated_payload.decrypted_size,
             upload_date=validated_payload.upload_date,

@@ -18,7 +18,7 @@
 from pydantic import BaseModel, Field
 
 
-class FileMetadata(BaseModel):
+class FileMetadataBase(BaseModel):
     """
     A model containing metadata on a registered file.
     """
@@ -26,7 +26,6 @@ class FileMetadata(BaseModel):
     file_id: str = Field(
         ..., description="The public ID of the file as present in the metadata catalog."
     )
-    object_id: str = Field(..., description="The S3-specific ID for a given bucket.")
     upload_date: str = Field(
         ...,
         description="The date and time when this file was ingested into the system.",
@@ -76,3 +75,9 @@ class FileMetadata(BaseModel):
         ...,
         description="The SHA-256 checksum of the entire decrypted file content.",
     )
+
+
+class FileMetadata(FileMetadataBase):
+    """The file metadata plus a generated S3 object ID"""
+
+    object_id: str

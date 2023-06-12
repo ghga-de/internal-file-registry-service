@@ -14,6 +14,7 @@
 # limitations under the License.
 
 """Main business-logic of this service"""
+import uuid
 
 from ifrs.config import Config
 from ifrs.core import models
@@ -57,13 +58,21 @@ class FileRegistry(FileRegistryPort):
         except ResourceNotFoundError:
             return False
 
-        if file == registered_file:
+        # object ID is a UUID generated upon registration, so cannot compare those
+        file_without_object_id = file.dict(exclude={"object_id"})
+        registered_file_without_object_id = registered_file.dict(exclude={"object_id"})
+
+        if file_without_object_id == registered_file_without_object_id:
             return True
 
         raise self.FileUpdateError(file_id=file.file_id)
 
     async def register_file(
-        self, *, file: models.FileMetadata, source_object_id: str, source_bucket_id: str
+        self,
+        *,
+        file: models.FileMetadataBase,
+        source_object_id: str,
+        source_bucket_id: str,
     ) -> None:
         """Registers a file and moves its content from the staging into the permanent
         storage. If the file with that exact metadata has already been registered,
@@ -88,19 +97,22 @@ class FileRegistry(FileRegistryPort):
             # There is nothing to do:
             return
 
+        object_id = str(uuid.uuid4())
+
+        file_with_object_id = models.FileMetadata(**file.dict(), object_id=object_id)
         try:
             await self._content_copy_svc.staging_to_permanent(
-                file=file,
+                file=file_with_object_id,
                 source_object_id=source_object_id,
                 source_bucket_id=source_bucket_id,
             )
         except IContentCopyService.ContentNotInstagingError as error:
             raise self.FileContentNotInstagingError(file_id=file.file_id) from error
 
-        await self._file_metadata_dao.insert(file)
+        await self._file_metadata_dao.insert(file_with_object_id)
 
         await self._event_publisher.file_internally_registered(
-            file=file, source_bucket_id=self._config.permanent_bucket
+            file=file_with_object_id, bucket_id=self._config.permanent_bucket
         )
 
     async def stage_registered_file(
