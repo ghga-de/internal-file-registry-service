@@ -108,8 +108,6 @@ async def test_reregistration_with_updated_metadata(
     # register new file from the staging:
     # (And check if an event informing about the new registration has been published.)
     file_registry = await joint_fixture.container.file_registry()
-    event_details = EXAMPLE_METADATA_BASE.dict()
-    event_details["bucket_id"] = joint_fixture.config.permanent_bucket
 
     async with joint_fixture.kafka.record_events(
         in_topic=joint_fixture.config.file_registered_event_topic,
