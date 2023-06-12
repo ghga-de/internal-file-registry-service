@@ -94,7 +94,11 @@ class FileRegistryPort(ABC):
 
     @abstractmethod
     async def register_file(
-        self, *, file: models.FileMetadata, source_object_id: str, source_bucket_id: str
+        self,
+        *,
+        file: models.FileMetadataBase,
+        source_object_id: str,
+        source_bucket_id: str,
     ) -> None:
         """Registers a file and moves its content from the staging into the permanent
         storage. If the file with that exact metadata has already been registered,

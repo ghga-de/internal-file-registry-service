@@ -44,7 +44,7 @@ class FileRegistry(FileRegistryPort):
         self._object_storage = object_storage
         self._config = config
 
-    async def _is_file_registered(self, *, file: models.FileMetadata) -> bool:
+    async def _is_file_registered(self, *, file: models.FileMetadataBase) -> bool:
         """Checks if the specified file is already registered. There are three possible
         outcomes:
             - Yes, the file has been registered with metadata that is identical to the
