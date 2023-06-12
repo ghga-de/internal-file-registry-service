@@ -25,7 +25,7 @@ class EventPublisherPort(ABC):
 
     @abstractmethod
     async def file_internally_registered(
-        self, *, file: models.FileMetadata, source_bucket_id: str
+        self, *, file: models.FileMetadata, bucket_id: str
     ) -> None:
         """Communicates the event that a new file has been internally registered."""
         ...

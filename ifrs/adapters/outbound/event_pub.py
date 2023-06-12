@@ -79,14 +79,14 @@ class EventPubTranslator(EventPublisherPort):
         self._provider = provider
 
     async def file_internally_registered(
-        self, *, file: models.FileMetadata, source_bucket_id: str
+        self, *, file: models.FileMetadata, bucket_id: str
     ) -> None:
         """Communicates the event that a new file has been internally registered."""
 
         payload = event_schemas.FileInternallyRegistered(
             file_id=file.file_id,
             object_id=file.object_id,
-            bucket_id=source_bucket_id,
+            bucket_id=bucket_id,
             decrypted_sha256=file.decrypted_sha256,
             decrypted_size=file.decrypted_size,
             decryption_secret_id=file.decryption_secret_id,
