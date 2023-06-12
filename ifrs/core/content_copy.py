@@ -23,7 +23,7 @@ from ifrs.ports.outbound.storage import ObjectStoragePort
 
 
 class StorageEnitiesConfig(BaseSettings):
-    """A config for specifying the location of permanent storage"""
+    """A config for specifying the location of major storage entities."""
 
     permanent_bucket: str = Field(
         ...,

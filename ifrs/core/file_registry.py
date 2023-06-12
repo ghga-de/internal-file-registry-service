@@ -97,9 +97,10 @@ class FileRegistry(FileRegistryPort):
             # There is nothing to do:
             return
 
+        # Generate & assign object ID to metadata
         object_id = str(uuid.uuid4())
-
         file_with_object_id = models.FileMetadata(**file.dict(), object_id=object_id)
+
         try:
             await self._content_copy_svc.staging_to_permanent(
                 file=file_with_object_id,

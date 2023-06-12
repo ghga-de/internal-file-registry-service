@@ -113,7 +113,7 @@ class EventPubTranslator(EventPublisherPort):
         target_object_id: str,
         target_bucket_id: str,
     ) -> None:
-        """Communicates the event that a new file has been internally registered."""
+        """Communicates the event that a file has been staged for download."""
 
         payload = event_schemas.FileStagedForDownload(
             file_id=file_id,

@@ -78,6 +78,8 @@ class FileMetadataBase(BaseModel):
 
 
 class FileMetadata(FileMetadataBase):
-    """The file metadata plus a generated S3 object ID"""
+    """The file metadata plus a object storage ID generated upon registration"""
 
-    object_id: str
+    object_id: str = Field(
+        ..., description="A UUID to identify the file in object storage"
+    )
