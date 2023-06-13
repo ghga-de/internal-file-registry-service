@@ -93,13 +93,23 @@ class FileRegistryPort(ABC):
             super().__init__(message)
 
     @abstractmethod
-    async def register_file(self, *, file: models.FileMetadata) -> None:
+    async def register_file(
+        self,
+        *,
+        file_without_object_id: models.FileMetadataBase,
+        source_object_id: str,
+        source_bucket_id: str,
+    ) -> None:
         """Registers a file and moves its content from the staging into the permanent
         storage. If the file with that exact metadata has already been registered,
         nothing is done.
 
         Args:
-            file: metadata on the file to register.
+            file_without_object_id: metadata on the file to register.
+            source_object_id:
+                The S3 object ID for the staging bucket.
+            source_bucket_id:
+                The S3 bucket ID for staging.
 
         Raises:
             self.FileUpdateError:
@@ -112,7 +122,12 @@ class FileRegistryPort(ABC):
 
     @abstractmethod
     async def stage_registered_file(
-        self, *, file_id: str, decrypted_sha256: str
+        self,
+        *,
+        file_id: str,
+        decrypted_sha256: str,
+        target_object_id: str,
+        target_bucket_id: str,
     ) -> None:
         """Stage a registered file to the outbox.
 
@@ -122,6 +137,10 @@ class FileRegistryPort(ABC):
             decrypted_sha256:
                 The checksum of the decrypted content. This is used to make sure that
                 this service and the outside client are talking about the same file.
+            target_object_id:
+                The S3 object ID for the outbox bucket.
+            target_bucket_id:
+                The S3 bucket ID for the outbox.
 
         Raises:
             self.FileNotInRegistryError:

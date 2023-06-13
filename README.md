@@ -41,13 +41,13 @@ We recommend using the provided Docker container.
 
 A pre-build version is available at [docker hub](https://hub.docker.com/repository/docker/ghga/internal-file-registry-service):
 ```bash
-docker pull ghga/internal-file-registry-service:0.3.6
+docker pull ghga/internal-file-registry-service:0.4.0
 ```
 
 Or you can build the container yourself from the [`./Dockerfile`](./Dockerfile):
 ```bash
 # Execute in the repo's root dir:
-docker build -t ghga/internal-file-registry-service:0.3.6 .
+docker build -t ghga/internal-file-registry-service:0.4.0 .
 ```
 
 For production-ready deployment, we recommend using Kubernetes, however,
@@ -55,7 +55,7 @@ for simple use cases, you could execute the service using docker
 on a single server:
 ```bash
 # The entrypoint is preconfigured:
-docker run -p 8080:8080 ghga/internal-file-registry-service:0.3.6 --help
+docker run -p 8080:8080 ghga/internal-file-registry-service:0.4.0 --help
 ```
 
 If you prefer not to use containers, you may install the service from source:
@@ -71,10 +71,6 @@ ifrs --help
 ### Parameters
 
 The service requires the following configuration parameters:
-- **`outbox_bucket`** *(string)*: The ID of the object storage bucket that is serving as download area.
-
-- **`staging_bucket`** *(string)*: The ID of the object storage bucket that is serving as staging area.
-
 - **`permanent_bucket`** *(string)*: The ID of the object storage bucket that is serving as permanent storage.
 
 - **`file_registered_event_topic`** *(string)*: Name of the topic used for events indicating that a new file has been internally registered.

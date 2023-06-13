@@ -38,6 +38,9 @@ from ifrs.container import Container
 from ifrs.main import get_configured_container
 from tests.fixtures.config import get_config
 
+OUTBOX_BUCKET = "outbox"
+STAGING_BUCKET = "staging"
+
 
 def get_free_port() -> int:
     """Finds and returns a free port on localhost."""
@@ -55,6 +58,8 @@ class JointFixture:
     mongodb: MongoDbFixture
     s3: S3Fixture
     kafka: KafkaFixture
+    outbox_bucket: str
+    staging_bucket: str
 
 
 @pytest_asyncio.fixture
@@ -73,8 +78,8 @@ async def joint_fixture(
         # create storage entities:
         await s3_fixture.populate_buckets(
             buckets=[
-                config.outbox_bucket,
-                config.staging_bucket,
+                OUTBOX_BUCKET,
+                STAGING_BUCKET,
                 config.permanent_bucket,
             ]
         )
@@ -85,4 +90,6 @@ async def joint_fixture(
             mongodb=mongodb_fixture,
             s3=s3_fixture,
             kafka=kafka_fixture,
+            outbox_bucket=OUTBOX_BUCKET,
+            staging_bucket=STAGING_BUCKET,
         )

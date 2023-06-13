@@ -14,6 +14,7 @@
 # limitations under the License.
 
 """Main business-logic of this service"""
+import uuid
 
 from ifrs.config import Config
 from ifrs.core import models
@@ -43,7 +44,9 @@ class FileRegistry(FileRegistryPort):
         self._object_storage = object_storage
         self._config = config
 
-    async def _is_file_registered(self, *, file: models.FileMetadata) -> bool:
+    async def _is_file_registered(
+        self, *, file_without_object_id: models.FileMetadataBase
+    ) -> bool:
         """Checks if the specified file is already registered. There are three possible
         outcomes:
             - Yes, the file has been registered with metadata that is identical to the
@@ -53,22 +56,37 @@ class FileRegistry(FileRegistryPort):
         """
 
         try:
-            registered_file = await self._file_metadata_dao.get_by_id(file.file_id)
+            registered_file = await self._file_metadata_dao.get_by_id(
+                file_without_object_id.file_id
+            )
         except ResourceNotFoundError:
             return False
 
-        if file == registered_file:
+        # object ID is a UUID generated upon registration, so cannot compare those
+        registered_file_without_object_id = registered_file.dict(exclude={"object_id"})
+
+        if file_without_object_id == registered_file_without_object_id:
             return True
 
-        raise self.FileUpdateError(file_id=file.file_id)
+        raise self.FileUpdateError(file_id=file_without_object_id.file_id)
 
-    async def register_file(self, *, file: models.FileMetadata) -> None:
+    async def register_file(
+        self,
+        *,
+        file_without_object_id: models.FileMetadataBase,
+        source_object_id: str,
+        source_bucket_id: str,
+    ) -> None:
         """Registers a file and moves its content from the staging into the permanent
         storage. If the file with that exact metadata has already been registered,
         nothing is done.
 
         Args:
-            file: metadata on the file to register.
+            file_without_object_id: metadata on the file to register.
+            source_object_id:
+                The S3 object ID for the staging bucket.
+            source_bucket_id:
+                The S3 bucket ID for staging.
 
         Raises:
             self.FileUpdateError:
@@ -78,21 +96,40 @@ class FileRegistry(FileRegistryPort):
                 When the file content is not present in the storage staging.
         """
 
-        if await self._is_file_registered(file=file):
+        if await self._is_file_registered(
+            file_without_object_id=file_without_object_id
+        ):
             # There is nothing to do:
             return
 
+        # Generate & assign object ID to metadata
+        object_id = str(uuid.uuid4())
+        file = models.FileMetadata(**file_without_object_id.dict(), object_id=object_id)
+
         try:
-            await self._content_copy_svc.staging_to_permanent(file=file)
+            await self._content_copy_svc.staging_to_permanent(
+                file=file,
+                source_object_id=source_object_id,
+                source_bucket_id=source_bucket_id,
+            )
         except IContentCopyService.ContentNotInstagingError as error:
-            raise self.FileContentNotInstagingError(file_id=file.file_id) from error
+            raise self.FileContentNotInstagingError(
+                file_id=file_without_object_id.file_id
+            ) from error
 
         await self._file_metadata_dao.insert(file)
 
-        await self._event_publisher.file_internally_registered(file=file)
+        await self._event_publisher.file_internally_registered(
+            file=file, bucket_id=self._config.permanent_bucket
+        )
 
     async def stage_registered_file(
-        self, *, file_id: str, decrypted_sha256: str
+        self,
+        *,
+        file_id: str,
+        decrypted_sha256: str,
+        target_object_id: str,
+        target_bucket_id: str,
     ) -> None:
         """Stage a registered file to the outbox.
 
@@ -102,6 +139,10 @@ class FileRegistry(FileRegistryPort):
             decrypted_sha256:
                 The checksum of the decrypted content. This is used to make sure that
                 this service and the outside client are talking about the same file.
+            target_object_id:
+                The S3 object ID for the outbox bucket.
+            target_bucket_id:
+                The S3 bucket ID for the outbox.
 
         Raises:
             self.FileNotInRegistryError:
@@ -127,10 +168,17 @@ class FileRegistry(FileRegistryPort):
             )
 
         try:
-            await self._content_copy_svc.permanent_to_outbox(file=file)
+            await self._content_copy_svc.permanent_to_outbox(
+                file=file,
+                target_object_id=target_object_id,
+                target_bucket_id=target_bucket_id,
+            )
 
             await self._event_publisher.file_staged_for_download(
-                file_id=file_id, decrypted_sha256=decrypted_sha256
+                file_id=file_id,
+                decrypted_sha256=decrypted_sha256,
+                target_object_id=target_object_id,
+                target_bucket_id=target_bucket_id,
             )
 
         except IContentCopyService.ContentNotInPermanentStorageError as error:
@@ -146,8 +194,12 @@ class FileRegistry(FileRegistryPort):
 
         # Try to remove file from S3
         try:
+            # Get object ID
+            file = await self._file_metadata_dao.get_by_id(file_id)
+            object_id = file.object_id
+
             await self._object_storage.delete_object(
-                bucket_id=self._config.permanent_bucket, object_id=file_id
+                bucket_id=self._config.permanent_bucket, object_id=object_id
             )
 
         except self._object_storage.ObjectNotFoundError:

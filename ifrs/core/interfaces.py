@@ -46,11 +46,15 @@ class IContentCopyService(ABC):
             super().__init__(message)
 
     @abstractmethod
-    async def staging_to_permanent(self, *, file: models.FileMetadata) -> None:
+    async def staging_to_permanent(
+        self, *, file: models.FileMetadata, source_object_id: str, source_bucket_id: str
+    ) -> None:
         """Copy a file from an staging stage to the permanent storage."""
         ...
 
     @abstractmethod
-    async def permanent_to_outbox(self, *, file: models.FileMetadata) -> None:
+    async def permanent_to_outbox(
+        self, *, file: models.FileMetadata, target_object_id: str, target_bucket_id: str
+    ) -> None:
         """Copy a file from an staging stage to the permanent storage."""
         ...

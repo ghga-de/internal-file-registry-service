@@ -78,11 +78,15 @@ class EventPubTranslator(EventPublisherPort):
         self._config = config
         self._provider = provider
 
-    async def file_internally_registered(self, *, file: models.FileMetadata) -> None:
+    async def file_internally_registered(
+        self, *, file: models.FileMetadata, bucket_id: str
+    ) -> None:
         """Communicates the event that a new file has been internally registered."""
 
         payload = event_schemas.FileInternallyRegistered(
             file_id=file.file_id,
+            object_id=file.object_id,
+            bucket_id=bucket_id,
             decrypted_sha256=file.decrypted_sha256,
             decrypted_size=file.decrypted_size,
             decryption_secret_id=file.decryption_secret_id,
@@ -102,13 +106,20 @@ class EventPubTranslator(EventPublisherPort):
         )
 
     async def file_staged_for_download(
-        self, *, file_id: str, decrypted_sha256: str
+        self,
+        *,
+        file_id: str,
+        decrypted_sha256: str,
+        target_object_id: str,
+        target_bucket_id: str,
     ) -> None:
-        """Communicates the event that a new file has been internally registered."""
+        """Communicates the event that a file has been staged for download."""
 
         payload = event_schemas.FileStagedForDownload(
             file_id=file_id,
             decrypted_sha256=decrypted_sha256,
+            target_object_id=target_object_id,
+            target_bucket_id=target_bucket_id,
         )
         payload_dict = json.loads(payload.json())
 

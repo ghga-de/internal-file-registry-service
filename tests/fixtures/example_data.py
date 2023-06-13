@@ -19,7 +19,7 @@ from datetime import datetime
 
 from ifrs.core import models
 
-EXAMPLE_FILE = models.FileMetadata(
+EXAMPLE_METADATA_BASE = models.FileMetadataBase(
     file_id="examplefile001",
     upload_date=datetime.utcnow().isoformat(),
     decryption_secret_id="some-secret-id",
@@ -38,4 +38,8 @@ EXAMPLE_FILE = models.FileMetadata(
         "62c298fd987a6bac2066e4dbed274879247b3edd816c8351dc22ada6d37b24b0",
         "45cccbdfc4bfe2aa7f17428a087282d71be917ef059cac15a161284340840957",
     ],
+)
+
+EXAMPLE_METADATA = models.FileMetadata(
+    **EXAMPLE_METADATA_BASE.dict(), object_id="objectid001"
 )

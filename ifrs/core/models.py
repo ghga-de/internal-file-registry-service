@@ -18,7 +18,7 @@
 from pydantic import BaseModel, Field
 
 
-class FileMetadata(BaseModel):
+class FileMetadataBase(BaseModel):
     """
     A model containing metadata on a registered file.
     """
@@ -74,4 +74,12 @@ class FileMetadata(BaseModel):
     decrypted_sha256: str = Field(
         ...,
         description="The SHA-256 checksum of the entire decrypted file content.",
+    )
+
+
+class FileMetadata(FileMetadataBase):
+    """The file metadata plus a object storage ID generated upon registration"""
+
+    object_id: str = Field(
+        ..., description="A UUID to identify the file in object storage"
     )
