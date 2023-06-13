@@ -44,7 +44,9 @@ class FileRegistry(FileRegistryPort):
         self._object_storage = object_storage
         self._config = config
 
-    async def _is_file_registered(self, *, file: models.FileMetadataBase) -> bool:
+    async def _is_file_registered(
+        self, *, file_without_object_id: models.FileMetadataBase
+    ) -> bool:
         """Checks if the specified file is already registered. There are three possible
         outcomes:
             - Yes, the file has been registered with metadata that is identical to the
@@ -54,22 +56,24 @@ class FileRegistry(FileRegistryPort):
         """
 
         try:
-            registered_file = await self._file_metadata_dao.get_by_id(file.file_id)
+            registered_file = await self._file_metadata_dao.get_by_id(
+                file_without_object_id.file_id
+            )
         except ResourceNotFoundError:
             return False
 
         # object ID is a UUID generated upon registration, so cannot compare those
         registered_file_without_object_id = registered_file.dict(exclude={"object_id"})
 
-        if file == registered_file_without_object_id:
+        if file_without_object_id == registered_file_without_object_id:
             return True
 
-        raise self.FileUpdateError(file_id=file.file_id)
+        raise self.FileUpdateError(file_id=file_without_object_id.file_id)
 
     async def register_file(
         self,
         *,
-        file: models.FileMetadataBase,
+        file_without_object_id: models.FileMetadataBase,
         source_object_id: str,
         source_bucket_id: str,
     ) -> None:
@@ -78,7 +82,7 @@ class FileRegistry(FileRegistryPort):
         nothing is done.
 
         Args:
-            file: metadata on the file to register.
+            file_without_object_id: metadata on the file to register.
             source_object_id:
                 The S3 object ID for the staging bucket.
             source_bucket_id:
@@ -92,27 +96,31 @@ class FileRegistry(FileRegistryPort):
                 When the file content is not present in the storage staging.
         """
 
-        if await self._is_file_registered(file=file):
+        if await self._is_file_registered(
+            file_without_object_id=file_without_object_id
+        ):
             # There is nothing to do:
             return
 
         # Generate & assign object ID to metadata
         object_id = str(uuid.uuid4())
-        file_with_object_id = models.FileMetadata(**file.dict(), object_id=object_id)
+        file = models.FileMetadata(**file_without_object_id.dict(), object_id=object_id)
 
         try:
             await self._content_copy_svc.staging_to_permanent(
-                file=file_with_object_id,
+                file=file,
                 source_object_id=source_object_id,
                 source_bucket_id=source_bucket_id,
             )
         except IContentCopyService.ContentNotInstagingError as error:
-            raise self.FileContentNotInstagingError(file_id=file.file_id) from error
+            raise self.FileContentNotInstagingError(
+                file_id=file_without_object_id.file_id
+            ) from error
 
-        await self._file_metadata_dao.insert(file_with_object_id)
+        await self._file_metadata_dao.insert(file)
 
         await self._event_publisher.file_internally_registered(
-            file=file_with_object_id, bucket_id=self._config.permanent_bucket
+            file=file, bucket_id=self._config.permanent_bucket
         )
 
     async def stage_registered_file(

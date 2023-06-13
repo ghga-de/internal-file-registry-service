@@ -96,7 +96,7 @@ class FileRegistryPort(ABC):
     async def register_file(
         self,
         *,
-        file: models.FileMetadataBase,
+        file_without_object_id: models.FileMetadataBase,
         source_object_id: str,
         source_bucket_id: str,
     ) -> None:
@@ -105,7 +105,7 @@ class FileRegistryPort(ABC):
         nothing is done.
 
         Args:
-            file: metadata on the file to register.
+            file_without_object_id: metadata on the file to register.
             source_object_id:
                 The S3 object ID for the staging bucket.
             source_bucket_id:

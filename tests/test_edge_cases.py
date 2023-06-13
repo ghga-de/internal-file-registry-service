@@ -34,7 +34,7 @@ async def test_register_with_empty_staging(
     file_registry = await joint_fixture.container.file_registry()
     with pytest.raises(FileRegistryPort.FileContentNotInstagingError):
         await file_registry.register_file(
-            file=EXAMPLE_METADATA_BASE,
+            file_without_object_id=EXAMPLE_METADATA_BASE,
             source_object_id="missing",
             source_bucket_id=joint_fixture.staging_bucket,
         )
@@ -65,7 +65,7 @@ async def test_reregistration(
         in_topic=joint_fixture.config.file_registered_event_topic
     ) as recorder:
         await file_registry.register_file(
-            file=EXAMPLE_METADATA_BASE,
+            file_without_object_id=EXAMPLE_METADATA_BASE,
             source_object_id=EXAMPLE_METADATA.object_id,
             source_bucket_id=joint_fixture.staging_bucket,
         )
@@ -82,7 +82,7 @@ async def test_reregistration(
         in_topic=joint_fixture.config.file_registered_event_topic,
     ):
         await file_registry.register_file(
-            file=EXAMPLE_METADATA_BASE,
+            file_without_object_id=EXAMPLE_METADATA_BASE,
             source_object_id=EXAMPLE_METADATA.object_id,
             source_bucket_id=joint_fixture.staging_bucket,
         )
@@ -113,7 +113,7 @@ async def test_reregistration_with_updated_metadata(
         in_topic=joint_fixture.config.file_registered_event_topic,
     ) as recorder:
         await file_registry.register_file(
-            file=EXAMPLE_METADATA_BASE,
+            file_without_object_id=EXAMPLE_METADATA_BASE,
             source_object_id=EXAMPLE_METADATA.object_id,
             source_bucket_id=joint_fixture.staging_bucket,
         )
@@ -132,7 +132,7 @@ async def test_reregistration_with_updated_metadata(
     ):
         with pytest.raises(FileRegistryPort.FileUpdateError):
             await file_registry.register_file(
-                file=file_update,
+                file_without_object_id=file_update,
                 source_object_id=EXAMPLE_METADATA.object_id,
                 source_bucket_id=joint_fixture.staging_bucket,
             )

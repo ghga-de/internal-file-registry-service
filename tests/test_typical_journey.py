@@ -49,7 +49,7 @@ async def test_happy_journey(
         in_topic=joint_fixture.config.file_registered_event_topic,
     ) as recorder:
         await file_registry.register_file(
-            file=EXAMPLE_METADATA_BASE,
+            file_without_object_id=EXAMPLE_METADATA_BASE,
             source_object_id=EXAMPLE_METADATA.object_id,
             source_bucket_id=joint_fixture.staging_bucket,
         )
