@@ -158,13 +158,13 @@ async def test_stage_checksum_missmatch(
     joint_fixture: JointFixture,  # noqa: F811, F405
     file_fixture: FileObject,  # noqa: F811
 ):
-    """Check that requesting to stage a registered file by specifying the wrong checksum
-    fails with the expected exception."""
+    """Check that requesting to stage a registered file to the outbox by specifying the
+    wrong checksum fails with the expected exception."""
 
     # place the content for an example file in the permanent storage:
     file_object = file_fixture.copy(
         update={
-            "bucket_id": joint_fixture.staging_bucket,
+            "bucket_id": joint_fixture.config.permanent_bucket,
             "object_id": EXAMPLE_METADATA.object_id,
         }
     )
@@ -174,7 +174,7 @@ async def test_stage_checksum_missmatch(
     file_metadata_dao = await joint_fixture.container.file_metadata_dao()
     await file_metadata_dao.insert(EXAMPLE_METADATA)
 
-    # request a stage for the registered file by specifying a wrong checksum:
+    # request a stage for the registered file to the outbox by specifying a wrong checksum:
     file_registry = await joint_fixture.container.file_registry()
     with pytest.raises(FileRegistryPort.ChecksumMissmatchError):
         await file_registry.stage_registered_file(
@@ -183,7 +183,7 @@ async def test_stage_checksum_missmatch(
                 "e6da6d6d05cc057964877aad8a3e9ad712c8abeae279dfa2f89b07eba7ef8abe"
             ),
             target_object_id=EXAMPLE_METADATA.object_id,
-            target_bucket_id=joint_fixture.staging_bucket,
+            target_bucket_id=joint_fixture.outbox_bucket,
         )
 
 
@@ -207,5 +207,5 @@ async def test_storage_db_inconsistency(
             file_id=EXAMPLE_METADATA_BASE.file_id,
             decrypted_sha256=EXAMPLE_METADATA_BASE.decrypted_sha256,
             target_object_id=EXAMPLE_METADATA.object_id,
-            target_bucket_id=joint_fixture.staging_bucket,
+            target_bucket_id=joint_fixture.outbox_bucket,
         )
