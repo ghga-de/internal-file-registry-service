@@ -59,10 +59,9 @@ class FileRegistry(FileRegistryPort):
             return False
 
         # object ID is a UUID generated upon registration, so cannot compare those
-        file_without_object_id = file.dict(exclude={"object_id"})
         registered_file_without_object_id = registered_file.dict(exclude={"object_id"})
 
-        if file_without_object_id == registered_file_without_object_id:
+        if file == registered_file_without_object_id:
             return True
 
         raise self.FileUpdateError(file_id=file.file_id)
