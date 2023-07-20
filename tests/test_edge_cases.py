@@ -17,17 +17,24 @@
 
 
 import pytest
-from hexkit.providers.s3.testutils import file_fixture  # noqa: F401
-from hexkit.providers.s3.testutils import FileObject
+from hexkit.providers.s3.testutils import FileObject, file_fixture  # noqa: F401
 
 from ifrs.ports.inbound.file_registry import FileRegistryPort
 from tests.fixtures.example_data import EXAMPLE_METADATA, EXAMPLE_METADATA_BASE
-from tests.fixtures.joint import *  # noqa: F403
+from tests.fixtures.module_scope_fixtures import (  # noqa: F401
+    JointFixture,
+    event_loop,
+    joint_fixture,
+    kafka_fixture,
+    mongodb_fixture,
+    reset_state,
+    s3_fixture,
+)
 
 
 @pytest.mark.asyncio
 async def test_register_with_empty_staging(
-    joint_fixture: JointFixture,  # noqa: F811, F405
+    joint_fixture: JointFixture, reset_state  # noqa: F811
 ):
     """Test registration of a file when the file content is missing from the staging."""
 
@@ -42,8 +49,9 @@ async def test_register_with_empty_staging(
 
 @pytest.mark.asyncio
 async def test_reregistration(
-    joint_fixture: JointFixture,  # noqa: F811, F405
+    joint_fixture: JointFixture,  # noqa: F811
     file_fixture: FileObject,  # noqa: F811
+    reset_state,  # noqa: F811
 ):
     """Test the re-registration of a file with identical metadata (should not result in
     an exception)."""
@@ -90,8 +98,9 @@ async def test_reregistration(
 
 @pytest.mark.asyncio
 async def test_reregistration_with_updated_metadata(
-    joint_fixture: JointFixture,  # noqa: F811, F405
+    joint_fixture: JointFixture,  # noqa: F811
     file_fixture: FileObject,  # noqa: F811
+    reset_state,  # noqa: F811
 ):
     """Check that a re-registration of a file with updated metadata fails with the
     expected exception."""
@@ -139,7 +148,9 @@ async def test_reregistration_with_updated_metadata(
 
 
 @pytest.mark.asyncio
-async def test_stage_non_existing_file(joint_fixture: JointFixture):  # noqa: F811, F405
+async def test_stage_non_existing_file(
+    joint_fixture: JointFixture, reset_state  # noqa: F811
+):
     """Check that requesting to stage a non-registered file fails with the expected
     exception."""
 
@@ -155,8 +166,9 @@ async def test_stage_non_existing_file(joint_fixture: JointFixture):  # noqa: F8
 
 @pytest.mark.asyncio
 async def test_stage_checksum_missmatch(
-    joint_fixture: JointFixture,  # noqa: F811, F405
+    joint_fixture: JointFixture,  # noqa: F811
     file_fixture: FileObject,  # noqa: F811
+    reset_state,  # noqa: F811
 ):
     """Check that requesting to stage a registered file to the outbox by specifying the
     wrong checksum fails with the expected exception."""
@@ -189,7 +201,8 @@ async def test_stage_checksum_missmatch(
 
 @pytest.mark.asyncio
 async def test_storage_db_inconsistency(
-    joint_fixture: JointFixture,  # noqa: F811, F405
+    joint_fixture: JointFixture,  # noqa: F811
+    reset_state,  # noqa: F811
 ):
     """Check that an inconsistency between the database and the storage, whereby the
     database contains a file metadata registration but the storage is missing the
