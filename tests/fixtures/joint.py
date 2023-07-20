@@ -21,17 +21,19 @@ __all__ = [
     "mongodb_fixture",
     "s3_fixture",
     "kafka_fixture",
+    "get_joint_fixture",
 ]
 
 import socket
+from asyncio import sleep
 from dataclasses import dataclass
 from typing import AsyncGenerator
 
 import pytest_asyncio
-from hexkit.providers.akafka.testutils import KafkaFixture, kafka_fixture
-from hexkit.providers.mongodb.testutils import MongoDbFixture  # F401
-from hexkit.providers.mongodb.testutils import mongodb_fixture
-from hexkit.providers.s3.testutils import S3Fixture, s3_fixture
+from hexkit.providers.akafka.testutils import KafkaFixture, get_kafka_fixture
+from hexkit.providers.mongodb.testutils import MongoDbFixture, get_mongodb_fixture
+from hexkit.providers.s3.testutils import S3Fixture, get_s3_fixture
+from pytest_asyncio.plugin import _ScopeName
 
 from ifrs.config import Config
 from ifrs.container import Container
@@ -61,9 +63,14 @@ class JointFixture:
     outbox_bucket: str
     staging_bucket: str
 
+    async def reset_state(self):
+        """Completely reset fixture states"""
+        await self.s3.empty_buckets()
+        self.mongodb.empty_collections()
+        self.kafka.delete_topics()
 
-@pytest_asyncio.fixture
-async def joint_fixture(
+
+async def joint_fixture_function(
     mongodb_fixture: MongoDbFixture, s3_fixture: S3Fixture, kafka_fixture: KafkaFixture
 ) -> AsyncGenerator[JointFixture, None]:
     """A fixture that embeds all other fixtures for API-level integration testing"""
@@ -93,3 +100,17 @@ async def joint_fixture(
             outbox_bucket=OUTBOX_BUCKET,
             staging_bucket=STAGING_BUCKET,
         )
+
+        # prevent teardown happening before reset_state has finished to prevent hanging
+        await sleep(2)
+
+
+def get_joint_fixture(scope: _ScopeName = "function"):
+    """Produce a joint fixture with desired scope"""
+    return pytest_asyncio.fixture(joint_fixture_function, scope=scope)
+
+
+joint_fixture = get_joint_fixture()
+mongodb_fixture = get_mongodb_fixture()
+kafka_fixture = get_kafka_fixture()
+s3_fixture = get_s3_fixture()
