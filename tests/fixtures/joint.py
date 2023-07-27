@@ -16,11 +16,7 @@
 """Join the functionality of all fixtures for API-level integration testing."""
 
 __all__ = [
-    "joint_fixture",
     "JointFixture",
-    "mongodb_fixture",
-    "s3_fixture",
-    "kafka_fixture",
     "get_joint_fixture",
 ]
 
@@ -30,9 +26,9 @@ from dataclasses import dataclass
 from typing import AsyncGenerator
 
 import pytest_asyncio
-from hexkit.providers.akafka.testutils import KafkaFixture, get_kafka_fixture
-from hexkit.providers.mongodb.testutils import MongoDbFixture, get_mongodb_fixture
-from hexkit.providers.s3.testutils import S3Fixture, get_s3_fixture
+from hexkit.providers.akafka.testutils import KafkaFixture
+from hexkit.providers.mongodb.testutils import MongoDbFixture
+from hexkit.providers.s3.testutils import S3Fixture
 from pytest_asyncio.plugin import _ScopeName
 
 from ifrs.config import Config
@@ -108,9 +104,3 @@ async def joint_fixture_function(
 def get_joint_fixture(scope: _ScopeName = "function"):
     """Produce a joint fixture with desired scope"""
     return pytest_asyncio.fixture(joint_fixture_function, scope=scope)
-
-
-joint_fixture = get_joint_fixture()
-mongodb_fixture = get_mongodb_fixture()
-kafka_fixture = get_kafka_fixture()
-s3_fixture = get_s3_fixture()
