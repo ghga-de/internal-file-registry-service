@@ -33,9 +33,7 @@ from tests.fixtures.module_scope_fixtures import (  # noqa: F401
 
 
 @pytest.mark.asyncio
-async def test_register_with_empty_staging(
-    joint_fixture: JointFixture, reset_state  # noqa: F811
-):
+async def test_register_with_empty_staging(joint_fixture: JointFixture):  # noqa: F811
     """Test registration of a file when the file content is missing from the staging."""
 
     file_registry = await joint_fixture.container.file_registry()
@@ -51,7 +49,6 @@ async def test_register_with_empty_staging(
 async def test_reregistration(
     joint_fixture: JointFixture,  # noqa: F811
     file_fixture: FileObject,  # noqa: F811
-    reset_state,  # noqa: F811
 ):
     """Test the re-registration of a file with identical metadata (should not result in
     an exception)."""
@@ -100,7 +97,6 @@ async def test_reregistration(
 async def test_reregistration_with_updated_metadata(
     joint_fixture: JointFixture,  # noqa: F811
     file_fixture: FileObject,  # noqa: F811
-    reset_state,  # noqa: F811
 ):
     """Check that a re-registration of a file with updated metadata fails with the
     expected exception."""
@@ -148,9 +144,7 @@ async def test_reregistration_with_updated_metadata(
 
 
 @pytest.mark.asyncio
-async def test_stage_non_existing_file(
-    joint_fixture: JointFixture, reset_state  # noqa: F811
-):
+async def test_stage_non_existing_file(joint_fixture: JointFixture):  # noqa: F811
     """Check that requesting to stage a non-registered file fails with the expected
     exception."""
 
@@ -168,7 +162,6 @@ async def test_stage_non_existing_file(
 async def test_stage_checksum_missmatch(
     joint_fixture: JointFixture,  # noqa: F811
     file_fixture: FileObject,  # noqa: F811
-    reset_state,  # noqa: F811
 ):
     """Check that requesting to stage a registered file to the outbox by specifying the
     wrong checksum fails with the expected exception."""
@@ -202,7 +195,6 @@ async def test_stage_checksum_missmatch(
 @pytest.mark.asyncio
 async def test_storage_db_inconsistency(
     joint_fixture: JointFixture,  # noqa: F811
-    reset_state,  # noqa: F811
 ):
     """Check that an inconsistency between the database and the storage, whereby the
     database contains a file metadata registration but the storage is missing the
