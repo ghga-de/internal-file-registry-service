@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+#
 
-"""This service acts as a registry for the internal location and representation of files."""
-
-__version__ = "0.4.1"
+"""Scripts and utils used during development or in CI pipelines."""

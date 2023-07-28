@@ -15,13 +15,13 @@
 
 """Example data used for testing."""
 
-from datetime import datetime
+from ghga_service_commons.utils.utc_dates import now_as_utc
 
 from ifrs.core import models
 
 EXAMPLE_METADATA_BASE = models.FileMetadataBase(
     file_id="examplefile001",
-    upload_date=datetime.utcnow().isoformat(),
+    upload_date=now_as_utc().isoformat(),
     decryption_secret_id="some-secret-id",
     decrypted_size=64 * 1024**2,
     encrypted_part_size=16 * 1024**2,

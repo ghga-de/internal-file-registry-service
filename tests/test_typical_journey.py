@@ -22,7 +22,15 @@ from hexkit.providers.s3.testutils import file_fixture  # noqa: F401
 from hexkit.providers.s3.testutils import FileObject
 
 from tests.fixtures.example_data import EXAMPLE_METADATA, EXAMPLE_METADATA_BASE
-from tests.fixtures.joint import *  # noqa: F403
+from tests.fixtures.module_scope_fixtures import (  # noqa: F401
+    JointFixture,
+    event_loop,
+    joint_fixture,
+    kafka_fixture,
+    mongodb_fixture,
+    reset_state,
+    s3_fixture,
+)
 
 
 @pytest.mark.asyncio
