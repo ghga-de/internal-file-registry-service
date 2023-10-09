@@ -29,7 +29,7 @@ def get_configured_container(*, config: Config) -> Container:
 
 async def consume_events(run_forever: bool = True):
     """Run an event consumer listening to the specified topic."""
-    config = Config()
+    config = Config()  # type: ignore
 
     async with get_configured_container(config=config) as container:
         event_subscriber = await container.event_subscriber()
