@@ -22,8 +22,8 @@ __all__ = [
 
 import socket
 from asyncio import sleep
+from collections.abc import AsyncGenerator
 from dataclasses import dataclass
-from typing import AsyncGenerator
 
 import pytest_asyncio
 from hexkit.providers.akafka.testutils import KafkaFixture
@@ -70,7 +70,6 @@ async def joint_fixture_function(
     mongodb_fixture: MongoDbFixture, s3_fixture: S3Fixture, kafka_fixture: KafkaFixture
 ) -> AsyncGenerator[JointFixture, None]:
     """A fixture that embeds all other fixtures for API-level integration testing"""
-
     # merge configs from different sources with the default one:
     config = get_config(
         sources=[mongodb_fixture.config, s3_fixture.config, kafka_fixture.config]

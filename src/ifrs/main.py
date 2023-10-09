@@ -13,33 +13,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Test config"""
-
-from pathlib import Path
-from typing import Optional
-
-from pydantic import BaseSettings
+"""In this module object construction and dependency injection is carried out."""
 
 from ifrs.config import Config
-from tests.fixtures.utils import BASE_DIR
-
-TEST_CONFIG_YAML = BASE_DIR / "test_config.yaml"
+from ifrs.container import Container
 
 
-def get_config(
-    sources: Optional[list[BaseSettings]] = None,
-    default_config_yaml: Path = TEST_CONFIG_YAML,
-) -> Config:
-    """Merges parameters from the default TEST_CONFIG_YAML with params inferred
-    from testcontainers.
-    """
-    sources_dict: dict[str, object] = {}
+def get_configured_container(*, config: Config) -> Container:
+    """Create and configure a DI container."""
+    container = Container()
+    container.config.load_config(config)
 
-    if sources is not None:
-        for source in sources:
-            sources_dict.update(**source.dict())
-
-    return Config(config_yaml=default_config_yaml, **sources_dict)  # type: ignore
+    return container
 
 
-DEFAULT_CONFIG = get_config()
+async def consume_events(run_forever: bool = True):
+    """Run an event consumer listening to the specified topic."""
+    config = Config()  # type: ignore
+
+    async with get_configured_container(config=config) as container:
+        event_subscriber = await container.event_subscriber()
+        await event_subscriber.run(forever=run_forever)

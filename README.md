@@ -97,7 +97,7 @@ The service requires the following configuration parameters:
 
 - **`files_to_delete_type`** *(string)*: The type used for events informing about a file to be deleted.
 
-- **`service_name`** *(string)*: Default: `internal_file_registry`.
+- **`service_name`** *(string)*: Default: `"internal_file_registry"`.
 
 - **`service_instance_id`** *(string)*: A string that uniquely identifies this instance across all instances of this service. A globally unique Kafka client ID will be created by concatenating the service_name and the service_instance_id.
 
@@ -105,7 +105,7 @@ The service requires the following configuration parameters:
 
   - **Items** *(string)*
 
-- **`db_connection_str`** *(string)*: MongoDB connection string. Might include credentials. For more information see: https://naiveskill.com/mongodb-connection-string/.
+- **`db_connection_str`** *(string, format: password)*: MongoDB connection string. Might include credentials. For more information see: https://naiveskill.com/mongodb-connection-string/.
 
 - **`db_name`** *(string)*: Name of the database located on the MongoDB server.
 
@@ -113,11 +113,11 @@ The service requires the following configuration parameters:
 
 - **`s3_access_key_id`** *(string)*: Part of credentials for login into the S3 service. See: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/credentials.html.
 
-- **`s3_secret_access_key`** *(string)*: Part of credentials for login into the S3 service. See: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/credentials.html.
+- **`s3_secret_access_key`** *(string, format: password)*: Part of credentials for login into the S3 service. See: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/credentials.html.
 
-- **`s3_session_token`** *(string)*: Part of credentials for login into the S3 service. See: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/credentials.html.
+- **`s3_session_token`** *(string, format: password)*: Part of credentials for login into the S3 service. See: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/credentials.html.
 
-- **`aws_config_ini`** *(string)*: Path to a config file for specifying more advanced S3 parameters. This should follow the format described here: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html#using-a-configuration-file.
+- **`aws_config_ini`** *(string, format: path)*: Path to a config file for specifying more advanced S3 parameters. This should follow the format described here: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html#using-a-configuration-file.
 
 
 ### Usage:
@@ -177,7 +177,7 @@ Moreover, inside the devcontainer, a convenience commands `dev_install` is avail
 It installs the service with all development dependencies, installs pre-commit.
 
 The installation is performed automatically when you build the devcontainer. However,
-if you update dependencies in the [`./setup.cfg`](./setup.cfg) or the
+if you update dependencies in the [`./pyproject.toml`](./pyproject.toml) or the
 [`./requirements-dev.txt`](./requirements-dev.txt), please run it again.
 
 ## License

@@ -15,6 +15,7 @@
 
 """Main business-logic of this service"""
 import uuid
+from contextlib import suppress
 
 from ifrs.config import Config
 from ifrs.core import models
@@ -28,7 +29,7 @@ from ifrs.ports.outbound.storage import ObjectStoragePort
 class FileRegistry(FileRegistryPort):
     """A service that manages a registry files stored on a permanent object storage."""
 
-    def __init__(
+    def __init__(  # noqa: PLR0913 (too many args)
         self,
         *,
         content_copy_svc: IContentCopyService,
@@ -54,7 +55,6 @@ class FileRegistry(FileRegistryPort):
             - Yes, however, the metadata differs => raises self.FileUpdateError
             - No, the file has not been registered, yet => returns `False`
         """
-
         try:
             registered_file = await self._file_metadata_dao.get_by_id(
                 file_without_object_id.file_id
@@ -95,7 +95,6 @@ class FileRegistry(FileRegistryPort):
             self.FileContentNotInstagingError:
                 When the file content is not present in the storage staging.
         """
-
         if await self._is_file_registered(
             file_without_object_id=file_without_object_id
         ):
@@ -154,7 +153,6 @@ class FileRegistry(FileRegistryPort):
                 the permanent storage. This is an internal service error, which should
                 not happen, and not the fault of the client.
         """
-
         try:
             file = await self._file_metadata_dao.get_by_id(file_id)
         except ResourceNotFoundError as error:
@@ -191,26 +189,20 @@ class FileRegistry(FileRegistryPort):
         Args:
             file_id: id for the file to delete.
         """
-
         # Try to remove file from S3
-        try:
+        with suppress(self._object_storage.ObjectNotFoundError):
             # Get object ID
             file = await self._file_metadata_dao.get_by_id(file_id)
             object_id = file.object_id
 
+            # If file does not exist anyways, we are done.
             await self._object_storage.delete_object(
                 bucket_id=self._config.permanent_bucket, object_id=object_id
             )
 
-        except self._object_storage.ObjectNotFoundError:
-            # If file does not exist anyways, we are done.
-            pass
-
         # Try to remove file from database
-        try:
-            await self._file_metadata_dao.delete(id_=file_id)
-        except ResourceNotFoundError:
+        with suppress(ResourceNotFoundError):
             # If file does not exist anyways, we are done.
-            pass
+            await self._file_metadata_dao.delete(id_=file_id)
 
         await self._event_publisher.file_deleted(file_id=file_id)

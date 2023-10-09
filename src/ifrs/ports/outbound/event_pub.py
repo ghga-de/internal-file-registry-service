@@ -37,7 +37,7 @@ class EventPublisherPort(ABC):
         file_id: str,
         decrypted_sha256: str,
         target_object_id: str,
-        target_bucket_id: str
+        target_bucket_id: str,
     ) -> None:
         """Communicates the event that a file has been staged for download"""
         ...

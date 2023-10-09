@@ -40,4 +40,4 @@ class Config(
     service_name: str = "internal_file_registry"
 
 
-CONFIG = Config()
+CONFIG = Config()  # type: ignore

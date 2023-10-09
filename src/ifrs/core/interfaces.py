@@ -22,7 +22,8 @@ from ifrs.core import models
 
 class IContentCopyService(ABC):
     """Interface for a service that copies the content of a file between storage
-    entities."""
+    entities.
+    """
 
     class ContentNotInstagingError(RuntimeError):
         """Thrown when the content of a file is unexpectedly not in the staging storage."""
@@ -36,7 +37,8 @@ class IContentCopyService(ABC):
 
     class ContentNotInPermanentStorageError(RuntimeError):
         """Thrown when the content of a file is unexpectedly not in the permanent
-        storage."""
+        storage.
+        """
 
         def __init__(self, file_id: str):
             message = (

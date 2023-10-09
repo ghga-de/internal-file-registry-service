@@ -18,8 +18,10 @@
 import pytest
 import requests
 from hexkit.providers.akafka.testutils import ExpectedEvent
-from hexkit.providers.s3.testutils import file_fixture  # noqa: F401
-from hexkit.providers.s3.testutils import FileObject
+from hexkit.providers.s3.testutils import (
+    FileObject,
+    file_fixture,  # noqa: F401
+)
 
 from tests.fixtures.example_data import EXAMPLE_METADATA, EXAMPLE_METADATA_BASE
 from tests.fixtures.module_scope_fixtures import (  # noqa: F401
@@ -35,11 +37,10 @@ from tests.fixtures.module_scope_fixtures import (  # noqa: F401
 
 @pytest.mark.asyncio
 async def test_happy_journey(
-    joint_fixture: JointFixture,  # noqa: F811, F405
+    joint_fixture: JointFixture,  # noqa: F811
     file_fixture: FileObject,  # noqa: F811
 ):
     """Simulates a typical, successful journey for upload, download, and deletion"""
-
     # place example content in the staging:
     file_object = file_fixture.copy(
         update={
