@@ -35,7 +35,6 @@ from tests.fixtures.module_scope_fixtures import (  # noqa: F401
 @pytest.mark.asyncio
 async def test_register_with_empty_staging(joint_fixture: JointFixture):  # noqa: F811
     """Test registration of a file when the file content is missing from the staging."""
-
     file_registry = await joint_fixture.container.file_registry()
     with pytest.raises(FileRegistryPort.FileContentNotInstagingError):
         await file_registry.register_file(
@@ -51,8 +50,8 @@ async def test_reregistration(
     file_fixture: FileObject,  # noqa: F811
 ):
     """Test the re-registration of a file with identical metadata (should not result in
-    an exception)."""
-
+    an exception).
+    """
     # place example content in the staging:
     file_object = file_fixture.copy(
         update={
@@ -99,8 +98,8 @@ async def test_reregistration_with_updated_metadata(
     file_fixture: FileObject,  # noqa: F811
 ):
     """Check that a re-registration of a file with updated metadata fails with the
-    expected exception."""
-
+    expected exception.
+    """
     # place example content in the staging:
     file_object = file_fixture.copy(
         update={
@@ -146,8 +145,8 @@ async def test_reregistration_with_updated_metadata(
 @pytest.mark.asyncio
 async def test_stage_non_existing_file(joint_fixture: JointFixture):  # noqa: F811
     """Check that requesting to stage a non-registered file fails with the expected
-    exception."""
-
+    exception.
+    """
     file_registry = await joint_fixture.container.file_registry()
     with pytest.raises(FileRegistryPort.FileNotInRegistryError):
         await file_registry.stage_registered_file(
@@ -164,8 +163,8 @@ async def test_stage_checksum_missmatch(
     file_fixture: FileObject,  # noqa: F811
 ):
     """Check that requesting to stage a registered file to the outbox by specifying the
-    wrong checksum fails with the expected exception."""
-
+    wrong checksum fails with the expected exception.
+    """
     # place the content for an example file in the permanent storage:
     file_object = file_fixture.copy(
         update={
@@ -198,8 +197,8 @@ async def test_storage_db_inconsistency(
 ):
     """Check that an inconsistency between the database and the storage, whereby the
     database contains a file metadata registration but the storage is missing the
-    corresponding content, results in the expected exception."""
-
+    corresponding content, results in the expected exception.
+    """
     # populate the database with metadata on an example file even though the storage is
     # empty:
     file_metadata_dao = await joint_fixture.container.file_metadata_dao()
