@@ -29,8 +29,8 @@ class FileMetadataDaoConstructor:
     @staticmethod
     async def construct(*, dao_factory: DaoFactoryProtocol) -> FileMetadataDaoPort:
         """Setup the DAOs using the specified provider of the
-        DaoFactoryProtocol."""
-
+        DaoFactoryProtocol.
+        """
         return await dao_factory.get_dao(
             name="file_metadata",
             dto_model=models.FileMetadata,

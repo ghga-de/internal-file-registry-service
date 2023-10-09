@@ -23,7 +23,8 @@ from ifrs.core.interfaces import IContentCopyService
 
 class FileRegistryPort(ABC):
     """The interface of a service that manages a registry files stored on a permanent
-    object storage."""
+    object storage.
+    """
 
     class InvalidRequestError(RuntimeError, ABC):
         """A base for exceptions that are thrown when the request to this port was
@@ -62,7 +63,8 @@ class FileRegistryPort(ABC):
 
     class ChecksumMissmatchError(InvalidRequestError):
         """Thrown when the checksum of the decrypted content of a file did not match the
-        expectations."""
+        expectations.
+        """
 
         def __init__(
             self, file_id: str, provided_checksum: str, expected_checksum: str
@@ -83,7 +85,8 @@ class FileRegistryPort(ABC):
 
     class FileInRegistryButNotInStorageError(FatalError):
         """Thrown if a file is registered (metadata is present in the database) but its
-        content is not present in the permanent storage."""
+        content is not present in the permanent storage.
+        """
 
         def __init__(self, file_id: str):
             message = (

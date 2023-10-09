@@ -13,6 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""This service acts as a registry for the internal location and representation of files."""
+"""Interfaces for object storage adapters and the exception they may throw."""
 
-__version__ = "0.4.1"
+# pylint: disable=unused-import
+from hexkit.protocols.objstorage import ObjectStorageProtocol
+
+# Further abstraction seems not adequate here, thus using the protocol as port.
+ObjectStoragePort = ObjectStorageProtocol

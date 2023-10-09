@@ -65,7 +65,8 @@ class EventSubTranslatorConfig(BaseSettings):
 
 class EventSubTranslator(EventSubscriberProtocol):
     """A triple hexagonal translator compatible with the EventSubscriberProtocol that
-    is used to receive metadata on new files to register."""
+    is used to receive metadata on new files to register.
+    """
 
     def __init__(
         self,
@@ -73,7 +74,6 @@ class EventSubTranslator(EventSubscriberProtocol):
         file_registry: FileRegistryPort,
     ):
         """Initialize with config parameters and core dependencies."""
-
         self.topics_of_interest = [
             config.files_to_register_topic,
             config.files_to_stage_topic,
@@ -88,7 +88,6 @@ class EventSubTranslator(EventSubscriberProtocol):
 
     async def _consume_files_to_register(self, *, payload: JsonObject) -> None:
         """Consume file registration events."""
-
         validated_payload = get_validated_payload(
             payload=payload, schema=event_schemas.FileUploadValidationSuccess
         )
@@ -113,7 +112,6 @@ class EventSubTranslator(EventSubscriberProtocol):
 
     async def _consume_file_downloads(self, *, payload: JsonObject) -> None:
         """Consume file download events."""
-
         validated_payload = get_validated_payload(
             payload=payload, schema=event_schemas.NonStagedFileRequested
         )
@@ -127,7 +125,6 @@ class EventSubTranslator(EventSubscriberProtocol):
 
     async def _consume_file_deletions(self, *, payload: JsonObject) -> None:
         """Consume file deletion events."""
-
         validated_payload = get_validated_payload(
             payload=payload, schema=event_schemas.FileDeletionRequested
         )
@@ -144,7 +141,6 @@ class EventSubTranslator(EventSubscriberProtocol):
         topic: Ascii,  # pylint: disable=unused-argument
     ) -> None:
         """Consume events from the topics of interest."""
-
         if type_ == self._config.files_to_register_type:
             await self._consume_files_to_register(payload=payload)
         elif type_ == self._config.files_to_stage_type:

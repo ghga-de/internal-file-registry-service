@@ -36,7 +36,8 @@ class StorageEnitiesConfig(BaseSettings):
 
 class ContentCopyService(IContentCopyService):
     """A service that copies the content of a file between storage
-    entities."""
+    entities.
+    """
 
     def __init__(
         self,
@@ -45,7 +46,6 @@ class ContentCopyService(IContentCopyService):
         object_storage: ObjectStoragePort,
     ):
         """Initialize with essential config params and outbound adapters."""
-
         self._config = config
         self._object_storage = object_storage
 
@@ -53,7 +53,6 @@ class ContentCopyService(IContentCopyService):
         self, *, file: models.FileMetadata, source_object_id: str, source_bucket_id: str
     ) -> None:
         """Copy a file from an staging stage to the permanent storage."""
-
         if await self._object_storage.does_object_exist(
             bucket_id=self._config.permanent_bucket, object_id=file.object_id
         ):
@@ -76,7 +75,6 @@ class ContentCopyService(IContentCopyService):
         self, *, file: models.FileMetadata, target_object_id: str, target_bucket_id: str
     ) -> None:
         """Copy a file from an staging stage to the permanent storage."""
-
         if await self._object_storage.does_object_exist(
             bucket_id=target_bucket_id, object_id=target_object_id
         ):

@@ -19,9 +19,7 @@ from pydantic import BaseModel, Field
 
 
 class FileMetadataBase(BaseModel):
-    """
-    A model containing metadata on a registered file.
-    """
+    """A model containing metadata on a registered file."""
 
     file_id: str = Field(
         ..., description="The public ID of the file as present in the metadata catalog."

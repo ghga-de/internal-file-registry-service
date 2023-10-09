@@ -68,13 +68,13 @@ class EventPubTranslatorConfig(BaseSettings):
 
 class EventPubTranslator(EventPublisherPort):
     """A translator according to the triple hexagonal architecture implementing
-    the EventPublisherPort."""
+    the EventPublisherPort.
+    """
 
     def __init__(
         self, *, config: EventPubTranslatorConfig, provider: EventPublisherProtocol
     ):
         """Initialize with configs and a provider of the EventPublisherProtocol."""
-
         self._config = config
         self._provider = provider
 
@@ -82,7 +82,6 @@ class EventPubTranslator(EventPublisherPort):
         self, *, file: models.FileMetadata, bucket_id: str
     ) -> None:
         """Communicates the event that a new file has been internally registered."""
-
         payload = event_schemas.FileInternallyRegistered(
             file_id=file.file_id,
             object_id=file.object_id,
@@ -114,7 +113,6 @@ class EventPubTranslator(EventPublisherPort):
         target_bucket_id: str,
     ) -> None:
         """Communicates the event that a file has been staged for download."""
-
         payload = event_schemas.FileStagedForDownload(
             file_id=file_id,
             decrypted_sha256=decrypted_sha256,
@@ -132,7 +130,6 @@ class EventPubTranslator(EventPublisherPort):
 
     async def file_deleted(self, *, file_id: str) -> None:
         """Communicates the event that a file has been successfully deleted."""
-
         payload = event_schemas.FileDeletionSuccess(
             file_id=file_id,
         )

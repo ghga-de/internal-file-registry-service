@@ -13,10 +13,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Interfaces for object storage adapters and the exception they may throw."""
+"""In this module object construction and dependency injection is carried out."""
 
-# pylint: disable=unused-import
-from hexkit.protocols.objstorage import ObjectStorageProtocol  # noqa: F401
+from ifrs.config import Config
+from ifrs.container import Container
 
-# Further abstraction seems not adequate here, thus using the protocol as port.
-ObjectStoragePort = ObjectStorageProtocol
+
+def get_configured_container(*, config: Config) -> Container:
+    """Create and configure a DI container."""
+    container = Container()
+    container.config.load_config(config)
+
+    return container
+
+
+async def consume_events(run_forever: bool = True):
+    """Run an event consumer listening to the specified topic."""
+    config = Config()
+
+    async with get_configured_container(config=config) as container:
+        event_subscriber = await container.event_subscriber()
+        await event_subscriber.run(forever=run_forever)
