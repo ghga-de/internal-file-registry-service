@@ -31,7 +31,7 @@ class IContentCopyService(ABC):
         def __init__(self, file_id: str):
             message = (
                 f"The content of the file with id '{file_id}' does not exist in the"
-                + " staging."
+                + " staging storage."
             )
             super().__init__(message)
 
@@ -43,7 +43,7 @@ class IContentCopyService(ABC):
         def __init__(self, file_id: str):
             message = (
                 f"The content of the file with id '{file_id}' does not exist in the"
-                + " staging."
+                + " permanent storage."
             )
             super().__init__(message)
 
@@ -51,12 +51,12 @@ class IContentCopyService(ABC):
     async def staging_to_permanent(
         self, *, file: models.FileMetadata, source_object_id: str, source_bucket_id: str
     ) -> None:
-        """Copy a file from an staging stage to the permanent storage."""
+        """Copy a file from a staging stage to the permanent storage."""
         ...
 
     @abstractmethod
     async def permanent_to_outbox(
         self, *, file: models.FileMetadata, target_object_id: str, target_bucket_id: str
     ) -> None:
-        """Copy a file from an staging stage to the permanent storage."""
+        """Copy a file from the permanent storage to an outbox storage."""
         ...
