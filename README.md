@@ -75,51 +75,241 @@ ifrs --help
 The service requires the following configuration parameters:
 - **`permanent_bucket`** *(string)*: The ID of the object storage bucket that is serving as permanent storage.
 
+
+  Examples:
+
+  ```json
+  "permanent"
+  ```
+
+
 - **`file_registered_event_topic`** *(string)*: Name of the topic used for events indicating that a new file has been internally registered.
+
+
+  Examples:
+
+  ```json
+  "internal_file_registry"
+  ```
+
 
 - **`file_registered_event_type`** *(string)*: The type used for events indicating that a new file has been internally registered.
 
+
+  Examples:
+
+  ```json
+  "file_registered"
+  ```
+
+
 - **`file_staged_event_topic`** *(string)*: Name of the topic used for events indicating that a new file has been internally registered.
+
+
+  Examples:
+
+  ```json
+  "internal_file_registry"
+  ```
+
 
 - **`file_staged_event_type`** *(string)*: The type used for events indicating that a new file has been internally registered.
 
+
+  Examples:
+
+  ```json
+  "file_staged_for_download"
+  ```
+
+
 - **`file_deleted_event_topic`** *(string)*: Name of the topic used for events indicating that a file has been deleted.
+
+
+  Examples:
+
+  ```json
+  "internal_file_registry"
+  ```
+
 
 - **`file_deleted_event_type`** *(string)*: The type used for events indicating that a file has been deleted.
 
+
+  Examples:
+
+  ```json
+  "file_deleted"
+  ```
+
+
 - **`files_to_register_topic`** *(string)*: The name of the topic to receive events informing about new files to register.
+
+
+  Examples:
+
+  ```json
+  "file_interrogation"
+  ```
+
 
 - **`files_to_register_type`** *(string)*: The type used for events informing about new files to register.
 
+
+  Examples:
+
+  ```json
+  "file_interrogation_success"
+  ```
+
+
 - **`files_to_stage_topic`** *(string)*: The name of the topic to receive events informing about files to stage.
+
+
+  Examples:
+
+  ```json
+  "file_downloads"
+  ```
+
 
 - **`files_to_stage_type`** *(string)*: The type used for events informing about a file to be staged.
 
+
+  Examples:
+
+  ```json
+  "file_stage_requested"
+  ```
+
+
 - **`files_to_delete_topic`** *(string)*: The name of the topic to receive events informing about files to delete.
 
+
+  Examples:
+
+  ```json
+  "file_deletions"
+  ```
+
+
 - **`files_to_delete_type`** *(string)*: The type used for events informing about a file to be deleted.
+
+
+  Examples:
+
+  ```json
+  "file_deletion_requested"
+  ```
+
 
 - **`service_name`** *(string)*: Default: `"internal_file_registry"`.
 
 - **`service_instance_id`** *(string)*: A string that uniquely identifies this instance across all instances of this service. A globally unique Kafka client ID will be created by concatenating the service_name and the service_instance_id.
 
+
+  Examples:
+
+  ```json
+  "germany-bw-instance-001"
+  ```
+
+
 - **`kafka_servers`** *(array)*: A list of connection strings to connect to Kafka bootstrap servers.
 
   - **Items** *(string)*
 
+
+  Examples:
+
+  ```json
+  [
+      "localhost:9092"
+  ]
+  ```
+
+
 - **`db_connection_str`** *(string, format: password)*: MongoDB connection string. Might include credentials. For more information see: https://naiveskill.com/mongodb-connection-string/.
+
+
+  Examples:
+
+  ```json
+  "mongodb://localhost:27017"
+  ```
+
 
 - **`db_name`** *(string)*: Name of the database located on the MongoDB server.
 
+
+  Examples:
+
+  ```json
+  "my-database"
+  ```
+
+
 - **`s3_endpoint_url`** *(string)*: URL to the S3 API.
+
+
+  Examples:
+
+  ```json
+  "http://localhost:4566"
+  ```
+
 
 - **`s3_access_key_id`** *(string)*: Part of credentials for login into the S3 service. See: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/credentials.html.
 
+
+  Examples:
+
+  ```json
+  "my-access-key-id"
+  ```
+
+
 - **`s3_secret_access_key`** *(string, format: password)*: Part of credentials for login into the S3 service. See: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/credentials.html.
 
-- **`s3_session_token`** *(string, format: password)*: Part of credentials for login into the S3 service. See: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/credentials.html.
 
-- **`aws_config_ini`** *(string, format: path)*: Path to a config file for specifying more advanced S3 parameters. This should follow the format described here: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html#using-a-configuration-file.
+  Examples:
+
+  ```json
+  "my-secret-access-key"
+  ```
+
+
+- **`s3_session_token`**: Part of credentials for login into the S3 service. See: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/credentials.html. Default: `null`.
+
+  - **Any of**
+
+    - *string, format: password*
+
+    - *null*
+
+
+  Examples:
+
+  ```json
+  "my-session-token"
+  ```
+
+
+- **`aws_config_ini`**: Path to a config file for specifying more advanced S3 parameters. This should follow the format described here: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html#using-a-configuration-file. Default: `null`.
+
+  - **Any of**
+
+    - *string, format: path*
+
+    - *null*
+
+
+  Examples:
+
+  ```json
+  "~/.aws/config"
+  ```
+
 
 
 ### Usage:

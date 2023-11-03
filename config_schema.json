@@ -1,225 +1,215 @@
 {
-  "title": "ModSettings",
+  "additionalProperties": false,
   "description": "Modifies the orginal Settings class provided by the user",
-  "type": "object",
   "properties": {
     "permanent_bucket": {
-      "title": "Permanent Bucket",
       "description": "The ID of the object storage bucket that is serving as permanent storage.",
-      "example": "permanent",
-      "env_names": [
-        "ifrs_permanent_bucket"
+      "examples": [
+        "permanent"
       ],
+      "title": "Permanent Bucket",
       "type": "string"
     },
     "file_registered_event_topic": {
-      "title": "File Registered Event Topic",
       "description": "Name of the topic used for events indicating that a new file has been internally registered.",
-      "example": "internal_file_registry",
-      "env_names": [
-        "ifrs_file_registered_event_topic"
+      "examples": [
+        "internal_file_registry"
       ],
+      "title": "File Registered Event Topic",
       "type": "string"
     },
     "file_registered_event_type": {
-      "title": "File Registered Event Type",
       "description": "The type used for events indicating that a new file has been internally registered.",
-      "example": "file_registered",
-      "env_names": [
-        "ifrs_file_registered_event_type"
+      "examples": [
+        "file_registered"
       ],
+      "title": "File Registered Event Type",
       "type": "string"
     },
     "file_staged_event_topic": {
-      "title": "File Staged Event Topic",
       "description": "Name of the topic used for events indicating that a new file has been internally registered.",
-      "example": "internal_file_registry",
-      "env_names": [
-        "ifrs_file_staged_event_topic"
+      "examples": [
+        "internal_file_registry"
       ],
+      "title": "File Staged Event Topic",
       "type": "string"
     },
     "file_staged_event_type": {
-      "title": "File Staged Event Type",
       "description": "The type used for events indicating that a new file has been internally registered.",
-      "example": "file_staged_for_download",
-      "env_names": [
-        "ifrs_file_staged_event_type"
+      "examples": [
+        "file_staged_for_download"
       ],
+      "title": "File Staged Event Type",
       "type": "string"
     },
     "file_deleted_event_topic": {
-      "title": "File Deleted Event Topic",
       "description": "Name of the topic used for events indicating that a file has been deleted.",
-      "example": "internal_file_registry",
-      "env_names": [
-        "ifrs_file_deleted_event_topic"
+      "examples": [
+        "internal_file_registry"
       ],
+      "title": "File Deleted Event Topic",
       "type": "string"
     },
     "file_deleted_event_type": {
-      "title": "File Deleted Event Type",
       "description": "The type used for events indicating that a file has been deleted.",
-      "example": "file_deleted",
-      "env_names": [
-        "ifrs_file_deleted_event_type"
+      "examples": [
+        "file_deleted"
       ],
+      "title": "File Deleted Event Type",
       "type": "string"
     },
     "files_to_register_topic": {
-      "title": "Files To Register Topic",
       "description": "The name of the topic to receive events informing about new files to register.",
-      "example": "file_interrogation",
-      "env_names": [
-        "ifrs_files_to_register_topic"
+      "examples": [
+        "file_interrogation"
       ],
+      "title": "Files To Register Topic",
       "type": "string"
     },
     "files_to_register_type": {
-      "title": "Files To Register Type",
       "description": "The type used for events informing about new files to register.",
-      "example": "file_interrogation_success",
-      "env_names": [
-        "ifrs_files_to_register_type"
+      "examples": [
+        "file_interrogation_success"
       ],
+      "title": "Files To Register Type",
       "type": "string"
     },
     "files_to_stage_topic": {
-      "title": "Files To Stage Topic",
       "description": "The name of the topic to receive events informing about files to stage.",
-      "example": "file_downloads",
-      "env_names": [
-        "ifrs_files_to_stage_topic"
+      "examples": [
+        "file_downloads"
       ],
+      "title": "Files To Stage Topic",
       "type": "string"
     },
     "files_to_stage_type": {
-      "title": "Files To Stage Type",
       "description": "The type used for events informing about a file to be staged.",
-      "example": "file_stage_requested",
-      "env_names": [
-        "ifrs_files_to_stage_type"
+      "examples": [
+        "file_stage_requested"
       ],
+      "title": "Files To Stage Type",
       "type": "string"
     },
     "files_to_delete_topic": {
-      "title": "Files To Delete Topic",
       "description": "The name of the topic to receive events informing about files to delete.",
-      "example": "file_deletions",
-      "env_names": [
-        "ifrs_files_to_delete_topic"
+      "examples": [
+        "file_deletions"
       ],
+      "title": "Files To Delete Topic",
       "type": "string"
     },
     "files_to_delete_type": {
-      "title": "Files To Delete Type",
       "description": "The type used for events informing about a file to be deleted.",
-      "example": "file_deletion_requested",
-      "env_names": [
-        "ifrs_files_to_delete_type"
+      "examples": [
+        "file_deletion_requested"
       ],
+      "title": "Files To Delete Type",
       "type": "string"
     },
     "service_name": {
-      "title": "Service Name",
       "default": "internal_file_registry",
-      "env_names": [
-        "ifrs_service_name"
-      ],
+      "title": "Service Name",
       "type": "string"
     },
     "service_instance_id": {
-      "title": "Service Instance Id",
       "description": "A string that uniquely identifies this instance across all instances of this service. A globally unique Kafka client ID will be created by concatenating the service_name and the service_instance_id.",
-      "example": "germany-bw-instance-001",
-      "env_names": [
-        "ifrs_service_instance_id"
+      "examples": [
+        "germany-bw-instance-001"
       ],
+      "title": "Service Instance Id",
       "type": "string"
     },
     "kafka_servers": {
-      "title": "Kafka Servers",
       "description": "A list of connection strings to connect to Kafka bootstrap servers.",
-      "example": [
-        "localhost:9092"
+      "examples": [
+        [
+          "localhost:9092"
+        ]
       ],
-      "env_names": [
-        "ifrs_kafka_servers"
-      ],
-      "type": "array",
       "items": {
         "type": "string"
-      }
+      },
+      "title": "Kafka Servers",
+      "type": "array"
     },
     "db_connection_str": {
-      "title": "Db Connection Str",
       "description": "MongoDB connection string. Might include credentials. For more information see: https://naiveskill.com/mongodb-connection-string/",
-      "example": "mongodb://localhost:27017",
-      "env_names": [
-        "ifrs_db_connection_str"
+      "examples": [
+        "mongodb://localhost:27017"
       ],
+      "format": "password",
+      "title": "Db Connection Str",
       "type": "string",
-      "writeOnly": true,
-      "format": "password"
+      "writeOnly": true
     },
     "db_name": {
-      "title": "Db Name",
       "description": "Name of the database located on the MongoDB server.",
-      "example": "my-database",
-      "env_names": [
-        "ifrs_db_name"
+      "examples": [
+        "my-database"
       ],
+      "title": "Db Name",
       "type": "string"
     },
     "s3_endpoint_url": {
-      "title": "S3 Endpoint Url",
       "description": "URL to the S3 API.",
-      "example": "http://localhost:4566",
-      "env_names": [
-        "ifrs_s3_endpoint_url"
+      "examples": [
+        "http://localhost:4566"
       ],
+      "title": "S3 Endpoint Url",
       "type": "string"
     },
     "s3_access_key_id": {
-      "title": "S3 Access Key Id",
       "description": "Part of credentials for login into the S3 service. See: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/credentials.html",
-      "example": "my-access-key-id",
-      "env_names": [
-        "ifrs_s3_access_key_id"
+      "examples": [
+        "my-access-key-id"
       ],
+      "title": "S3 Access Key Id",
       "type": "string"
     },
     "s3_secret_access_key": {
-      "title": "S3 Secret Access Key",
       "description": "Part of credentials for login into the S3 service. See: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/credentials.html",
-      "example": "my-secret-access-key",
-      "env_names": [
-        "ifrs_s3_secret_access_key"
+      "examples": [
+        "my-secret-access-key"
       ],
+      "format": "password",
+      "title": "S3 Secret Access Key",
       "type": "string",
-      "writeOnly": true,
-      "format": "password"
+      "writeOnly": true
     },
     "s3_session_token": {
-      "title": "S3 Session Token",
-      "description": "Part of credentials for login into the S3 service. See: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/credentials.html",
-      "example": "my-session-token",
-      "env_names": [
-        "ifrs_s3_session_token"
+      "anyOf": [
+        {
+          "format": "password",
+          "type": "string",
+          "writeOnly": true
+        },
+        {
+          "type": "null"
+        }
       ],
-      "type": "string",
-      "writeOnly": true,
-      "format": "password"
+      "default": null,
+      "description": "Part of credentials for login into the S3 service. See: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/credentials.html",
+      "examples": [
+        "my-session-token"
+      ],
+      "title": "S3 Session Token"
     },
     "aws_config_ini": {
-      "title": "Aws Config Ini",
-      "description": "Path to a config file for specifying more advanced S3 parameters. This should follow the format described here: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html#using-a-configuration-file",
-      "example": "~/.aws/config",
-      "env_names": [
-        "ifrs_aws_config_ini"
+      "anyOf": [
+        {
+          "format": "path",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
       ],
-      "type": "string",
-      "format": "path"
+      "default": null,
+      "description": "Path to a config file for specifying more advanced S3 parameters. This should follow the format described here: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html#using-a-configuration-file",
+      "examples": [
+        "~/.aws/config"
+      ],
+      "title": "Aws Config Ini"
     }
   },
   "required": [
@@ -244,5 +234,6 @@
     "s3_access_key_id",
     "s3_secret_access_key"
   ],
-  "additionalProperties": false
+  "title": "ModSettings",
+  "type": "object"
 }
