@@ -53,7 +53,7 @@ async def test_reregistration(
     an exception).
     """
     # place example content in the staging:
-    file_object = file_fixture.copy(
+    file_object = file_fixture.model_copy(
         update={
             "bucket_id": joint_fixture.staging_bucket,
             "object_id": EXAMPLE_METADATA.object_id,
@@ -101,7 +101,7 @@ async def test_reregistration_with_updated_metadata(
     expected exception.
     """
     # place example content in the staging:
-    file_object = file_fixture.copy(
+    file_object = file_fixture.model_copy(
         update={
             "bucket_id": joint_fixture.staging_bucket,
             "object_id": EXAMPLE_METADATA.object_id,
@@ -129,7 +129,7 @@ async def test_reregistration_with_updated_metadata(
 
     # try to re-register the same file with updated metadata:
     # (Expect an exception and no second event.)
-    file_update = EXAMPLE_METADATA_BASE.copy(update={"decrypted_size": 4321})
+    file_update = EXAMPLE_METADATA_BASE.model_copy(update={"decrypted_size": 4321})
     async with joint_fixture.kafka.expect_events(
         events=[],
         in_topic=joint_fixture.config.file_registered_event_topic,
@@ -166,7 +166,7 @@ async def test_stage_checksum_missmatch(
     wrong checksum fails with the expected exception.
     """
     # place the content for an example file in the permanent storage:
-    file_object = file_fixture.copy(
+    file_object = file_fixture.model_copy(
         update={
             "bucket_id": joint_fixture.config.permanent_bucket,
             "object_id": EXAMPLE_METADATA.object_id,

@@ -42,7 +42,7 @@ async def test_happy_journey(
 ):
     """Simulates a typical, successful journey for upload, download, and deletion"""
     # place example content in the staging:
-    file_object = file_fixture.copy(
+    file_object = file_fixture.model_copy(
         update={
             "bucket_id": joint_fixture.staging_bucket,
             "object_id": EXAMPLE_METADATA.object_id,
@@ -89,6 +89,7 @@ async def test_happy_journey(
                     "decrypted_sha256": EXAMPLE_METADATA_BASE.decrypted_sha256,
                     "target_object_id": EXAMPLE_METADATA.object_id,
                     "target_bucket_id": joint_fixture.outbox_bucket,
+                    "s3_enpoint_alias": "test",
                 },
                 type_=joint_fixture.config.file_staged_event_type,
             )

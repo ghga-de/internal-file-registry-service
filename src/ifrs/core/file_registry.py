@@ -63,7 +63,9 @@ class FileRegistry(FileRegistryPort):
             return False
 
         # object ID is a UUID generated upon registration, so cannot compare those
-        registered_file_without_object_id = registered_file.dict(exclude={"object_id"})
+        registered_file_without_object_id = registered_file.model_dump(
+            exclude={"object_id"}
+        )
 
         if file_without_object_id == registered_file_without_object_id:
             return True
@@ -103,7 +105,9 @@ class FileRegistry(FileRegistryPort):
 
         # Generate & assign object ID to metadata
         object_id = str(uuid.uuid4())
-        file = models.FileMetadata(**file_without_object_id.dict(), object_id=object_id)
+        file = models.FileMetadata(
+            **file_without_object_id.model_dump(), object_id=object_id
+        )
 
         try:
             await self._content_copy_svc.staging_to_permanent(
