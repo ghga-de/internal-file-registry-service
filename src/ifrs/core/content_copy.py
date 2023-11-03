@@ -15,7 +15,8 @@
 
 """Application core-internal interfaces."""
 
-from pydantic import BaseSettings, Field
+from pydantic import Field
+from pydantic_settings import BaseSettings
 
 from ifrs.core import models
 from ifrs.core.interfaces import IContentCopyService
@@ -30,7 +31,7 @@ class StorageEnitiesConfig(BaseSettings):
         description=(
             "The ID of the object storage bucket that is serving as permanent storage."
         ),
-        example="permanent",
+        examples=["permanent"],
     )
 
 

@@ -19,7 +19,8 @@ import json
 
 from ghga_event_schemas import pydantic_ as event_schemas
 from hexkit.protocols.eventpub import EventPublisherProtocol
-from pydantic import BaseSettings, Field
+from pydantic import Field
+from pydantic_settings import BaseSettings
 
 from ifrs.core import models
 from ifrs.ports.outbound.event_pub import EventPublisherPort
@@ -32,37 +33,37 @@ class EventPubTranslatorConfig(BaseSettings):
         ...,
         description="Name of the topic used for events indicating that a new file has"
         + " been internally registered.",
-        example="internal_file_registry",
+        examples=["internal_file_registry"],
     )
     file_registered_event_type: str = Field(
         ...,
         description="The type used for events indicating that a new file has"
         + " been internally registered.",
-        example="file_registered",
+        examples=["file_registered"],
     )
     file_staged_event_topic: str = Field(
         ...,
         description="Name of the topic used for events indicating that a new file has"
         + " been internally registered.",
-        example="internal_file_registry",
+        examples=["internal_file_registry"],
     )
     file_staged_event_type: str = Field(
         ...,
         description="The type used for events indicating that a new file has"
         + " been internally registered.",
-        example="file_staged_for_download",
+        examples=["file_staged_for_download"],
     )
     file_deleted_event_topic: str = Field(
         ...,
         description="Name of the topic used for events indicating that a file has"
         + " been deleted.",
-        example="internal_file_registry",
+        examples=["internal_file_registry"],
     )
     file_deleted_event_type: str = Field(
         ...,
         description="The type used for events indicating that a file has"
         + " been deleted.",
-        example="file_deleted",
+        examples=["file_deleted"],
     )
 
 
