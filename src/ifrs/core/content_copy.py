@@ -13,17 +13,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Application core-internal interfaces."""
+"""Specialized service managing copy operations of files between buckets."""
 
 from pydantic import Field
 from pydantic_settings import BaseSettings
 
 from ifrs.core import models
-from ifrs.core.interfaces import IContentCopyService
+from ifrs.ports.inbound.content_copy import ContentCopyServicePort
 from ifrs.ports.outbound.storage import ObjectStoragePort
 
 
-class StorageEnitiesConfig(BaseSettings):
+class StorageEntitiesConfig(BaseSettings):
     """A config for specifying the location of major storage entities."""
 
     permanent_bucket: str = Field(
@@ -35,7 +35,7 @@ class StorageEnitiesConfig(BaseSettings):
     )
 
 
-class ContentCopyService(IContentCopyService):
+class ContentCopyService(ContentCopyServicePort):
     """A service that copies the content of a file between storage
     entities.
     """
@@ -43,7 +43,7 @@ class ContentCopyService(IContentCopyService):
     def __init__(
         self,
         *,
-        config: StorageEnitiesConfig,
+        config: StorageEntitiesConfig,
         object_storage: ObjectStoragePort,
     ):
         """Initialize with essential config params and outbound adapters."""
@@ -63,7 +63,7 @@ class ContentCopyService(IContentCopyService):
         if not await self._object_storage.does_object_exist(
             bucket_id=source_bucket_id, object_id=source_object_id
         ):
-            raise self.ContentNotInstagingError(file_id=file.file_id)
+            raise self.ContentNotInStagingError(file_id=file.file_id)
 
         await self._object_storage.copy_object(
             source_bucket_id=source_bucket_id,

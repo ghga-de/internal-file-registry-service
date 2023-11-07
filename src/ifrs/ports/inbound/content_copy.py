@@ -13,19 +13,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Application core-internal interfaces."""
+"""Interface for managing copy operations of files between buckets."""
 
 from abc import ABC, abstractmethod
 
 from ifrs.core import models
 
 
-class IContentCopyService(ABC):
+class ContentCopyServicePort(ABC):
     """Interface for a service that copies the content of a file between storage
     entities.
     """
 
-    class ContentNotInstagingError(RuntimeError):
+    class ContentNotInStagingError(RuntimeError):
         """Thrown when the content of a file is unexpectedly not in the staging storage."""
 
         def __init__(self, file_id: str):

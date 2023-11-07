@@ -27,13 +27,16 @@ from dataclasses import dataclass
 
 import pytest_asyncio
 from hexkit.providers.akafka.testutils import KafkaFixture
+from hexkit.providers.mongodb import MongoDbDaoFactory
 from hexkit.providers.mongodb.testutils import MongoDbFixture
 from hexkit.providers.s3.testutils import S3Fixture
 from pytest_asyncio.plugin import _ScopeName
 
+from ifrs.adapters.outbound.dao import FileMetadataDaoConstructor
 from ifrs.config import Config
-from ifrs.container import Container
-from ifrs.main import get_configured_container
+from ifrs.inject import prepare_core
+from ifrs.ports.inbound.file_registry import FileRegistryPort
+from ifrs.ports.outbound.dao import FileMetadataDaoPort
 from tests.fixtures.config import get_config
 
 OUTBOX_BUCKET = "outbox"
@@ -52,9 +55,10 @@ class JointFixture:
     """Returned by the `joint_fixture`."""
 
     config: Config
-    container: Container
     mongodb: MongoDbFixture
     s3: S3Fixture
+    file_metadata_dao: FileMetadataDaoPort
+    file_registry: FileRegistryPort
     kafka: KafkaFixture
     outbox_bucket: str
     staging_bucket: str
@@ -74,9 +78,13 @@ async def joint_fixture_function(
     config = get_config(
         sources=[mongodb_fixture.config, s3_fixture.config, kafka_fixture.config]
     )
+    dao_factory = MongoDbDaoFactory(config=config)
+    file_metadata_dao = await FileMetadataDaoConstructor.construct(
+        dao_factory=dao_factory
+    )
 
     # create a DI container instance:translators
-    async with get_configured_container(config=config) as container:
+    async with prepare_core(config=config) as file_registry:
         # create storage entities:
         await s3_fixture.populate_buckets(
             buckets=[
@@ -88,9 +96,10 @@ async def joint_fixture_function(
 
         yield JointFixture(
             config=config,
-            container=container,
             mongodb=mongodb_fixture,
             s3=s3_fixture,
+            file_metadata_dao=file_metadata_dao,
+            file_registry=file_registry,
             kafka=kafka_fixture,
             outbox_bucket=OUTBOX_BUCKET,
             staging_bucket=STAGING_BUCKET,

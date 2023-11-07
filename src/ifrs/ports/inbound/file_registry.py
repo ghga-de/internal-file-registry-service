@@ -18,7 +18,7 @@
 from abc import ABC, abstractmethod
 
 from ifrs.core import models
-from ifrs.core.interfaces import IContentCopyService
+from ifrs.ports.inbound.content_copy import ContentCopyServicePort
 
 
 class FileRegistryPort(ABC):
@@ -46,7 +46,7 @@ class FileRegistryPort(ABC):
             super().__init__(message)
 
     class FileContentNotInstagingError(
-        InvalidRequestError, IContentCopyService.ContentNotInstagingError
+        InvalidRequestError, ContentCopyServicePort.ContentNotInStagingError
     ):
         """Thrown when the content of a file is unexpectedly not in the staging storage."""
 

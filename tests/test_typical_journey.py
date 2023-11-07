@@ -52,12 +52,11 @@ async def test_happy_journey(
 
     # register new file from the staging:
     # (And check if an event informing about the new registration has been published.)
-    file_registry = await joint_fixture.container.file_registry()
 
     async with joint_fixture.kafka.record_events(
         in_topic=joint_fixture.config.file_registered_event_topic,
     ) as recorder:
-        await file_registry.register_file(
+        await joint_fixture.file_registry.register_file(
             file_without_object_id=EXAMPLE_METADATA_BASE,
             source_object_id=EXAMPLE_METADATA.object_id,
             source_bucket_id=joint_fixture.staging_bucket,
@@ -86,17 +85,18 @@ async def test_happy_journey(
             ExpectedEvent(
                 payload={
                     "file_id": EXAMPLE_METADATA_BASE.file_id,
-                    "decrypted_sha256": EXAMPLE_METADATA_BASE.decrypted_sha256,
                     "target_object_id": EXAMPLE_METADATA.object_id,
                     "target_bucket_id": joint_fixture.outbox_bucket,
                     "s3_enpoint_alias": "test",
+                    "decrypted_sha256": EXAMPLE_METADATA_BASE.decrypted_sha256,
                 },
                 type_=joint_fixture.config.file_staged_event_type,
+                key=EXAMPLE_METADATA_BASE.file_id,
             )
         ],
         in_topic=joint_fixture.config.file_staged_event_topic,
     ):
-        await file_registry.stage_registered_file(
+        await joint_fixture.file_registry.stage_registered_file(
             file_id=EXAMPLE_METADATA_BASE.file_id,
             decrypted_sha256=EXAMPLE_METADATA_BASE.decrypted_sha256,
             target_object_id=EXAMPLE_METADATA.object_id,
@@ -137,7 +137,9 @@ async def test_happy_journey(
         ],
         in_topic=joint_fixture.config.file_deleted_event_topic,
     ):
-        await file_registry.delete_file(file_id=EXAMPLE_METADATA_BASE.file_id)
+        await joint_fixture.file_registry.delete_file(
+            file_id=EXAMPLE_METADATA_BASE.file_id
+        )
 
     assert not await joint_fixture.s3.storage.does_object_exist(
         bucket_id=joint_fixture.config.permanent_bucket,
