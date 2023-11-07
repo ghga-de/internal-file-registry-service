@@ -67,7 +67,7 @@ class FileRegistry(FileRegistryPort):
             exclude={"object_id"}
         )
 
-        if file_without_object_id == registered_file_without_object_id:
+        if file_without_object_id.model_dump() == registered_file_without_object_id:
             return True
 
         raise self.FileUpdateError(file_id=file_without_object_id.file_id)

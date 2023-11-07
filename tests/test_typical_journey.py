@@ -85,10 +85,10 @@ async def test_happy_journey(
             ExpectedEvent(
                 payload={
                     "file_id": EXAMPLE_METADATA_BASE.file_id,
+                    "decrypted_sha256": EXAMPLE_METADATA_BASE.decrypted_sha256,
                     "target_object_id": EXAMPLE_METADATA.object_id,
                     "target_bucket_id": joint_fixture.outbox_bucket,
-                    "s3_enpoint_alias": "test",
-                    "decrypted_sha256": EXAMPLE_METADATA_BASE.decrypted_sha256,
+                    "s3_endpoint_alias": "test",
                 },
                 type_=joint_fixture.config.file_staged_event_type,
                 key=EXAMPLE_METADATA_BASE.file_id,
