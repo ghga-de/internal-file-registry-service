@@ -19,7 +19,7 @@ from contextlib import suppress
 
 from ifrs.config import Config
 from ifrs.core import models
-from ifrs.core.interfaces import IContentCopyService
+from ifrs.ports.inbound.content_copy import ContentCopyServicePort
 from ifrs.ports.inbound.file_registry import FileRegistryPort
 from ifrs.ports.outbound.dao import FileMetadataDaoPort, ResourceNotFoundError
 from ifrs.ports.outbound.event_pub import EventPublisherPort
@@ -32,7 +32,7 @@ class FileRegistry(FileRegistryPort):
     def __init__(  # noqa: PLR0913 (too many args)
         self,
         *,
-        content_copy_svc: IContentCopyService,
+        content_copy_svc: ContentCopyServicePort,
         file_metadata_dao: FileMetadataDaoPort,
         event_publisher: EventPublisherPort,
         object_storage: ObjectStoragePort,
@@ -63,9 +63,11 @@ class FileRegistry(FileRegistryPort):
             return False
 
         # object ID is a UUID generated upon registration, so cannot compare those
-        registered_file_without_object_id = registered_file.dict(exclude={"object_id"})
+        registered_file_without_object_id = registered_file.model_dump(
+            exclude={"object_id"}
+        )
 
-        if file_without_object_id == registered_file_without_object_id:
+        if file_without_object_id.model_dump() == registered_file_without_object_id:
             return True
 
         raise self.FileUpdateError(file_id=file_without_object_id.file_id)
@@ -103,7 +105,9 @@ class FileRegistry(FileRegistryPort):
 
         # Generate & assign object ID to metadata
         object_id = str(uuid.uuid4())
-        file = models.FileMetadata(**file_without_object_id.dict(), object_id=object_id)
+        file = models.FileMetadata(
+            **file_without_object_id.model_dump(), object_id=object_id
+        )
 
         try:
             await self._content_copy_svc.staging_to_permanent(
@@ -111,7 +115,7 @@ class FileRegistry(FileRegistryPort):
                 source_object_id=source_object_id,
                 source_bucket_id=source_bucket_id,
             )
-        except IContentCopyService.ContentNotInstagingError as error:
+        except ContentCopyServicePort.ContentNotInStagingError as error:
             raise self.FileContentNotInstagingError(
                 file_id=file_without_object_id.file_id
             ) from error
@@ -179,7 +183,7 @@ class FileRegistry(FileRegistryPort):
                 target_bucket_id=target_bucket_id,
             )
 
-        except IContentCopyService.ContentNotInPermanentStorageError as error:
+        except ContentCopyServicePort.ContentNotInPermanentStorageError as error:
             raise self.FileInRegistryButNotInStorageError(file_id=file_id) from error
 
     async def delete_file(self, *, file_id: str) -> None:

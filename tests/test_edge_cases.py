@@ -35,9 +35,8 @@ from tests.fixtures.module_scope_fixtures import (  # noqa: F401
 @pytest.mark.asyncio
 async def test_register_with_empty_staging(joint_fixture: JointFixture):  # noqa: F811
     """Test registration of a file when the file content is missing from the staging."""
-    file_registry = await joint_fixture.container.file_registry()
     with pytest.raises(FileRegistryPort.FileContentNotInstagingError):
-        await file_registry.register_file(
+        await joint_fixture.file_registry.register_file(
             file_without_object_id=EXAMPLE_METADATA_BASE,
             source_object_id="missing",
             source_bucket_id=joint_fixture.staging_bucket,
@@ -53,7 +52,7 @@ async def test_reregistration(
     an exception).
     """
     # place example content in the staging:
-    file_object = file_fixture.copy(
+    file_object = file_fixture.model_copy(
         update={
             "bucket_id": joint_fixture.staging_bucket,
             "object_id": EXAMPLE_METADATA.object_id,
@@ -63,12 +62,11 @@ async def test_reregistration(
 
     # register new file from the staging:
     # (And check if an event informing about the new registration has been published.)
-    file_registry = await joint_fixture.container.file_registry()
 
     async with joint_fixture.kafka.record_events(
         in_topic=joint_fixture.config.file_registered_event_topic
     ) as recorder:
-        await file_registry.register_file(
+        await joint_fixture.file_registry.register_file(
             file_without_object_id=EXAMPLE_METADATA_BASE,
             source_object_id=EXAMPLE_METADATA.object_id,
             source_bucket_id=joint_fixture.staging_bucket,
@@ -85,7 +83,7 @@ async def test_reregistration(
         events=[],
         in_topic=joint_fixture.config.file_registered_event_topic,
     ):
-        await file_registry.register_file(
+        await joint_fixture.file_registry.register_file(
             file_without_object_id=EXAMPLE_METADATA_BASE,
             source_object_id=EXAMPLE_METADATA.object_id,
             source_bucket_id=joint_fixture.staging_bucket,
@@ -101,7 +99,7 @@ async def test_reregistration_with_updated_metadata(
     expected exception.
     """
     # place example content in the staging:
-    file_object = file_fixture.copy(
+    file_object = file_fixture.model_copy(
         update={
             "bucket_id": joint_fixture.staging_bucket,
             "object_id": EXAMPLE_METADATA.object_id,
@@ -111,12 +109,11 @@ async def test_reregistration_with_updated_metadata(
 
     # register new file from the staging:
     # (And check if an event informing about the new registration has been published.)
-    file_registry = await joint_fixture.container.file_registry()
 
     async with joint_fixture.kafka.record_events(
         in_topic=joint_fixture.config.file_registered_event_topic,
     ) as recorder:
-        await file_registry.register_file(
+        await joint_fixture.file_registry.register_file(
             file_without_object_id=EXAMPLE_METADATA_BASE,
             source_object_id=EXAMPLE_METADATA.object_id,
             source_bucket_id=joint_fixture.staging_bucket,
@@ -129,13 +126,13 @@ async def test_reregistration_with_updated_metadata(
 
     # try to re-register the same file with updated metadata:
     # (Expect an exception and no second event.)
-    file_update = EXAMPLE_METADATA_BASE.copy(update={"decrypted_size": 4321})
+    file_update = EXAMPLE_METADATA_BASE.model_copy(update={"decrypted_size": 4321})
     async with joint_fixture.kafka.expect_events(
         events=[],
         in_topic=joint_fixture.config.file_registered_event_topic,
     ):
         with pytest.raises(FileRegistryPort.FileUpdateError):
-            await file_registry.register_file(
+            await joint_fixture.file_registry.register_file(
                 file_without_object_id=file_update,
                 source_object_id=EXAMPLE_METADATA.object_id,
                 source_bucket_id=joint_fixture.staging_bucket,
@@ -147,9 +144,8 @@ async def test_stage_non_existing_file(joint_fixture: JointFixture):  # noqa: F8
     """Check that requesting to stage a non-registered file fails with the expected
     exception.
     """
-    file_registry = await joint_fixture.container.file_registry()
     with pytest.raises(FileRegistryPort.FileNotInRegistryError):
-        await file_registry.stage_registered_file(
+        await joint_fixture.file_registry.stage_registered_file(
             file_id="notregisteredfile001",
             decrypted_sha256=EXAMPLE_METADATA_BASE.decrypted_sha256,
             target_object_id=EXAMPLE_METADATA.object_id,
@@ -166,7 +162,7 @@ async def test_stage_checksum_missmatch(
     wrong checksum fails with the expected exception.
     """
     # place the content for an example file in the permanent storage:
-    file_object = file_fixture.copy(
+    file_object = file_fixture.model_copy(
         update={
             "bucket_id": joint_fixture.config.permanent_bucket,
             "object_id": EXAMPLE_METADATA.object_id,
@@ -175,13 +171,11 @@ async def test_stage_checksum_missmatch(
     await joint_fixture.s3.populate_file_objects(file_objects=[file_object])
 
     # populate the database with a corresponding file metadata entry:
-    file_metadata_dao = await joint_fixture.container.file_metadata_dao()
-    await file_metadata_dao.insert(EXAMPLE_METADATA)
+    await joint_fixture.file_metadata_dao.insert(EXAMPLE_METADATA)
 
     # request a stage for the registered file to the outbox by specifying a wrong checksum:
-    file_registry = await joint_fixture.container.file_registry()
     with pytest.raises(FileRegistryPort.ChecksumMissmatchError):
-        await file_registry.stage_registered_file(
+        await joint_fixture.file_registry.stage_registered_file(
             file_id=EXAMPLE_METADATA_BASE.file_id,
             decrypted_sha256=(
                 "e6da6d6d05cc057964877aad8a3e9ad712c8abeae279dfa2f89b07eba7ef8abe"
@@ -201,13 +195,11 @@ async def test_storage_db_inconsistency(
     """
     # populate the database with metadata on an example file even though the storage is
     # empty:
-    file_metadata_dao = await joint_fixture.container.file_metadata_dao()
-    await file_metadata_dao.insert(EXAMPLE_METADATA)
+    await joint_fixture.file_metadata_dao.insert(EXAMPLE_METADATA)
 
     # request a stage for the registered file by specifying a wrong checksum:
-    file_registry = await joint_fixture.container.file_registry()
     with pytest.raises(FileRegistryPort.FileInRegistryButNotInStorageError):
-        await file_registry.stage_registered_file(
+        await joint_fixture.file_registry.stage_registered_file(
             file_id=EXAMPLE_METADATA_BASE.file_id,
             decrypted_sha256=EXAMPLE_METADATA_BASE.decrypted_sha256,
             target_object_id=EXAMPLE_METADATA.object_id,

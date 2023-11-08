@@ -19,7 +19,8 @@ import json
 
 from ghga_event_schemas import pydantic_ as event_schemas
 from hexkit.protocols.eventpub import EventPublisherProtocol
-from pydantic import BaseSettings, Field
+from pydantic import Field
+from pydantic_settings import BaseSettings
 
 from ifrs.core import models
 from ifrs.ports.outbound.event_pub import EventPublisherPort
@@ -32,37 +33,37 @@ class EventPubTranslatorConfig(BaseSettings):
         ...,
         description="Name of the topic used for events indicating that a new file has"
         + " been internally registered.",
-        example="internal_file_registry",
+        examples=["internal_file_registry"],
     )
     file_registered_event_type: str = Field(
         ...,
         description="The type used for events indicating that a new file has"
         + " been internally registered.",
-        example="file_registered",
+        examples=["file_registered"],
     )
     file_staged_event_topic: str = Field(
         ...,
         description="Name of the topic used for events indicating that a new file has"
         + " been internally registered.",
-        example="internal_file_registry",
+        examples=["internal_file_registry"],
     )
     file_staged_event_type: str = Field(
         ...,
         description="The type used for events indicating that a new file has"
         + " been internally registered.",
-        example="file_staged_for_download",
+        examples=["file_staged_for_download"],
     )
     file_deleted_event_topic: str = Field(
         ...,
         description="Name of the topic used for events indicating that a file has"
         + " been deleted.",
-        example="internal_file_registry",
+        examples=["internal_file_registry"],
     )
     file_deleted_event_type: str = Field(
         ...,
         description="The type used for events indicating that a file has"
         + " been deleted.",
-        example="file_deleted",
+        examples=["file_deleted"],
     )
 
 
@@ -83,6 +84,7 @@ class EventPubTranslator(EventPublisherPort):
     ) -> None:
         """Communicates the event that a new file has been internally registered."""
         payload = event_schemas.FileInternallyRegistered(
+            s3_endpoint_alias="test",
             file_id=file.file_id,
             object_id=file.object_id,
             bucket_id=bucket_id,
@@ -95,7 +97,7 @@ class EventPubTranslator(EventPublisherPort):
             encrypted_parts_sha256=file.encrypted_parts_sha256,
             upload_date=file.upload_date,
         )
-        payload_dict = json.loads(payload.json())
+        payload_dict = json.loads(payload.model_dump_json())
 
         await self._provider.publish(
             payload=payload_dict,
@@ -114,12 +116,13 @@ class EventPubTranslator(EventPublisherPort):
     ) -> None:
         """Communicates the event that a file has been staged for download."""
         payload = event_schemas.FileStagedForDownload(
+            s3_endpoint_alias="test",
             file_id=file_id,
             decrypted_sha256=decrypted_sha256,
             target_object_id=target_object_id,
             target_bucket_id=target_bucket_id,
         )
-        payload_dict = json.loads(payload.json())
+        payload_dict = json.loads(payload.model_dump_json())
 
         await self._provider.publish(
             payload=payload_dict,
@@ -133,7 +136,7 @@ class EventPubTranslator(EventPublisherPort):
         payload = event_schemas.FileDeletionSuccess(
             file_id=file_id,
         )
-        payload_dict = json.loads(payload.json())
+        payload_dict = json.loads(payload.model_dump_json())
 
         await self._provider.publish(
             payload=payload_dict,

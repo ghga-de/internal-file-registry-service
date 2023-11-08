@@ -19,7 +19,8 @@ from ghga_event_schemas import pydantic_ as event_schemas
 from ghga_event_schemas.validation import get_validated_payload
 from hexkit.custom_types import Ascii, JsonObject
 from hexkit.protocols.eventsub import EventSubscriberProtocol
-from pydantic import BaseSettings, Field
+from pydantic import Field
+from pydantic_settings import BaseSettings
 
 from ifrs.core import models
 from ifrs.ports.inbound.file_registry import FileRegistryPort
@@ -32,34 +33,34 @@ class EventSubTranslatorConfig(BaseSettings):
         ...,
         description="The name of the topic to receive events informing about new files "
         + "to register.",
-        example="file_interrogation",
+        examples=["file_interrogation"],
     )
     files_to_register_type: str = Field(
         ...,
         description="The type used for events informing about new files to register.",
-        example="file_interrogation_success",
+        examples=["file_interrogation_success"],
     )
 
     files_to_stage_topic: str = Field(
         ...,
         description="The name of the topic to receive events informing about files to stage.",
-        example="file_downloads",
+        examples=["file_downloads"],
     )
     files_to_stage_type: str = Field(
         ...,
         description="The type used for events informing about a file to be staged.",
-        example="file_stage_requested",
+        examples=["file_stage_requested"],
     )
 
     files_to_delete_topic: str = Field(
         ...,
         description="The name of the topic to receive events informing about files to delete.",
-        example="file_deletions",
+        examples=["file_deletions"],
     )
     files_to_delete_type: str = Field(
         ...,
         description="The type used for events informing about a file to be deleted.",
-        example="file_deletion_requested",
+        examples=["file_deletion_requested"],
     )
 
 

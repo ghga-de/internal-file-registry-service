@@ -22,7 +22,7 @@ from hexkit.providers.s3 import S3Config
 
 from ifrs.adapters.inbound.event_sub import EventSubTranslatorConfig
 from ifrs.adapters.outbound.event_pub import EventPubTranslatorConfig
-from ifrs.core.content_copy import StorageEnitiesConfig
+from ifrs.core.content_copy import StorageEntitiesConfig
 
 
 # pylint: disable=too-many-ancestors
@@ -33,7 +33,7 @@ class Config(
     KafkaConfig,
     EventSubTranslatorConfig,
     EventPubTranslatorConfig,
-    StorageEnitiesConfig,
+    StorageEntitiesConfig,
 ):
     """Config parameters and their defaults."""
 

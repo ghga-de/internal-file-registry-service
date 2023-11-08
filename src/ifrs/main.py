@@ -16,21 +16,12 @@
 """In this module object construction and dependency injection is carried out."""
 
 from ifrs.config import Config
-from ifrs.container import Container
-
-
-def get_configured_container(*, config: Config) -> Container:
-    """Create and configure a DI container."""
-    container = Container()
-    container.config.load_config(config)
-
-    return container
+from ifrs.inject import prepare_event_subscriber
 
 
 async def consume_events(run_forever: bool = True):
     """Run an event consumer listening to the specified topic."""
     config = Config()  # type: ignore
 
-    async with get_configured_container(config=config) as container:
-        event_subscriber = await container.event_subscriber()
+    async with prepare_event_subscriber(config=config) as event_subscriber:
         await event_subscriber.run(forever=run_forever)

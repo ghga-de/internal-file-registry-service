@@ -41,5 +41,5 @@ EXAMPLE_METADATA_BASE = models.FileMetadataBase(
 )
 
 EXAMPLE_METADATA = models.FileMetadata(
-    **EXAMPLE_METADATA_BASE.dict(), object_id="objectid001"
+    **EXAMPLE_METADATA_BASE.model_dump(), object_id="objectid001"
 )
