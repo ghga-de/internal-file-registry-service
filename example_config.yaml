@@ -1,4 +1,3 @@
-aws_config_ini: null
 db_connection_str: '**********'
 db_name: dev_db
 file_deleted_event_topic: internal_file_registry
@@ -13,12 +12,21 @@ files_to_register_topic: file_interrogation
 files_to_register_type: file_interrogation_success
 files_to_stage_topic: file_downloads
 files_to_stage_type: file_stage_requested
+kafka_security_protocol: PLAINTEXT
 kafka_servers:
 - kafka:9092
-permanent_bucket: permanent
-s3_access_key_id: test
-s3_endpoint_url: http://localstack:4566
-s3_secret_access_key: '**********'
-s3_session_token: null
+kafka_ssl_cafile: ''
+kafka_ssl_certfile: ''
+kafka_ssl_keyfile: ''
+kafka_ssl_password: ''
+object_storages:
+  test:
+    bucket: outbox
+    credentials:
+      aws_config_ini: null
+      s3_access_key_id: test
+      s3_endpoint_url: http://ifrs:4566
+      s3_secret_access_key: '**********'
+      s3_session_token: null
 service_instance_id: '001'
 service_name: internal_file_registry

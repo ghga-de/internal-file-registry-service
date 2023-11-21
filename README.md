@@ -1,5 +1,5 @@
 
-[![tests](https://github.com/ghga-de/internal-file-registry-service/actions/workflows/tests.yaml/badge.svg)](https://github.com/ghga-de/internal-file-registry-service/actions/workflows/unit_and_int_tests.yaml)
+[![tests](https://github.com/ghga-de/internal-file-registry-service/actions/workflows/tests.yaml/badge.svg)](https://github.com/ghga-de/internal-file-registry-service/actions/workflows/tests.yaml)
 [![Coverage Status](https://coveralls.io/repos/github/ghga-de/internal-file-registry-service/badge.svg?branch=main)](https://coveralls.io/github/ghga-de/internal-file-registry-service?branch=main)
 
 # Internal File Registry Service
@@ -73,15 +73,9 @@ ifrs --help
 ### Parameters
 
 The service requires the following configuration parameters:
-- **`permanent_bucket`** *(string)*: The ID of the object storage bucket that is serving as permanent storage.
+- **`object_storages`** *(object)*: Can contain additional properties.
 
-
-  Examples:
-
-  ```json
-  "permanent"
-  ```
-
+  - **Additional Properties**: Refer to *[#/$defs/S3ObjectStorageNodeConfig](#$defs/S3ObjectStorageNodeConfig)*.
 
 - **`file_registered_event_topic`** *(string)*: Name of the topic used for events indicating that a new file has been internally registered.
 
@@ -229,6 +223,16 @@ The service requires the following configuration parameters:
   ```
 
 
+- **`kafka_security_protocol`** *(string)*: Protocol used to communicate with brokers. Valid values are: PLAINTEXT, SSL. Must be one of: `["PLAINTEXT", "SSL"]`. Default: `"PLAINTEXT"`.
+
+- **`kafka_ssl_cafile`** *(string)*: Certificate Authority file path containing certificates used to sign broker certificates. If a CA not specified, the default system CA will be used if found by OpenSSL. Default: `""`.
+
+- **`kafka_ssl_certfile`** *(string)*: Optional filename of client certificate, as well as any CA certificates needed to establish the certificate's authenticity. Default: `""`.
+
+- **`kafka_ssl_keyfile`** *(string)*: Optional filename containing the client private key. Default: `""`.
+
+- **`kafka_ssl_password`** *(string)*: Optional password to be used for the client private key. Default: `""`.
+
 - **`db_connection_str`** *(string, format: password)*: MongoDB connection string. Might include credentials. For more information see: https://naiveskill.com/mongodb-connection-string/.
 
 
@@ -246,68 +250,6 @@ The service requires the following configuration parameters:
 
   ```json
   "my-database"
-  ```
-
-
-- **`s3_endpoint_url`** *(string)*: URL to the S3 API.
-
-
-  Examples:
-
-  ```json
-  "http://localhost:4566"
-  ```
-
-
-- **`s3_access_key_id`** *(string)*: Part of credentials for login into the S3 service. See: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/credentials.html.
-
-
-  Examples:
-
-  ```json
-  "my-access-key-id"
-  ```
-
-
-- **`s3_secret_access_key`** *(string, format: password)*: Part of credentials for login into the S3 service. See: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/credentials.html.
-
-
-  Examples:
-
-  ```json
-  "my-secret-access-key"
-  ```
-
-
-- **`s3_session_token`**: Part of credentials for login into the S3 service. See: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/credentials.html. Default: `null`.
-
-  - **Any of**
-
-    - *string, format: password*
-
-    - *null*
-
-
-  Examples:
-
-  ```json
-  "my-session-token"
-  ```
-
-
-- **`aws_config_ini`**: Path to a config file for specifying more advanced S3 parameters. This should follow the format described here: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html#using-a-configuration-file. Default: `null`.
-
-  - **Any of**
-
-    - *string, format: path*
-
-    - *null*
-
-
-  Examples:
-
-  ```json
-  "~/.aws/config"
   ```
 
 

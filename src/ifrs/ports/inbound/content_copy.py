@@ -49,14 +49,24 @@ class ContentCopyServicePort(ABC):
 
     @abstractmethod
     async def staging_to_permanent(
-        self, *, file: models.FileMetadata, source_object_id: str, source_bucket_id: str
+        self,
+        *,
+        file: models.FileMetadata,
+        source_object_id: str,
+        source_bucket_id: str,
+        s3_endpoint_alias: str,
     ) -> None:
         """Copy a file from a staging stage to the permanent storage."""
         ...
 
     @abstractmethod
     async def permanent_to_outbox(
-        self, *, file: models.FileMetadata, target_object_id: str, target_bucket_id: str
+        self,
+        *,
+        file: models.FileMetadata,
+        target_object_id: str,
+        target_bucket_id: str,
+        s3_endpoint_alias: str,
     ) -> None:
         """Copy a file from the permanent storage to an outbox storage."""
         ...

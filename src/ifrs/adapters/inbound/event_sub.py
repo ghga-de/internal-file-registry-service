@@ -109,6 +109,7 @@ class EventSubTranslator(EventSubscriberProtocol):
             file_without_object_id=file_without_object_id,
             source_object_id=validated_payload.object_id,
             source_bucket_id=validated_payload.bucket_id,
+            s3_endpoint_alias=validated_payload.s3_endpoint_alias,
         )
 
     async def _consume_file_downloads(self, *, payload: JsonObject) -> None:
@@ -122,6 +123,7 @@ class EventSubTranslator(EventSubscriberProtocol):
             decrypted_sha256=validated_payload.decrypted_sha256,
             target_object_id=validated_payload.target_object_id,
             target_bucket_id=validated_payload.target_bucket_id,
+            s3_endpoint_alias=validated_payload.s3_endpoint_alias,
         )
 
     async def _consume_file_deletions(self, *, payload: JsonObject) -> None:
@@ -132,6 +134,7 @@ class EventSubTranslator(EventSubscriberProtocol):
 
         await self._file_registry.delete_file(
             file_id=validated_payload.file_id,
+            s3_endpoint_alias=validated_payload.s3_endpoint_alias,
         )
 
     async def _consume_validated(

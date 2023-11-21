@@ -102,6 +102,7 @@ class FileRegistryPort(ABC):
         file_without_object_id: models.FileMetadataBase,
         source_object_id: str,
         source_bucket_id: str,
+        s3_endpoint_alias: str,
     ) -> None:
         """Registers a file and moves its content from the staging into the permanent
         storage. If the file with that exact metadata has already been registered,
@@ -113,6 +114,8 @@ class FileRegistryPort(ABC):
                 The S3 object ID for the staging bucket.
             source_bucket_id:
                 The S3 bucket ID for staging.
+            s3_endpoint_alias:
+                The label of the object storage configuration to use
 
         Raises:
             self.FileUpdateError:
@@ -124,13 +127,14 @@ class FileRegistryPort(ABC):
         ...
 
     @abstractmethod
-    async def stage_registered_file(
+    async def stage_registered_file(  # noqa: PLR0913
         self,
         *,
         file_id: str,
         decrypted_sha256: str,
         target_object_id: str,
         target_bucket_id: str,
+        s3_endpoint_alias: str,
     ) -> None:
         """Stage a registered file to the outbox.
 
@@ -144,6 +148,8 @@ class FileRegistryPort(ABC):
                 The S3 object ID for the outbox bucket.
             target_bucket_id:
                 The S3 bucket ID for the outbox.
+            s3_endpoint_alias:
+                The label of the object storage configuration to use
 
         Raises:
             self.FileNotInRegistryError:
@@ -157,11 +163,14 @@ class FileRegistryPort(ABC):
         ...
 
     @abstractmethod
-    async def delete_file(self, *, file_id: str) -> None:
+    async def delete_file(self, *, file_id: str, s3_endpoint_alias: str) -> None:
         """Deletes a file from the permanent storage and the internal database.
         If no file with that id exists, do nothing.
 
         Args:
-            file_id: id for the file to delete.
+            file_id:
+                id for the file to delete.
+            s3_endpoint_alias:
+                The label of the object storage configuration to use
         """
         ...

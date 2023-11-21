@@ -41,107 +41,115 @@ async def test_happy_journey(
     file_fixture: FileObject,  # noqa: F811
 ):
     """Simulates a typical, successful journey for upload, download, and deletion"""
-    # place example content in the staging:
-    file_object = file_fixture.model_copy(
-        update={
-            "bucket_id": joint_fixture.staging_bucket,
-            "object_id": EXAMPLE_METADATA.object_id,
-        }
-    )
-    await joint_fixture.s3.populate_file_objects(file_objects=[file_object])
-
-    # register new file from the staging:
-    # (And check if an event informing about the new registration has been published.)
-
-    async with joint_fixture.kafka.record_events(
-        in_topic=joint_fixture.config.file_registered_event_topic,
-    ) as recorder:
-        await joint_fixture.file_registry.register_file(
-            file_without_object_id=EXAMPLE_METADATA_BASE,
-            source_object_id=EXAMPLE_METADATA.object_id,
-            source_bucket_id=joint_fixture.staging_bucket,
-        )
-
-    assert len(recorder.recorded_events) == 1
-    event = recorder.recorded_events[0]
-    assert event.payload["object_id"] != ""
-    assert event.type_ == joint_fixture.config.file_registered_event_type
-
-    object_id = event.payload["object_id"]
-
-    # check that the file content is now in both the staging and the permanent storage:
-    assert await joint_fixture.s3.storage.does_object_exist(
-        bucket_id=joint_fixture.staging_bucket,
-        object_id=EXAMPLE_METADATA.object_id,
-    )
-    assert await joint_fixture.s3.storage.does_object_exist(
-        bucket_id=joint_fixture.config.permanent_bucket,
-        object_id=object_id,
-    )
-
-    # request a stage to the outbox:
-    async with joint_fixture.kafka.expect_events(
-        events=[
-            ExpectedEvent(
-                payload={
-                    "file_id": EXAMPLE_METADATA_BASE.file_id,
-                    "decrypted_sha256": EXAMPLE_METADATA_BASE.decrypted_sha256,
-                    "target_object_id": EXAMPLE_METADATA.object_id,
-                    "target_bucket_id": joint_fixture.outbox_bucket,
-                    "s3_endpoint_alias": "test",
-                },
-                type_=joint_fixture.config.file_staged_event_type,
-                key=EXAMPLE_METADATA_BASE.file_id,
-            )
-        ],
-        in_topic=joint_fixture.config.file_staged_event_topic,
+    for s3, s3_endpoint_alias in (
+        (joint_fixture.s3, joint_fixture.endpoint_aliases.node1),
+        (joint_fixture.second_s3, joint_fixture.endpoint_aliases.node2),
     ):
-        await joint_fixture.file_registry.stage_registered_file(
-            file_id=EXAMPLE_METADATA_BASE.file_id,
-            decrypted_sha256=EXAMPLE_METADATA_BASE.decrypted_sha256,
-            target_object_id=EXAMPLE_METADATA.object_id,
-            target_bucket_id=joint_fixture.outbox_bucket,
+        bucket_id = joint_fixture.config.object_storages[s3_endpoint_alias].bucket
+        # place example content in the staging:
+        file_object = file_fixture.model_copy(
+            update={
+                "bucket_id": joint_fixture.staging_bucket,
+                "object_id": EXAMPLE_METADATA.object_id,
+            }
         )
+        await s3.populate_file_objects(file_objects=[file_object])
 
-    # check that the file content is now in all three storage entities:
-    assert await joint_fixture.s3.storage.does_object_exist(
-        bucket_id=joint_fixture.staging_bucket,
-        object_id=EXAMPLE_METADATA.object_id,
-    )
-    assert await joint_fixture.s3.storage.does_object_exist(
-        bucket_id=joint_fixture.config.permanent_bucket,
-        object_id=object_id,
-    )
-    assert await joint_fixture.s3.storage.does_object_exist(
-        bucket_id=joint_fixture.outbox_bucket, object_id=EXAMPLE_METADATA.object_id
-    )
+        # register new file from the staging:
+        # (And check if an event informing about the new registration has been published.)
 
-    # check that the file content in the outbox is identical to the content in the
-    # staging:
-    download_url = await joint_fixture.s3.storage.get_object_download_url(
-        bucket_id=joint_fixture.outbox_bucket, object_id=EXAMPLE_METADATA.object_id
-    )
-    response = requests.get(download_url, timeout=60)
-    response.raise_for_status()
-    assert response.content == file_object.content
-
-    # Request file deletion:
-    async with joint_fixture.kafka.expect_events(
-        events=[
-            ExpectedEvent(
-                payload={
-                    "file_id": EXAMPLE_METADATA_BASE.file_id,
-                },
-                type_=joint_fixture.config.file_deleted_event_type,
+        async with joint_fixture.kafka.record_events(
+            in_topic=joint_fixture.config.file_registered_event_topic,
+        ) as recorder:
+            await joint_fixture.file_registry.register_file(
+                file_without_object_id=EXAMPLE_METADATA_BASE,
+                source_object_id=EXAMPLE_METADATA.object_id,
+                source_bucket_id=joint_fixture.staging_bucket,
+                s3_endpoint_alias=s3_endpoint_alias,
             )
-        ],
-        in_topic=joint_fixture.config.file_deleted_event_topic,
-    ):
-        await joint_fixture.file_registry.delete_file(
-            file_id=EXAMPLE_METADATA_BASE.file_id
+
+        assert len(recorder.recorded_events) == 1
+        event = recorder.recorded_events[0]
+        assert event.payload["object_id"] != ""
+        assert event.type_ == joint_fixture.config.file_registered_event_type
+
+        object_id = event.payload["object_id"]
+
+        # check that the file content is now in both the staging and the permanent storage:
+        assert await s3.storage.does_object_exist(
+            bucket_id=joint_fixture.staging_bucket,
+            object_id=EXAMPLE_METADATA.object_id,
+        )
+        assert await s3.storage.does_object_exist(
+            bucket_id=bucket_id,
+            object_id=object_id,
         )
 
-    assert not await joint_fixture.s3.storage.does_object_exist(
-        bucket_id=joint_fixture.config.permanent_bucket,
-        object_id=object_id,
-    )
+        # request a stage to the outbox:
+        async with joint_fixture.kafka.expect_events(
+            events=[
+                ExpectedEvent(
+                    payload={
+                        "file_id": EXAMPLE_METADATA_BASE.file_id,
+                        "decrypted_sha256": EXAMPLE_METADATA_BASE.decrypted_sha256,
+                        "target_object_id": EXAMPLE_METADATA.object_id,
+                        "target_bucket_id": joint_fixture.outbox_bucket,
+                        "s3_endpoint_alias": "test",
+                    },
+                    type_=joint_fixture.config.file_staged_event_type,
+                    key=EXAMPLE_METADATA_BASE.file_id,
+                )
+            ],
+            in_topic=joint_fixture.config.file_staged_event_topic,
+        ):
+            await joint_fixture.file_registry.stage_registered_file(
+                file_id=EXAMPLE_METADATA_BASE.file_id,
+                decrypted_sha256=EXAMPLE_METADATA_BASE.decrypted_sha256,
+                target_object_id=EXAMPLE_METADATA.object_id,
+                target_bucket_id=joint_fixture.outbox_bucket,
+                s3_endpoint_alias=s3_endpoint_alias,
+            )
+
+        # check that the file content is now in all three storage entities:
+        assert await s3.storage.does_object_exist(
+            bucket_id=joint_fixture.staging_bucket,
+            object_id=EXAMPLE_METADATA.object_id,
+        )
+        assert await s3.storage.does_object_exist(
+            bucket_id=bucket_id,
+            object_id=object_id,
+        )
+        assert await s3.storage.does_object_exist(
+            bucket_id=joint_fixture.outbox_bucket, object_id=EXAMPLE_METADATA.object_id
+        )
+
+        # check that the file content in the outbox is identical to the content in the
+        # staging:
+        download_url = await s3.storage.get_object_download_url(
+            bucket_id=joint_fixture.outbox_bucket, object_id=EXAMPLE_METADATA.object_id
+        )
+        response = requests.get(download_url, timeout=60)
+        response.raise_for_status()
+        assert response.content == file_object.content
+
+        # Request file deletion:
+        async with joint_fixture.kafka.expect_events(
+            events=[
+                ExpectedEvent(
+                    payload={
+                        "file_id": EXAMPLE_METADATA_BASE.file_id,
+                    },
+                    type_=joint_fixture.config.file_deleted_event_type,
+                )
+            ],
+            in_topic=joint_fixture.config.file_deleted_event_topic,
+        ):
+            await joint_fixture.file_registry.delete_file(
+                file_id=EXAMPLE_METADATA_BASE.file_id,
+                s3_endpoint_alias=s3_endpoint_alias,
+            )
+
+        assert not await s3.storage.does_object_exist(
+            bucket_id=bucket_id,
+            object_id=object_id,
+        )
