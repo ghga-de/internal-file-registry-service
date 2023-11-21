@@ -139,6 +139,7 @@ async def test_happy_journey(
                 ExpectedEvent(
                     payload={
                         "file_id": EXAMPLE_METADATA_BASE.file_id,
+                        "s3_endpoint_alias": s3_endpoint_alias,
                     },
                     type_=joint_fixture.config.file_deleted_event_type,
                 )
