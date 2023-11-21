@@ -2,7 +2,7 @@ db_connection_str: "mongodb://mongodb:27017"
 db_name: "dev_db"
 object_storages:
   test:
-    bucket: outbox
+    bucket: permanent
     credentials:
       s3_endpoint_url: http://ifrs:4566
       s3_access_key_id: test

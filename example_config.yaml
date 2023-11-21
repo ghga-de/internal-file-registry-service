@@ -21,7 +21,7 @@ kafka_ssl_keyfile: ''
 kafka_ssl_password: ''
 object_storages:
   test:
-    bucket: outbox
+    bucket: permanent
     credentials:
       aws_config_ini: null
       s3_access_key_id: test
