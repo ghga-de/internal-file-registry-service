@@ -32,6 +32,7 @@ from tests.fixtures.module_scope_fixtures import (  # noqa: F401
     mongodb_fixture,
     reset_state,
     s3_fixture,
+    second_s3_fixture,
 )
 
 

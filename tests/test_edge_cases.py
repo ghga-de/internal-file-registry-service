@@ -29,6 +29,7 @@ from tests.fixtures.module_scope_fixtures import (  # noqa: F401
     mongodb_fixture,
     reset_state,
     s3_fixture,
+    second_s3_fixture,
 )
 
 
@@ -100,6 +101,8 @@ async def test_reregistration(
                 s3_endpoint_alias=s3_endpoint_alias,
             )
 
+        await joint_fixture.reset_state()
+
 
 @pytest.mark.asyncio
 async def test_reregistration_with_updated_metadata(
@@ -154,6 +157,7 @@ async def test_reregistration_with_updated_metadata(
                     source_bucket_id=joint_fixture.staging_bucket,
                     s3_endpoint_alias=s3_endpoint_alias,
                 )
+        await joint_fixture.reset_state()
 
 
 @pytest.mark.asyncio
@@ -183,6 +187,9 @@ async def test_stage_checksum_missmatch(
     """Check that requesting to stage a registered file to the outbox by specifying the
     wrong checksum fails with the expected exception.
     """
+    # populate the database with a corresponding file metadata entry:
+    await joint_fixture.file_metadata_dao.insert(EXAMPLE_METADATA)
+
     for s3, s3_endpoint_alias in (
         (joint_fixture.s3, joint_fixture.endpoint_aliases.node1),
         (joint_fixture.second_s3, joint_fixture.endpoint_aliases.node2),
@@ -196,9 +203,6 @@ async def test_stage_checksum_missmatch(
             }
         )
         await s3.populate_file_objects(file_objects=[file_object])
-
-        # populate the database with a corresponding file metadata entry:
-        await joint_fixture.file_metadata_dao.insert(EXAMPLE_METADATA)
 
         # request a stage for the registered file to the outbox by specifying a wrong checksum:
         with pytest.raises(FileRegistryPort.ChecksumMissmatchError):

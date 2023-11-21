@@ -82,6 +82,7 @@ class JointFixture:
     async def reset_state(self):
         """Completely reset fixture states"""
         await self.s3.empty_buckets()
+        await self.second_s3.empty_buckets()
         self.mongodb.empty_collections()
         self.kafka.delete_topics()
 
@@ -122,6 +123,13 @@ async def joint_fixture_function(
     async with prepare_core(config=config) as file_registry:
         # create storage entities:
         await s3_fixture.populate_buckets(
+            buckets=[
+                OUTBOX_BUCKET,
+                STAGING_BUCKET,
+                PERMANENT_BUCKET,
+            ]
+        )
+        await second_s3_fixture.populate_buckets(
             buckets=[
                 OUTBOX_BUCKET,
                 STAGING_BUCKET,

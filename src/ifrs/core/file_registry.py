@@ -223,4 +223,6 @@ class FileRegistry(FileRegistryPort):
             # If file does not exist anyways, we are done.
             await self._file_metadata_dao.delete(id_=file_id)
 
-        await self._event_publisher.file_deleted(file_id=file_id)
+        await self._event_publisher.file_deleted(
+            file_id=file_id, s3_endpoint_alias=s3_endpoint_alias
+        )
