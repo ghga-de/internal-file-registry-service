@@ -138,10 +138,7 @@ async def test_happy_journey(
         async with joint_fixture.kafka.expect_events(
             events=[
                 ExpectedEvent(
-                    payload={
-                        "file_id": file_metadata_base.file_id,
-                        "s3_endpoint_alias": s3_endpoint_alias,
-                    },
+                    payload={"file_id": file_metadata_base.file_id},
                     type_=joint_fixture.config.file_deleted_event_type,
                 )
             ],
