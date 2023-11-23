@@ -79,7 +79,6 @@ class FileRegistry(FileRegistryPort):
         file_without_object_id: models.FileMetadataBase,
         source_object_id: str,
         source_bucket_id: str,
-        s3_endpoint_alias: str,
     ) -> None:
         """Registers a file and moves its content from the staging into the permanent
         storage. If the file with that exact metadata has already been registered,
@@ -91,8 +90,6 @@ class FileRegistry(FileRegistryPort):
                 The S3 object ID for the staging bucket.
             source_bucket_id:
                 The S3 bucket ID for staging.
-            s3_endpoint_alias:
-                The label of the object storage configuration to use
 
         Raises:
             self.FileUpdateError:
@@ -118,7 +115,7 @@ class FileRegistry(FileRegistryPort):
                 file=file,
                 source_object_id=source_object_id,
                 source_bucket_id=source_bucket_id,
-                s3_endpoint_alias=s3_endpoint_alias,
+                s3_endpoint_alias=file.s3_endpoint_alias,
             )
         except ContentCopyServicePort.ContentNotInStagingError as error:
             raise self.FileContentNotInstagingError(
@@ -127,20 +124,19 @@ class FileRegistry(FileRegistryPort):
 
         await self._file_metadata_dao.insert(file)
 
-        permanent_bucket, _ = self._object_storages.for_alias(s3_endpoint_alias)
+        permanent_bucket, _ = self._object_storages.for_alias(file.s3_endpoint_alias)
 
         await self._event_publisher.file_internally_registered(
             file=file, bucket_id=permanent_bucket
         )
 
-    async def stage_registered_file(  # noqa: PLR0913
+    async def stage_registered_file(
         self,
         *,
         file_id: str,
         decrypted_sha256: str,
         target_object_id: str,
         target_bucket_id: str,
-        s3_endpoint_alias: str,
     ) -> None:
         """Stage a registered file to the outbox.
 
@@ -184,7 +180,7 @@ class FileRegistry(FileRegistryPort):
                 file=file,
                 target_object_id=target_object_id,
                 target_bucket_id=target_bucket_id,
-                s3_endpoint_alias=s3_endpoint_alias,
+                s3_endpoint_alias=file.s3_endpoint_alias,
             )
 
             await self._event_publisher.file_staged_for_download(
@@ -192,29 +188,34 @@ class FileRegistry(FileRegistryPort):
                 decrypted_sha256=decrypted_sha256,
                 target_object_id=target_object_id,
                 target_bucket_id=target_bucket_id,
+                s3_endpoint_alias=file.s3_endpoint_alias,
             )
 
         except ContentCopyServicePort.ContentNotInPermanentStorageError as error:
             raise self.FileInRegistryButNotInStorageError(file_id=file_id) from error
 
-    async def delete_file(self, *, file_id: str, s3_endpoint_alias: str) -> None:
+    async def delete_file(self, *, file_id: str) -> None:
         """Deletes a file from the permanent storage and the internal database.
         If no file with that id exists, do nothing.
 
         Args:
             file_id:
                 id for the file to delete.
-            s3_endpoint_alias:
-                The label of the object storage configuration to use
         """
-        bucket_id, object_storage = self._object_storages.for_alias(s3_endpoint_alias)
+        try:
+            file = await self._file_metadata_dao.get_by_id(file_id)
+        except ResourceNotFoundError:
+            # resource not in database, nothing to do
+            return
+
+        # Get object ID and storage instance
+        object_id = file.object_id
+        bucket_id, object_storage = self._object_storages.for_alias(
+            file.s3_endpoint_alias
+        )
 
         # Try to remove file from S3
         with suppress(object_storage.ObjectNotFoundError):
-            # Get object ID
-            file = await self._file_metadata_dao.get_by_id(file_id)
-            object_id = file.object_id
-
             # If file does not exist anyways, we are done.
             await object_storage.delete_object(bucket_id=bucket_id, object_id=object_id)
 
@@ -224,5 +225,5 @@ class FileRegistry(FileRegistryPort):
             await self._file_metadata_dao.delete(id_=file_id)
 
         await self._event_publisher.file_deleted(
-            file_id=file_id, s3_endpoint_alias=s3_endpoint_alias
+            file_id=file_id, s3_endpoint_alias=file.s3_endpoint_alias
         )

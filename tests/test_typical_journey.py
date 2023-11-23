@@ -58,15 +58,17 @@ async def test_happy_journey(
 
         # register new file from the staging:
         # (And check if an event informing about the new registration has been published.)
+        file_metadata_base = EXAMPLE_METADATA_BASE.model_copy(
+            update={"s3_endpoint_alias": s3_endpoint_alias}, deep=True
+        )
 
         async with joint_fixture.kafka.record_events(
             in_topic=joint_fixture.config.file_registered_event_topic,
         ) as recorder:
             await joint_fixture.file_registry.register_file(
-                file_without_object_id=EXAMPLE_METADATA_BASE,
+                file_without_object_id=file_metadata_base,
                 source_object_id=EXAMPLE_METADATA.object_id,
                 source_bucket_id=joint_fixture.staging_bucket,
-                s3_endpoint_alias=s3_endpoint_alias,
             )
 
         assert len(recorder.recorded_events) == 1
@@ -91,24 +93,23 @@ async def test_happy_journey(
             events=[
                 ExpectedEvent(
                     payload={
-                        "file_id": EXAMPLE_METADATA_BASE.file_id,
-                        "decrypted_sha256": EXAMPLE_METADATA_BASE.decrypted_sha256,
+                        "file_id": file_metadata_base.file_id,
+                        "decrypted_sha256": file_metadata_base.decrypted_sha256,
                         "target_object_id": EXAMPLE_METADATA.object_id,
                         "target_bucket_id": joint_fixture.outbox_bucket,
-                        "s3_endpoint_alias": "test",
+                        "s3_endpoint_alias": s3_endpoint_alias,
                     },
                     type_=joint_fixture.config.file_staged_event_type,
-                    key=EXAMPLE_METADATA_BASE.file_id,
+                    key=file_metadata_base.file_id,
                 )
             ],
             in_topic=joint_fixture.config.file_staged_event_topic,
         ):
             await joint_fixture.file_registry.stage_registered_file(
-                file_id=EXAMPLE_METADATA_BASE.file_id,
-                decrypted_sha256=EXAMPLE_METADATA_BASE.decrypted_sha256,
+                file_id=file_metadata_base.file_id,
+                decrypted_sha256=file_metadata_base.decrypted_sha256,
                 target_object_id=EXAMPLE_METADATA.object_id,
                 target_bucket_id=joint_fixture.outbox_bucket,
-                s3_endpoint_alias=s3_endpoint_alias,
             )
 
         # check that the file content is now in all three storage entities:
@@ -138,7 +139,7 @@ async def test_happy_journey(
             events=[
                 ExpectedEvent(
                     payload={
-                        "file_id": EXAMPLE_METADATA_BASE.file_id,
+                        "file_id": file_metadata_base.file_id,
                         "s3_endpoint_alias": s3_endpoint_alias,
                     },
                     type_=joint_fixture.config.file_deleted_event_type,
@@ -147,11 +148,12 @@ async def test_happy_journey(
             in_topic=joint_fixture.config.file_deleted_event_topic,
         ):
             await joint_fixture.file_registry.delete_file(
-                file_id=EXAMPLE_METADATA_BASE.file_id,
-                s3_endpoint_alias=s3_endpoint_alias,
+                file_id=file_metadata_base.file_id,
             )
 
         assert not await s3.storage.does_object_exist(
             bucket_id=bucket_id,
             object_id=object_id,
         )
+
+        await joint_fixture.reset_state()

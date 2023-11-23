@@ -36,17 +36,12 @@ from tests.fixtures.module_scope_fixtures import (  # noqa: F401
 @pytest.mark.asyncio
 async def test_register_with_empty_staging(joint_fixture: JointFixture):  # noqa: F811
     """Test registration of a file when the file content is missing from the staging."""
-    for s3_endpoint_alias in (
-        joint_fixture.endpoint_aliases.node1,
-        joint_fixture.endpoint_aliases.node2,
-    ):
-        with pytest.raises(FileRegistryPort.FileContentNotInstagingError):
-            await joint_fixture.file_registry.register_file(
-                file_without_object_id=EXAMPLE_METADATA_BASE,
-                source_object_id="missing",
-                source_bucket_id=joint_fixture.staging_bucket,
-                s3_endpoint_alias=s3_endpoint_alias,
-            )
+    with pytest.raises(FileRegistryPort.FileContentNotInstagingError):
+        await joint_fixture.file_registry.register_file(
+            file_without_object_id=EXAMPLE_METADATA_BASE,
+            source_object_id="missing",
+            source_bucket_id=joint_fixture.staging_bucket,
+        )
 
 
 @pytest.mark.asyncio
@@ -72,15 +67,17 @@ async def test_reregistration(
 
         # register new file from the staging:
         # (And check if an event informing about the new registration has been published.)
+        file_metadata_base = EXAMPLE_METADATA_BASE.model_copy(
+            update={"s3_endpoint_alias": s3_endpoint_alias}
+        )
 
         async with joint_fixture.kafka.record_events(
             in_topic=joint_fixture.config.file_registered_event_topic
         ) as recorder:
             await joint_fixture.file_registry.register_file(
-                file_without_object_id=EXAMPLE_METADATA_BASE,
+                file_without_object_id=file_metadata_base,
                 source_object_id=EXAMPLE_METADATA.object_id,
                 source_bucket_id=joint_fixture.staging_bucket,
-                s3_endpoint_alias=s3_endpoint_alias,
             )
 
         assert len(recorder.recorded_events) == 1
@@ -95,10 +92,9 @@ async def test_reregistration(
             in_topic=joint_fixture.config.file_registered_event_topic,
         ):
             await joint_fixture.file_registry.register_file(
-                file_without_object_id=EXAMPLE_METADATA_BASE,
+                file_without_object_id=file_metadata_base,
                 source_object_id=EXAMPLE_METADATA.object_id,
                 source_bucket_id=joint_fixture.staging_bucket,
-                s3_endpoint_alias=s3_endpoint_alias,
             )
 
         await joint_fixture.reset_state()
@@ -127,15 +123,17 @@ async def test_reregistration_with_updated_metadata(
 
         # register new file from the staging:
         # (And check if an event informing about the new registration has been published.)
+        file_metadata_base = EXAMPLE_METADATA_BASE.model_copy(
+            update={"s3_endpoint_alias": s3_endpoint_alias}
+        )
 
         async with joint_fixture.kafka.record_events(
             in_topic=joint_fixture.config.file_registered_event_topic,
         ) as recorder:
             await joint_fixture.file_registry.register_file(
-                file_without_object_id=EXAMPLE_METADATA_BASE,
+                file_without_object_id=file_metadata_base,
                 source_object_id=EXAMPLE_METADATA.object_id,
                 source_bucket_id=joint_fixture.staging_bucket,
-                s3_endpoint_alias=s3_endpoint_alias,
             )
 
         assert len(recorder.recorded_events) == 1
@@ -145,7 +143,7 @@ async def test_reregistration_with_updated_metadata(
 
         # try to re-register the same file with updated metadata:
         # (Expect an exception and no second event.)
-        file_update = EXAMPLE_METADATA_BASE.model_copy(update={"decrypted_size": 4321})
+        file_update = file_metadata_base.model_copy(update={"decrypted_size": 4321})
         async with joint_fixture.kafka.expect_events(
             events=[],
             in_topic=joint_fixture.config.file_registered_event_topic,
@@ -155,7 +153,6 @@ async def test_reregistration_with_updated_metadata(
                     file_without_object_id=file_update,
                     source_object_id=EXAMPLE_METADATA.object_id,
                     source_bucket_id=joint_fixture.staging_bucket,
-                    s3_endpoint_alias=s3_endpoint_alias,
                 )
         await joint_fixture.reset_state()
 
@@ -165,18 +162,13 @@ async def test_stage_non_existing_file(joint_fixture: JointFixture):  # noqa: F8
     """Check that requesting to stage a non-registered file fails with the expected
     exception.
     """
-    for s3_endpoint_alias in (
-        joint_fixture.endpoint_aliases.node1,
-        joint_fixture.endpoint_aliases.node2,
-    ):
-        with pytest.raises(FileRegistryPort.FileNotInRegistryError):
-            await joint_fixture.file_registry.stage_registered_file(
-                file_id="notregisteredfile001",
-                decrypted_sha256=EXAMPLE_METADATA_BASE.decrypted_sha256,
-                target_object_id=EXAMPLE_METADATA.object_id,
-                target_bucket_id=joint_fixture.outbox_bucket,
-                s3_endpoint_alias=s3_endpoint_alias,
-            )
+    with pytest.raises(FileRegistryPort.FileNotInRegistryError):
+        await joint_fixture.file_registry.stage_registered_file(
+            file_id="notregisteredfile001",
+            decrypted_sha256=EXAMPLE_METADATA_BASE.decrypted_sha256,
+            target_object_id=EXAMPLE_METADATA.object_id,
+            target_bucket_id=joint_fixture.outbox_bucket,
+        )
 
 
 @pytest.mark.asyncio
@@ -213,7 +205,6 @@ async def test_stage_checksum_missmatch(
                 ),
                 target_object_id=EXAMPLE_METADATA.object_id,
                 target_bucket_id=joint_fixture.outbox_bucket,
-                s3_endpoint_alias=s3_endpoint_alias,
             )
 
 
@@ -236,5 +227,4 @@ async def test_storage_db_inconsistency(
             decrypted_sha256=EXAMPLE_METADATA_BASE.decrypted_sha256,
             target_object_id=EXAMPLE_METADATA.object_id,
             target_bucket_id=joint_fixture.outbox_bucket,
-            s3_endpoint_alias=joint_fixture.endpoint_aliases.node1,
         )
