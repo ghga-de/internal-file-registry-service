@@ -17,13 +17,14 @@
 import uuid
 from contextlib import suppress
 
+from ghga_service_commons.utils.multinode_storage import ObjectStorages
+
 from ifrs.config import Config
 from ifrs.core import models
 from ifrs.ports.inbound.content_copy import ContentCopyServicePort
 from ifrs.ports.inbound.file_registry import FileRegistryPort
 from ifrs.ports.outbound.dao import FileMetadataDaoPort, ResourceNotFoundError
 from ifrs.ports.outbound.event_pub import EventPublisherPort
-from ifrs.ports.outbound.storage import ObjectStoragePort
 
 
 class FileRegistry(FileRegistryPort):
@@ -35,14 +36,14 @@ class FileRegistry(FileRegistryPort):
         content_copy_svc: ContentCopyServicePort,
         file_metadata_dao: FileMetadataDaoPort,
         event_publisher: EventPublisherPort,
-        object_storage: ObjectStoragePort,
+        object_storages: ObjectStorages,
         config: Config,
     ):
         """Initialize with essential config params and outbound adapters."""
         self._content_copy_svc = content_copy_svc
         self._event_publisher = event_publisher
         self._file_metadata_dao = file_metadata_dao
-        self._object_storage = object_storage
+        self._object_storages = object_storages
         self._config = config
 
     async def _is_file_registered(
@@ -114,6 +115,7 @@ class FileRegistry(FileRegistryPort):
                 file=file,
                 source_object_id=source_object_id,
                 source_bucket_id=source_bucket_id,
+                s3_endpoint_alias=file.s3_endpoint_alias,
             )
         except ContentCopyServicePort.ContentNotInStagingError as error:
             raise self.FileContentNotInstagingError(
@@ -122,8 +124,10 @@ class FileRegistry(FileRegistryPort):
 
         await self._file_metadata_dao.insert(file)
 
+        permanent_bucket, _ = self._object_storages.for_alias(file.s3_endpoint_alias)
+
         await self._event_publisher.file_internally_registered(
-            file=file, bucket_id=self._config.permanent_bucket
+            file=file, bucket_id=permanent_bucket
         )
 
     async def stage_registered_file(
@@ -146,6 +150,8 @@ class FileRegistry(FileRegistryPort):
                 The S3 object ID for the outbox bucket.
             target_bucket_id:
                 The S3 bucket ID for the outbox.
+            s3_endpoint_alias:
+                The label of the object storage configuration to use
 
         Raises:
             self.FileNotInRegistryError:
@@ -174,6 +180,7 @@ class FileRegistry(FileRegistryPort):
                 file=file,
                 target_object_id=target_object_id,
                 target_bucket_id=target_bucket_id,
+                s3_endpoint_alias=file.s3_endpoint_alias,
             )
 
             await self._event_publisher.file_staged_for_download(
@@ -181,6 +188,7 @@ class FileRegistry(FileRegistryPort):
                 decrypted_sha256=decrypted_sha256,
                 target_object_id=target_object_id,
                 target_bucket_id=target_bucket_id,
+                s3_endpoint_alias=file.s3_endpoint_alias,
             )
 
         except ContentCopyServicePort.ContentNotInPermanentStorageError as error:
@@ -191,18 +199,25 @@ class FileRegistry(FileRegistryPort):
         If no file with that id exists, do nothing.
 
         Args:
-            file_id: id for the file to delete.
+            file_id:
+                id for the file to delete.
         """
-        # Try to remove file from S3
-        with suppress(self._object_storage.ObjectNotFoundError):
-            # Get object ID
+        try:
             file = await self._file_metadata_dao.get_by_id(file_id)
-            object_id = file.object_id
+        except ResourceNotFoundError:
+            # resource not in database, nothing to do
+            return
 
+        # Get object ID and storage instance
+        object_id = file.object_id
+        bucket_id, object_storage = self._object_storages.for_alias(
+            file.s3_endpoint_alias
+        )
+
+        # Try to remove file from S3
+        with suppress(object_storage.ObjectNotFoundError):
             # If file does not exist anyways, we are done.
-            await self._object_storage.delete_object(
-                bucket_id=self._config.permanent_bucket, object_id=object_id
-            )
+            await object_storage.delete_object(bucket_id=bucket_id, object_id=object_id)
 
         # Try to remove file from database
         with suppress(ResourceNotFoundError):

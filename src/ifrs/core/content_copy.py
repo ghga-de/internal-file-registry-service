@@ -15,24 +15,13 @@
 
 """Specialized service managing copy operations of files between buckets."""
 
-from pydantic import Field
-from pydantic_settings import BaseSettings
+from ghga_service_commons.utils.multinode_storage import (
+    ObjectStorages,
+    S3ObjectStoragesConfig,
+)
 
 from ifrs.core import models
 from ifrs.ports.inbound.content_copy import ContentCopyServicePort
-from ifrs.ports.outbound.storage import ObjectStoragePort
-
-
-class StorageEntitiesConfig(BaseSettings):
-    """A config for specifying the location of major storage entities."""
-
-    permanent_bucket: str = Field(
-        ...,
-        description=(
-            "The ID of the object storage bucket that is serving as permanent storage."
-        ),
-        examples=["permanent"],
-    )
 
 
 class ContentCopyService(ContentCopyServicePort):
@@ -43,52 +32,70 @@ class ContentCopyService(ContentCopyServicePort):
     def __init__(
         self,
         *,
-        config: StorageEntitiesConfig,
-        object_storage: ObjectStoragePort,
+        config: S3ObjectStoragesConfig,
+        object_storages: ObjectStorages,
     ):
         """Initialize with essential config params and outbound adapters."""
         self._config = config
-        self._object_storage = object_storage
+        self._object_storages = object_storages
 
     async def staging_to_permanent(
-        self, *, file: models.FileMetadata, source_object_id: str, source_bucket_id: str
+        self,
+        *,
+        file: models.FileMetadata,
+        source_object_id: str,
+        source_bucket_id: str,
+        s3_endpoint_alias: str,
     ) -> None:
         """Copy a file from an staging stage to the permanent storage."""
-        if await self._object_storage.does_object_exist(
-            bucket_id=self._config.permanent_bucket, object_id=file.object_id
+        target_bucket_id, object_storage = self._object_storages.for_alias(
+            s3_endpoint_alias
+        )
+
+        if await object_storage.does_object_exist(
+            bucket_id=target_bucket_id, object_id=file.object_id
         ):
             # the content is already where it should go, there is nothing to do
             return
 
-        if not await self._object_storage.does_object_exist(
+        if not await object_storage.does_object_exist(
             bucket_id=source_bucket_id, object_id=source_object_id
         ):
             raise self.ContentNotInStagingError(file_id=file.file_id)
 
-        await self._object_storage.copy_object(
+        await object_storage.copy_object(
             source_bucket_id=source_bucket_id,
             source_object_id=source_object_id,
-            dest_bucket_id=self._config.permanent_bucket,
+            dest_bucket_id=target_bucket_id,
             dest_object_id=file.object_id,
         )
 
     async def permanent_to_outbox(
-        self, *, file: models.FileMetadata, target_object_id: str, target_bucket_id: str
+        self,
+        *,
+        file: models.FileMetadata,
+        target_object_id: str,
+        target_bucket_id: str,
+        s3_endpoint_alias: str,
     ) -> None:
         """Copy a file from an staging stage to the permanent storage."""
-        if await self._object_storage.does_object_exist(
+        source_bucket_id, object_storage = self._object_storages.for_alias(
+            s3_endpoint_alias
+        )
+
+        if await object_storage.does_object_exist(
             bucket_id=target_bucket_id, object_id=target_object_id
         ):
             # the content is already where it should go, there is nothing to do
             return
 
-        if not await self._object_storage.does_object_exist(
-            bucket_id=self._config.permanent_bucket, object_id=file.object_id
+        if not await object_storage.does_object_exist(
+            bucket_id=source_bucket_id, object_id=file.object_id
         ):
             raise self.ContentNotInPermanentStorageError(file_id=file.file_id)
 
-        await self._object_storage.copy_object(
-            source_bucket_id=self._config.permanent_bucket,
+        await object_storage.copy_object(
+            source_bucket_id=source_bucket_id,
             source_object_id=file.object_id,
             dest_bucket_id=target_bucket_id,
             dest_object_id=target_object_id,

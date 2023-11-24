@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ifrs"
-version = "0.4.1"
+version = "1.0.0"
 description = "Internal-File-Registry-Service - This service acts as a registry for the internal location and representation of files."
 readme = "README.md"
 authors = [
@@ -23,7 +23,7 @@ classifiers = [
     "Intended Audience :: Developers",
 ]
 dependencies = [
-    "ghga-event-schemas~=1.0.0",
+    "ghga-event-schemas==1.0.0",
     "ghga-service-commons>=1.1.0",
     "hexkit[mongodb,s3,akafka]>=0.11.0",
 ]

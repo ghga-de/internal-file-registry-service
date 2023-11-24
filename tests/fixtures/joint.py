@@ -26,6 +26,10 @@ from collections.abc import AsyncGenerator
 from dataclasses import dataclass
 
 import pytest_asyncio
+from ghga_service_commons.utils.multinode_storage import (
+    S3ObjectStorageNodeConfig,
+    S3ObjectStoragesConfig,
+)
 from hexkit.providers.akafka.testutils import KafkaFixture
 from hexkit.providers.mongodb import MongoDbDaoFactory
 from hexkit.providers.mongodb.testutils import MongoDbFixture
@@ -40,7 +44,17 @@ from ifrs.ports.outbound.dao import FileMetadataDaoPort
 from tests.fixtures.config import get_config
 
 OUTBOX_BUCKET = "outbox"
+PERMANENT_BUCKET = "permanent"
 STAGING_BUCKET = "staging"
+
+S3_ENDPOINT_ALIASES = ("test", "test2")
+
+
+@dataclass
+class EndpointAliases:
+    node1: str = S3_ENDPOINT_ALIASES[0]
+    node2: str = S3_ENDPOINT_ALIASES[1]
+    fake: str = f"{S3_ENDPOINT_ALIASES[0]}_fake"
 
 
 def get_free_port() -> int:
@@ -57,26 +71,48 @@ class JointFixture:
     config: Config
     mongodb: MongoDbFixture
     s3: S3Fixture
+    second_s3: S3Fixture
     file_metadata_dao: FileMetadataDaoPort
     file_registry: FileRegistryPort
     kafka: KafkaFixture
     outbox_bucket: str
     staging_bucket: str
+    endpoint_aliases: EndpointAliases
 
     async def reset_state(self):
         """Completely reset fixture states"""
         await self.s3.empty_buckets()
+        await self.second_s3.empty_buckets()
         self.mongodb.empty_collections()
         self.kafka.delete_topics()
 
 
 async def joint_fixture_function(
-    mongodb_fixture: MongoDbFixture, s3_fixture: S3Fixture, kafka_fixture: KafkaFixture
+    mongodb_fixture: MongoDbFixture,
+    s3_fixture: S3Fixture,
+    second_s3_fixture: S3Fixture,
+    kafka_fixture: KafkaFixture,
 ) -> AsyncGenerator[JointFixture, None]:
     """A fixture that embeds all other fixtures for API-level integration testing"""
     # merge configs from different sources with the default one:
+
+    node_config = S3ObjectStorageNodeConfig(
+        bucket=PERMANENT_BUCKET, credentials=s3_fixture.config
+    )
+    second_node_config = S3ObjectStorageNodeConfig(
+        bucket=PERMANENT_BUCKET, credentials=second_s3_fixture.config
+    )
+
+    endpoint_aliases = EndpointAliases()
+
+    object_storage_config = S3ObjectStoragesConfig(
+        object_storages={
+            endpoint_aliases.node1: node_config,
+            endpoint_aliases.node2: second_node_config,
+        }
+    )
     config = get_config(
-        sources=[mongodb_fixture.config, s3_fixture.config, kafka_fixture.config]
+        sources=[mongodb_fixture.config, object_storage_config, kafka_fixture.config]
     )
     dao_factory = MongoDbDaoFactory(config=config)
     file_metadata_dao = await FileMetadataDaoConstructor.construct(
@@ -90,7 +126,14 @@ async def joint_fixture_function(
             buckets=[
                 OUTBOX_BUCKET,
                 STAGING_BUCKET,
-                config.permanent_bucket,
+                PERMANENT_BUCKET,
+            ]
+        )
+        await second_s3_fixture.populate_buckets(
+            buckets=[
+                OUTBOX_BUCKET,
+                STAGING_BUCKET,
+                PERMANENT_BUCKET,
             ]
         )
 
@@ -98,11 +141,13 @@ async def joint_fixture_function(
             config=config,
             mongodb=mongodb_fixture,
             s3=s3_fixture,
+            second_s3=second_s3_fixture,
             file_metadata_dao=file_metadata_dao,
             file_registry=file_registry,
             kafka=kafka_fixture,
             outbox_bucket=OUTBOX_BUCKET,
             staging_bucket=STAGING_BUCKET,
+            endpoint_aliases=endpoint_aliases,
         )
 
         # prevent teardown happening before reset_state has finished to prevent hanging

@@ -29,6 +29,7 @@ from tests.fixtures.module_scope_fixtures import (  # noqa: F401
     mongodb_fixture,
     reset_state,
     s3_fixture,
+    second_s3_fixture,
 )
 
 
@@ -51,43 +52,52 @@ async def test_reregistration(
     """Test the re-registration of a file with identical metadata (should not result in
     an exception).
     """
-    # place example content in the staging:
-    file_object = file_fixture.model_copy(
-        update={
-            "bucket_id": joint_fixture.staging_bucket,
-            "object_id": EXAMPLE_METADATA.object_id,
-        }
-    )
-    await joint_fixture.s3.populate_file_objects(file_objects=[file_object])
-
-    # register new file from the staging:
-    # (And check if an event informing about the new registration has been published.)
-
-    async with joint_fixture.kafka.record_events(
-        in_topic=joint_fixture.config.file_registered_event_topic
-    ) as recorder:
-        await joint_fixture.file_registry.register_file(
-            file_without_object_id=EXAMPLE_METADATA_BASE,
-            source_object_id=EXAMPLE_METADATA.object_id,
-            source_bucket_id=joint_fixture.staging_bucket,
-        )
-
-    assert len(recorder.recorded_events) == 1
-    event = recorder.recorded_events[0]
-    assert event.payload["object_id"] != ""
-    assert event.type_ == joint_fixture.config.file_registered_event_type
-
-    # re-register the same file from the staging:
-    # (A second event is not expected.)
-    async with joint_fixture.kafka.expect_events(
-        events=[],
-        in_topic=joint_fixture.config.file_registered_event_topic,
+    for s3, s3_endpoint_alias in (
+        (joint_fixture.s3, joint_fixture.endpoint_aliases.node1),
+        (joint_fixture.second_s3, joint_fixture.endpoint_aliases.node2),
     ):
-        await joint_fixture.file_registry.register_file(
-            file_without_object_id=EXAMPLE_METADATA_BASE,
-            source_object_id=EXAMPLE_METADATA.object_id,
-            source_bucket_id=joint_fixture.staging_bucket,
+        # place example content in the staging:
+        file_object = file_fixture.model_copy(
+            update={
+                "bucket_id": joint_fixture.staging_bucket,
+                "object_id": EXAMPLE_METADATA.object_id,
+            }
         )
+        await s3.populate_file_objects(file_objects=[file_object])
+
+        # register new file from the staging:
+        # (And check if an event informing about the new registration has been published.)
+        file_metadata_base = EXAMPLE_METADATA_BASE.model_copy(
+            update={"s3_endpoint_alias": s3_endpoint_alias}
+        )
+
+        async with joint_fixture.kafka.record_events(
+            in_topic=joint_fixture.config.file_registered_event_topic
+        ) as recorder:
+            await joint_fixture.file_registry.register_file(
+                file_without_object_id=file_metadata_base,
+                source_object_id=EXAMPLE_METADATA.object_id,
+                source_bucket_id=joint_fixture.staging_bucket,
+            )
+
+        assert len(recorder.recorded_events) == 1
+        event = recorder.recorded_events[0]
+        assert event.payload["object_id"] != ""
+        assert event.type_ == joint_fixture.config.file_registered_event_type
+
+        # re-register the same file from the staging:
+        # (A second event is not expected.)
+        async with joint_fixture.kafka.expect_events(
+            events=[],
+            in_topic=joint_fixture.config.file_registered_event_topic,
+        ):
+            await joint_fixture.file_registry.register_file(
+                file_without_object_id=file_metadata_base,
+                source_object_id=EXAMPLE_METADATA.object_id,
+                source_bucket_id=joint_fixture.staging_bucket,
+            )
+
+        await joint_fixture.reset_state()
 
 
 @pytest.mark.asyncio
@@ -98,45 +108,53 @@ async def test_reregistration_with_updated_metadata(
     """Check that a re-registration of a file with updated metadata fails with the
     expected exception.
     """
-    # place example content in the staging:
-    file_object = file_fixture.model_copy(
-        update={
-            "bucket_id": joint_fixture.staging_bucket,
-            "object_id": EXAMPLE_METADATA.object_id,
-        }
-    )
-    await joint_fixture.s3.populate_file_objects(file_objects=[file_object])
+    for s3, s3_endpoint_alias in (
+        (joint_fixture.s3, joint_fixture.endpoint_aliases.node1),
+        (joint_fixture.second_s3, joint_fixture.endpoint_aliases.node2),
+    ):
+        # place example content in the staging:
+        file_object = file_fixture.model_copy(
+            update={
+                "bucket_id": joint_fixture.staging_bucket,
+                "object_id": EXAMPLE_METADATA.object_id,
+            }
+        )
+        await s3.populate_file_objects(file_objects=[file_object])
 
-    # register new file from the staging:
-    # (And check if an event informing about the new registration has been published.)
-
-    async with joint_fixture.kafka.record_events(
-        in_topic=joint_fixture.config.file_registered_event_topic,
-    ) as recorder:
-        await joint_fixture.file_registry.register_file(
-            file_without_object_id=EXAMPLE_METADATA_BASE,
-            source_object_id=EXAMPLE_METADATA.object_id,
-            source_bucket_id=joint_fixture.staging_bucket,
+        # register new file from the staging:
+        # (And check if an event informing about the new registration has been published.)
+        file_metadata_base = EXAMPLE_METADATA_BASE.model_copy(
+            update={"s3_endpoint_alias": s3_endpoint_alias}
         )
 
-    assert len(recorder.recorded_events) == 1
-    event = recorder.recorded_events[0]
-    assert event.payload["object_id"] != ""
-    assert event.type_ == joint_fixture.config.file_registered_event_type
-
-    # try to re-register the same file with updated metadata:
-    # (Expect an exception and no second event.)
-    file_update = EXAMPLE_METADATA_BASE.model_copy(update={"decrypted_size": 4321})
-    async with joint_fixture.kafka.expect_events(
-        events=[],
-        in_topic=joint_fixture.config.file_registered_event_topic,
-    ):
-        with pytest.raises(FileRegistryPort.FileUpdateError):
+        async with joint_fixture.kafka.record_events(
+            in_topic=joint_fixture.config.file_registered_event_topic,
+        ) as recorder:
             await joint_fixture.file_registry.register_file(
-                file_without_object_id=file_update,
+                file_without_object_id=file_metadata_base,
                 source_object_id=EXAMPLE_METADATA.object_id,
                 source_bucket_id=joint_fixture.staging_bucket,
             )
+
+        assert len(recorder.recorded_events) == 1
+        event = recorder.recorded_events[0]
+        assert event.payload["object_id"] != ""
+        assert event.type_ == joint_fixture.config.file_registered_event_type
+
+        # try to re-register the same file with updated metadata:
+        # (Expect an exception and no second event.)
+        file_update = file_metadata_base.model_copy(update={"decrypted_size": 4321})
+        async with joint_fixture.kafka.expect_events(
+            events=[],
+            in_topic=joint_fixture.config.file_registered_event_topic,
+        ):
+            with pytest.raises(FileRegistryPort.FileUpdateError):
+                await joint_fixture.file_registry.register_file(
+                    file_without_object_id=file_update,
+                    source_object_id=EXAMPLE_METADATA.object_id,
+                    source_bucket_id=joint_fixture.staging_bucket,
+                )
+        await joint_fixture.reset_state()
 
 
 @pytest.mark.asyncio
@@ -161,28 +179,33 @@ async def test_stage_checksum_missmatch(
     """Check that requesting to stage a registered file to the outbox by specifying the
     wrong checksum fails with the expected exception.
     """
-    # place the content for an example file in the permanent storage:
-    file_object = file_fixture.model_copy(
-        update={
-            "bucket_id": joint_fixture.config.permanent_bucket,
-            "object_id": EXAMPLE_METADATA.object_id,
-        }
-    )
-    await joint_fixture.s3.populate_file_objects(file_objects=[file_object])
-
     # populate the database with a corresponding file metadata entry:
     await joint_fixture.file_metadata_dao.insert(EXAMPLE_METADATA)
 
-    # request a stage for the registered file to the outbox by specifying a wrong checksum:
-    with pytest.raises(FileRegistryPort.ChecksumMissmatchError):
-        await joint_fixture.file_registry.stage_registered_file(
-            file_id=EXAMPLE_METADATA_BASE.file_id,
-            decrypted_sha256=(
-                "e6da6d6d05cc057964877aad8a3e9ad712c8abeae279dfa2f89b07eba7ef8abe"
-            ),
-            target_object_id=EXAMPLE_METADATA.object_id,
-            target_bucket_id=joint_fixture.outbox_bucket,
+    for s3, s3_endpoint_alias in (
+        (joint_fixture.s3, joint_fixture.endpoint_aliases.node1),
+        (joint_fixture.second_s3, joint_fixture.endpoint_aliases.node2),
+    ):
+        bucket_id = joint_fixture.config.object_storages[s3_endpoint_alias].bucket
+        # place the content for an example file in the permanent storage:
+        file_object = file_fixture.model_copy(
+            update={
+                "bucket_id": bucket_id,
+                "object_id": EXAMPLE_METADATA.object_id,
+            }
         )
+        await s3.populate_file_objects(file_objects=[file_object])
+
+        # request a stage for the registered file to the outbox by specifying a wrong checksum:
+        with pytest.raises(FileRegistryPort.ChecksumMissmatchError):
+            await joint_fixture.file_registry.stage_registered_file(
+                file_id=EXAMPLE_METADATA_BASE.file_id,
+                decrypted_sha256=(
+                    "e6da6d6d05cc057964877aad8a3e9ad712c8abeae279dfa2f89b07eba7ef8abe"
+                ),
+                target_object_id=EXAMPLE_METADATA.object_id,
+                target_bucket_id=joint_fixture.outbox_bucket,
+            )
 
 
 @pytest.mark.asyncio

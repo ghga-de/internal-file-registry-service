@@ -103,6 +103,7 @@ class EventSubTranslator(EventSubscriberProtocol):
             encrypted_parts_md5=validated_payload.encrypted_parts_md5,
             encrypted_parts_sha256=validated_payload.encrypted_parts_sha256,
             content_offset=validated_payload.content_offset,
+            s3_endpoint_alias=validated_payload.s3_endpoint_alias,
         )
 
         await self._file_registry.register_file(
@@ -130,9 +131,7 @@ class EventSubTranslator(EventSubscriberProtocol):
             payload=payload, schema=event_schemas.FileDeletionRequested
         )
 
-        await self._file_registry.delete_file(
-            file_id=validated_payload.file_id,
-        )
+        await self._file_registry.delete_file(file_id=validated_payload.file_id)
 
     async def _consume_validated(
         self,

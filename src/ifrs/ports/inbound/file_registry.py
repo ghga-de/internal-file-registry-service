@@ -162,6 +162,9 @@ class FileRegistryPort(ABC):
         If no file with that id exists, do nothing.
 
         Args:
-            file_id: id for the file to delete.
+            file_id:
+                id for the file to delete.
+            s3_endpoint_alias:
+                The label of the object storage configuration to use
         """
         ...

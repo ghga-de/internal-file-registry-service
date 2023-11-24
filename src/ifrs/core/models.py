@@ -73,6 +73,10 @@ class FileMetadataBase(BaseModel):
         ...,
         description="The SHA-256 checksum of the entire decrypted file content.",
     )
+    s3_endpoint_alias: str = Field(
+        ...,
+        description="Alias for the object storage location where the given object is stored.",
+    )
 
 
 class FileMetadata(FileMetadataBase):

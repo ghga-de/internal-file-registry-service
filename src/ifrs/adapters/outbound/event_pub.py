@@ -84,7 +84,7 @@ class EventPubTranslator(EventPublisherPort):
     ) -> None:
         """Communicates the event that a new file has been internally registered."""
         payload = event_schemas.FileInternallyRegistered(
-            s3_endpoint_alias="test",
+            s3_endpoint_alias=file.s3_endpoint_alias,
             file_id=file.file_id,
             object_id=file.object_id,
             bucket_id=bucket_id,
@@ -106,17 +106,18 @@ class EventPubTranslator(EventPublisherPort):
             key=file.file_id,
         )
 
-    async def file_staged_for_download(
+    async def file_staged_for_download(  # noqa: PLR0913
         self,
         *,
         file_id: str,
         decrypted_sha256: str,
         target_object_id: str,
         target_bucket_id: str,
+        s3_endpoint_alias: str,
     ) -> None:
         """Communicates the event that a file has been staged for download."""
         payload = event_schemas.FileStagedForDownload(
-            s3_endpoint_alias="test",
+            s3_endpoint_alias=s3_endpoint_alias,
             file_id=file_id,
             decrypted_sha256=decrypted_sha256,
             target_object_id=target_object_id,
@@ -133,9 +134,7 @@ class EventPubTranslator(EventPublisherPort):
 
     async def file_deleted(self, *, file_id: str) -> None:
         """Communicates the event that a file has been successfully deleted."""
-        payload = event_schemas.FileDeletionSuccess(
-            file_id=file_id,
-        )
+        payload = event_schemas.FileDeletionSuccess(file_id=file_id)
         payload_dict = json.loads(payload.model_dump_json())
 
         await self._provider.publish(
