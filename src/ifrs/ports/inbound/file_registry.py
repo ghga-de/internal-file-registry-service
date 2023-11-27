@@ -34,7 +34,7 @@ class FileRegistryPort(ABC):
     class FatalError(RuntimeError, ABC):
         """A base for exceptions that thrown for errors that are not a client mistake
         but likely a bug in the application. Exceptions of this kind should not be
-        handeled but let the application terminate.
+        handled, but let the application terminate.
         """
 
         def __init__(self, file_id: str):
@@ -45,7 +45,7 @@ class FileRegistryPort(ABC):
             )
             super().__init__(message)
 
-    class FileContentNotInstagingError(
+    class FileContentNotInStagingError(
         InvalidRequestError, ContentCopyServicePort.ContentNotInStagingError
     ):
         """Thrown when the content of a file is unexpectedly not in the staging storage."""
@@ -61,7 +61,7 @@ class FileRegistryPort(ABC):
             )
             super().__init__(message)
 
-    class ChecksumMissmatchError(InvalidRequestError):
+    class ChecksumMismatchError(InvalidRequestError):
         """Thrown when the checksum of the decrypted content of a file did not match the
         expectations.
         """
@@ -116,9 +116,9 @@ class FileRegistryPort(ABC):
 
         Raises:
             self.FileUpdateError:
-                When the file already been registered but its metadata differes from the
+                When the file already been registered but its metadata differs from the
                 provided one.
-            self.FileContentNotInstagingError:
+            self.FileContentNotInStagingError:
                 When the file content is not present in the storage staging.
         """
         ...
@@ -148,7 +148,7 @@ class FileRegistryPort(ABC):
         Raises:
             self.FileNotInRegistryError:
                 When a file is requested that has not (yet) been registered.
-            self.ChecksumMissmatchError:
+            self.ChecksumMismatchError:
                 When the provided checksum did not match the expectations.
             self.FileInRegistryButNotInStorageError:
                 When encountering inconsistency between the registry (the database) and

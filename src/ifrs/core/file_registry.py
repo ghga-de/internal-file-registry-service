@@ -93,9 +93,9 @@ class FileRegistry(FileRegistryPort):
 
         Raises:
             self.FileUpdateError:
-                When the file already been registered but its metadata differes from the
+                When the file already been registered but its metadata differs from the
                 provided one.
-            self.FileContentNotInstagingError:
+            self.FileContentNotInStagingError:
                 When the file content is not present in the storage staging.
         """
         if await self._is_file_registered(
@@ -118,7 +118,7 @@ class FileRegistry(FileRegistryPort):
                 s3_endpoint_alias=file.s3_endpoint_alias,
             )
         except ContentCopyServicePort.ContentNotInStagingError as error:
-            raise self.FileContentNotInstagingError(
+            raise self.FileContentNotInStagingError(
                 file_id=file_without_object_id.file_id
             ) from error
 
@@ -156,7 +156,7 @@ class FileRegistry(FileRegistryPort):
         Raises:
             self.FileNotInRegistryError:
                 When a file is requested that has not (yet) been registered.
-            self.ChecksumMissmatchError:
+            self.ChecksumMismatchError:
                 When the provided checksum did not match the expectations.
             self.FileInRegistryButNotInStorageError:
                 When encountering inconsistency between the registry (the database) and
@@ -169,7 +169,7 @@ class FileRegistry(FileRegistryPort):
             raise self.FileNotInRegistryError(file_id=file_id) from error
 
         if decrypted_sha256 != file.decrypted_sha256:
-            raise self.ChecksumMissmatchError(
+            raise self.ChecksumMismatchError(
                 file_id=file_id,
                 provided_checksum=decrypted_sha256,
                 expected_checksum=file.decrypted_sha256,

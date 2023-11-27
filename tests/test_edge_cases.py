@@ -36,7 +36,7 @@ from tests.fixtures.module_scope_fixtures import (  # noqa: F401
 @pytest.mark.asyncio
 async def test_register_with_empty_staging(joint_fixture: JointFixture):  # noqa: F811
     """Test registration of a file when the file content is missing from the staging."""
-    with pytest.raises(FileRegistryPort.FileContentNotInstagingError):
+    with pytest.raises(FileRegistryPort.FileContentNotInStagingError):
         await joint_fixture.file_registry.register_file(
             file_without_object_id=EXAMPLE_METADATA_BASE,
             source_object_id="missing",
@@ -172,7 +172,7 @@ async def test_stage_non_existing_file(joint_fixture: JointFixture):  # noqa: F8
 
 
 @pytest.mark.asyncio
-async def test_stage_checksum_missmatch(
+async def test_stage_checksum_mismatch(
     joint_fixture: JointFixture,  # noqa: F811
     file_fixture: FileObject,  # noqa: F811
 ):
@@ -197,7 +197,7 @@ async def test_stage_checksum_missmatch(
         await s3.populate_file_objects(file_objects=[file_object])
 
         # request a stage for the registered file to the outbox by specifying a wrong checksum:
-        with pytest.raises(FileRegistryPort.ChecksumMissmatchError):
+        with pytest.raises(FileRegistryPort.ChecksumMismatchError):
             await joint_fixture.file_registry.stage_registered_file(
                 file_id=EXAMPLE_METADATA_BASE.file_id,
                 decrypted_sha256=(
