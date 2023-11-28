@@ -18,7 +18,6 @@
 from abc import ABC, abstractmethod
 
 from ifrs.core import models
-from ifrs.ports.inbound.content_copy import ContentCopyServicePort
 
 
 class FileRegistryPort(ABC):
@@ -45,10 +44,15 @@ class FileRegistryPort(ABC):
             )
             super().__init__(message)
 
-    class FileContentNotInStagingError(
-        InvalidRequestError, ContentCopyServicePort.ContentNotInStagingError
-    ):
+    class FileContentNotInStagingError(InvalidRequestError):
         """Thrown when the content of a file is unexpectedly not in the staging storage."""
+
+        def __init__(self, file_id: str):
+            message = (
+                f"The content of the file with id '{file_id}' does not exist in the"
+                + " staging storage."
+            )
+            super().__init__(message)
 
     class FileUpdateError(InvalidRequestError):
         """Thrown when attempting to update metadata of an existing file."""

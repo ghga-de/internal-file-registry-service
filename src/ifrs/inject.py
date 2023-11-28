@@ -28,7 +28,6 @@ from ifrs.adapters.inbound.event_sub import EventSubTranslator
 from ifrs.adapters.outbound.dao import FileMetadataDaoConstructor
 from ifrs.adapters.outbound.event_pub import EventPubTranslator
 from ifrs.config import Config
-from ifrs.core.content_copy import ContentCopyService
 from ifrs.core.file_registry import FileRegistry
 from ifrs.ports.inbound.file_registry import FileRegistryPort
 
@@ -41,16 +40,12 @@ async def prepare_core(*, config: Config) -> AsyncGenerator[FileRegistryPort, No
     file_metadata_dao = await FileMetadataDaoConstructor.construct(
         dao_factory=dao_factory
     )
-    content_copy_svc = ContentCopyService(
-        object_storages=object_storages, config=config
-    )
 
     async with KafkaEventPublisher.construct(config=config) as kafka_event_publisher:
         event_publisher = EventPubTranslator(
             config=config, provider=kafka_event_publisher
         )
         file_registry = FileRegistry(
-            content_copy_svc=content_copy_svc,
             file_metadata_dao=file_metadata_dao,
             event_publisher=event_publisher,
             object_storages=object_storages,
