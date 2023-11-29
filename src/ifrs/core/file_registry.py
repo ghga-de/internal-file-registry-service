@@ -21,7 +21,6 @@ from ghga_service_commons.utils.multinode_storage import ObjectStorages
 
 from ifrs.config import Config
 from ifrs.core import models
-from ifrs.ports.inbound.content_copy import ContentCopyServicePort
 from ifrs.ports.inbound.file_registry import FileRegistryPort
 from ifrs.ports.outbound.dao import FileMetadataDaoPort, ResourceNotFoundError
 from ifrs.ports.outbound.event_pub import EventPublisherPort
@@ -30,17 +29,15 @@ from ifrs.ports.outbound.event_pub import EventPublisherPort
 class FileRegistry(FileRegistryPort):
     """A service that manages a registry files stored on a permanent object storage."""
 
-    def __init__(  # noqa: PLR0913 (too many args)
+    def __init__(
         self,
         *,
-        content_copy_svc: ContentCopyServicePort,
         file_metadata_dao: FileMetadataDaoPort,
         event_publisher: EventPublisherPort,
         object_storages: ObjectStorages,
         config: Config,
     ):
         """Initialize with essential config params and outbound adapters."""
-        self._content_copy_svc = content_copy_svc
         self._event_publisher = event_publisher
         self._file_metadata_dao = file_metadata_dao
         self._object_storages = object_storages
@@ -110,17 +107,23 @@ class FileRegistry(FileRegistryPort):
             **file_without_object_id.model_dump(), object_id=object_id
         )
 
-        try:
-            await self._content_copy_svc.staging_to_permanent(
-                file=file,
-                source_object_id=source_object_id,
-                source_bucket_id=source_bucket_id,
-                s3_endpoint_alias=file.s3_endpoint_alias,
-            )
-        except ContentCopyServicePort.ContentNotInStagingError as error:
+        permanent_bucket_id, object_storage = self._object_storages.for_alias(
+            file.s3_endpoint_alias
+        )
+
+        if not await object_storage.does_object_exist(
+            bucket_id=source_bucket_id, object_id=source_object_id
+        ):
             raise self.FileContentNotInStagingError(
                 file_id=file_without_object_id.file_id
-            ) from error
+            )
+
+        await object_storage.copy_object(
+            source_bucket_id=source_bucket_id,
+            source_object_id=source_object_id,
+            dest_bucket_id=permanent_bucket_id,
+            dest_object_id=object_id,
+        )
 
         await self._file_metadata_dao.insert(file)
 
@@ -175,24 +178,35 @@ class FileRegistry(FileRegistryPort):
                 expected_checksum=file.decrypted_sha256,
             )
 
-        try:
-            await self._content_copy_svc.permanent_to_outbox(
-                file=file,
-                target_object_id=target_object_id,
-                target_bucket_id=target_bucket_id,
-                s3_endpoint_alias=file.s3_endpoint_alias,
-            )
+        permanent_bucket_id, object_storage = self._object_storages.for_alias(
+            file.s3_endpoint_alias
+        )
 
-            await self._event_publisher.file_staged_for_download(
-                file_id=file_id,
-                decrypted_sha256=decrypted_sha256,
-                target_object_id=target_object_id,
-                target_bucket_id=target_bucket_id,
-                s3_endpoint_alias=file.s3_endpoint_alias,
-            )
+        if await object_storage.does_object_exist(
+            bucket_id=target_bucket_id, object_id=target_object_id
+        ):
+            # the content is already where it should go, there is nothing to do
+            return
 
-        except ContentCopyServicePort.ContentNotInPermanentStorageError as error:
-            raise self.FileInRegistryButNotInStorageError(file_id=file_id) from error
+        if not await object_storage.does_object_exist(
+            bucket_id=permanent_bucket_id, object_id=file.object_id
+        ):
+            raise self.FileInRegistryButNotInStorageError(file_id=file_id)
+
+        await object_storage.copy_object(
+            source_bucket_id=permanent_bucket_id,
+            source_object_id=file.object_id,
+            dest_bucket_id=target_bucket_id,
+            dest_object_id=target_object_id,
+        )
+
+        await self._event_publisher.file_staged_for_download(
+            file_id=file_id,
+            decrypted_sha256=decrypted_sha256,
+            target_object_id=target_object_id,
+            target_bucket_id=target_bucket_id,
+            s3_endpoint_alias=file.s3_endpoint_alias,
+        )
 
     async def delete_file(self, *, file_id: str) -> None:
         """Deletes a file from the permanent storage and the internal database.
