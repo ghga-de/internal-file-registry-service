@@ -23,7 +23,6 @@ from ifrs.ports.inbound.file_registry import FileRegistryPort
 from tests.fixtures.example_data import EXAMPLE_METADATA, EXAMPLE_METADATA_BASE
 from tests.fixtures.module_scope_fixtures import (  # noqa: F401
     JointFixture,
-    event_loop,
     joint_fixture,
     kafka_fixture,
     mongodb_fixture,
@@ -33,7 +32,7 @@ from tests.fixtures.module_scope_fixtures import (  # noqa: F401
 )
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio(scope="session")
 async def test_register_with_empty_staging(joint_fixture: JointFixture):  # noqa: F811
     """Test registration of a file when the file content is missing from the staging."""
     with pytest.raises(FileRegistryPort.FileContentNotInStagingError):
@@ -44,7 +43,7 @@ async def test_register_with_empty_staging(joint_fixture: JointFixture):  # noqa
         )
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio(scope="session")
 async def test_reregistration(
     joint_fixture: JointFixture,  # noqa: F811
     file_fixture: FileObject,  # noqa: F811
@@ -100,7 +99,7 @@ async def test_reregistration(
         await joint_fixture.reset_state()
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio(scope="session")
 async def test_reregistration_with_updated_metadata(
     joint_fixture: JointFixture,  # noqa: F811
     file_fixture: FileObject,  # noqa: F811
@@ -157,7 +156,7 @@ async def test_reregistration_with_updated_metadata(
         await joint_fixture.reset_state()
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio(scope="session")
 async def test_stage_non_existing_file(joint_fixture: JointFixture):  # noqa: F811
     """Check that requesting to stage a non-registered file fails with the expected
     exception.
@@ -171,7 +170,7 @@ async def test_stage_non_existing_file(joint_fixture: JointFixture):  # noqa: F8
         )
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio(scope="session")
 async def test_stage_checksum_mismatch(
     joint_fixture: JointFixture,  # noqa: F811
     file_fixture: FileObject,  # noqa: F811
@@ -208,7 +207,7 @@ async def test_stage_checksum_mismatch(
             )
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio(scope="session")
 async def test_storage_db_inconsistency(
     joint_fixture: JointFixture,  # noqa: F811
 ):
