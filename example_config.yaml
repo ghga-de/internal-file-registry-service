@@ -12,6 +12,7 @@ files_to_register_topic: file_interrogation
 files_to_register_type: file_interrogation_success
 files_to_stage_topic: file_downloads
 files_to_stage_type: file_stage_requested
+generate_correlation_id: true
 kafka_security_protocol: PLAINTEXT
 kafka_servers:
 - kafka:9092
