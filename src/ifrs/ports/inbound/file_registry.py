@@ -36,14 +36,6 @@ class FileRegistryPort(ABC):
         handled, but let the application terminate.
         """
 
-        def __init__(self, file_id: str):
-            message = (
-                f"The file with the ID '{file_id}' has already been registered and the "
-                + " provided metadata is not identical to the existing one. Updates are"
-                + " not permitted."
-            )
-            super().__init__(message)
-
     class FileContentNotInStagingError(InvalidRequestError):
         """Thrown when the content of a file is unexpectedly not in the staging storage."""
 
