@@ -15,6 +15,8 @@
 
 """In this module object construction and dependency injection is carried out."""
 
+from hexkit.log import configure_logging
+
 from ifrs.config import Config
 from ifrs.inject import prepare_event_subscriber
 
@@ -22,6 +24,7 @@ from ifrs.inject import prepare_event_subscriber
 async def consume_events(run_forever: bool = True):
     """Run an event consumer listening to the specified topic."""
     config = Config()  # type: ignore
+    configure_logging(config=config)
 
     async with prepare_event_subscriber(config=config) as event_subscriber:
         await event_subscriber.run(forever=run_forever)

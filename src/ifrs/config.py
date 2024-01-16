@@ -17,6 +17,7 @@
 
 from ghga_service_commons.utils.multinode_storage import S3ObjectStoragesConfig
 from hexkit.config import config_from_yaml
+from hexkit.log import LoggingConfig
 from hexkit.providers.akafka import KafkaConfig
 from hexkit.providers.mongodb import MongoDbConfig
 
@@ -24,7 +25,6 @@ from ifrs.adapters.inbound.event_sub import EventSubTranslatorConfig
 from ifrs.adapters.outbound.event_pub import EventPubTranslatorConfig
 
 
-# pylint: disable=too-many-ancestors
 @config_from_yaml(prefix="ifrs")
 class Config(
     MongoDbConfig,
@@ -32,6 +32,7 @@ class Config(
     EventSubTranslatorConfig,
     EventPubTranslatorConfig,
     S3ObjectStoragesConfig,
+    LoggingConfig,
 ):
     """Config parameters and their defaults."""
 
