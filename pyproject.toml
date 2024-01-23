@@ -27,7 +27,7 @@ description = "Internal-File-Registry-Service - This service acts as a registry 
 dependencies = [
     "ghga-event-schemas==1.0.0",
     "ghga-service-commons>=2.0.0",
-    "hexkit[mongodb,s3,akafka]>=2.0.0",
+    "hexkit[mongodb,s3,akafka]>=2.1.0",
 ]
 
 [project.license]
