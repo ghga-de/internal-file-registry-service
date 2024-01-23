@@ -14,6 +14,7 @@
 # limitations under the License.
 
 """Main business-logic of this service"""
+import logging
 import uuid
 from contextlib import suppress
 
@@ -24,6 +25,8 @@ from ifrs.core import models
 from ifrs.ports.inbound.file_registry import FileRegistryPort
 from ifrs.ports.outbound.dao import FileMetadataDaoPort, ResourceNotFoundError
 from ifrs.ports.outbound.event_pub import EventPublisherPort
+
+log = logging.getLogger(__name__)
 
 
 class FileRegistry(FileRegistryPort):
@@ -99,9 +102,17 @@ class FileRegistry(FileRegistryPort):
             file_without_object_id=file_without_object_id
         ):
             # There is nothing to do:
+            log.info(
+                "File with ID '%s' is already registered.",
+                file_without_object_id.file_id,
+            )
             return
 
         # Generate & assign object ID to metadata
+        log.info(
+            "File with ID '%s' is not yet registered. Generating object ID.",
+            file_without_object_id.file_id,
+        )
         object_id = str(uuid.uuid4())
         file = models.FileMetadata(
             **file_without_object_id.model_dump(), object_id=object_id
@@ -114,9 +125,11 @@ class FileRegistry(FileRegistryPort):
         if not await object_storage.does_object_exist(
             bucket_id=source_bucket_id, object_id=source_object_id
         ):
-            raise self.FileContentNotInStagingError(
+            error = self.FileContentNotInStagingError(
                 file_id=file_without_object_id.file_id
             )
+            log.error(error, extra={"file_id": file_without_object_id.file_id})
+            raise error
 
         await object_storage.copy_object(
             source_bucket_id=source_bucket_id,
@@ -125,6 +138,7 @@ class FileRegistry(FileRegistryPort):
             dest_object_id=object_id,
         )
 
+        log.info("Inserting file with file ID '%s'.", file.file_id)
         await self._file_metadata_dao.insert(file)
 
         permanent_bucket, _ = self._object_storages.for_alias(file.s3_endpoint_alias)
@@ -169,14 +183,25 @@ class FileRegistry(FileRegistryPort):
         try:
             file = await self._file_metadata_dao.get_by_id(file_id)
         except ResourceNotFoundError as error:
-            raise self.FileNotInRegistryError(file_id=file_id) from error
+            file_not_in_registry_error = self.FileNotInRegistryError(file_id=file_id)
+            log.error(file_not_in_registry_error, extra={"file_id": file_id})
+            raise file_not_in_registry_error from error
 
         if decrypted_sha256 != file.decrypted_sha256:
-            raise self.ChecksumMismatchError(
+            checksum_error = self.ChecksumMismatchError(
                 file_id=file_id,
                 provided_checksum=decrypted_sha256,
                 expected_checksum=file.decrypted_sha256,
             )
+            log.error(
+                checksum_error,
+                extra={
+                    "file_id": file_id,
+                    "provided_checksum": decrypted_sha256,
+                    "expected_checksum": file.decrypted_sha256,
+                },
+            )
+            raise checksum_error
 
         permanent_bucket_id, object_storage = self._object_storages.for_alias(
             file.s3_endpoint_alias
@@ -186,18 +211,30 @@ class FileRegistry(FileRegistryPort):
             bucket_id=target_bucket_id, object_id=target_object_id
         ):
             # the content is already where it should go, there is nothing to do
+            log.info(
+                "Object corresponding to file ID '%s' is already in storage.", file_id
+            )
             return
 
         if not await object_storage.does_object_exist(
             bucket_id=permanent_bucket_id, object_id=file.object_id
         ):
-            raise self.FileInRegistryButNotInStorageError(file_id=file_id)
+            not_in_storage_error = self.FileInRegistryButNotInStorageError(
+                file_id=file_id
+            )
+            log.critical(msg=not_in_storage_error, extra={"file_id": file_id})
+            raise not_in_storage_error
 
         await object_storage.copy_object(
             source_bucket_id=permanent_bucket_id,
             source_object_id=file.object_id,
             dest_bucket_id=target_bucket_id,
             dest_object_id=target_object_id,
+        )
+
+        log.info(
+            "Object corresponding to file ID '%s' has been staged to the outbox.",
+            file_id,
         )
 
         await self._event_publisher.file_staged_for_download(
@@ -220,6 +257,10 @@ class FileRegistry(FileRegistryPort):
             file = await self._file_metadata_dao.get_by_id(file_id)
         except ResourceNotFoundError:
             # resource not in database, nothing to do
+            log.info(
+                "File with ID '%s' was not found in the database. Deletion cancelled.",
+                file_id,
+            )
             return
 
         # Get object ID and storage instance
@@ -238,4 +279,7 @@ class FileRegistry(FileRegistryPort):
             # If file does not exist anyways, we are done.
             await self._file_metadata_dao.delete(id_=file_id)
 
+        log.info(
+            "Finished object storage and metadata deletion for file ID '%s'", file_id
+        )
         await self._event_publisher.file_deleted(file_id=file_id)

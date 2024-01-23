@@ -1,5 +1,3 @@
-<!-- Please provide a short overview of the features of this service.-->
-
 This service provides functionality to administer files stored in an S3-compatible
 object storage.
 All file-related metadata is stored in an internal mongodb database, owned and controlled

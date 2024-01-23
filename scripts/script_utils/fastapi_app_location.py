@@ -12,19 +12,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+#
 
-"""In this module object construction and dependency injection is carried out."""
+"""Used to define the location of the main FastAPI app object."""
 
-from hexkit.log import configure_logging
+# flake8: noqa
+# pylint: skip-file
 
-from ifrs.config import Config
-from ifrs.inject import prepare_event_subscriber
-
-
-async def consume_events(run_forever: bool = True):
-    """Run an event consumer listening to the specified topic."""
-    config = Config()  # type: ignore
-    configure_logging(config=config)
-
-    async with prepare_event_subscriber(config=config) as event_subscriber:
-        await event_subscriber.run(forever=run_forever)
+# Please adapt to package structure:
+from my_microservice.api.main import app

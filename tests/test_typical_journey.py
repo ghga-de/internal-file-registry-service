@@ -26,7 +26,6 @@ from hexkit.providers.s3.testutils import (
 from tests.fixtures.example_data import EXAMPLE_METADATA, EXAMPLE_METADATA_BASE
 from tests.fixtures.module_scope_fixtures import (  # noqa: F401
     JointFixture,
-    event_loop,
     joint_fixture,
     kafka_fixture,
     mongodb_fixture,
@@ -36,7 +35,7 @@ from tests.fixtures.module_scope_fixtures import (  # noqa: F401
 )
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio(scope="session")
 async def test_happy_journey(
     joint_fixture: JointFixture,  # noqa: F811
     file_fixture: FileObject,  # noqa: F811

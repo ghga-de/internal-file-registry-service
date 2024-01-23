@@ -15,27 +15,28 @@
 
 """Contains module-scoped fixtures"""
 
-import pytest_asyncio
+import asyncio
+
+import pytest
 from hexkit.providers.akafka.testutils import get_kafka_fixture
 from hexkit.providers.mongodb.testutils import get_mongodb_fixture
 from hexkit.providers.s3.testutils import get_s3_fixture
-from hexkit.providers.testing.utils import get_event_loop
 
 from tests.fixtures.joint import JointFixture, get_joint_fixture
 
 
-@pytest_asyncio.fixture(autouse=True)
-async def reset_state(joint_fixture: JointFixture):
+@pytest.fixture(autouse=True, scope="function")
+def reset_state(joint_fixture: JointFixture):
     """Clear joint_fixture state before and after tests that use this fixture.
 
     This is a function-level fixture because it needs to run in each test.
     """
-    await joint_fixture.reset_state()
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(joint_fixture.reset_state())
 
 
-event_loop = get_event_loop("module")
-mongodb_fixture = get_mongodb_fixture("module")
-kafka_fixture = get_kafka_fixture("module")
-s3_fixture = get_s3_fixture("module")
-second_s3_fixture = get_s3_fixture("module")
-joint_fixture = get_joint_fixture("module")
+mongodb_fixture = get_mongodb_fixture("session")
+kafka_fixture = get_kafka_fixture("session")
+s3_fixture = get_s3_fixture("session")
+second_s3_fixture = get_s3_fixture("session")
+joint_fixture = get_joint_fixture("session")
