@@ -22,7 +22,7 @@ classifiers = [
     "Intended Audience :: Developers",
 ]
 name = "ifrs"
-version = "1.2.0"
+version = "1.2.1"
 description = "Internal-File-Registry-Service - This service acts as a registry for the internal location and representation of files."
 dependencies = [
     "ghga-event-schemas==1.0.0",

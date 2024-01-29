@@ -21,7 +21,6 @@ __all__ = [
 ]
 
 import socket
-from asyncio import sleep
 from collections.abc import AsyncGenerator
 from dataclasses import dataclass
 
@@ -149,9 +148,6 @@ async def joint_fixture_function(
             staging_bucket=STAGING_BUCKET,
             endpoint_aliases=endpoint_aliases,
         )
-
-        # prevent teardown happening before reset_state has finished to prevent hanging
-        await sleep(2)
 
 
 def get_joint_fixture(scope: _ScopeName = "function"):
