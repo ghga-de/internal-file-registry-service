@@ -77,8 +77,8 @@ class FileRegistry(FileRegistryPort):
         self,
         *,
         file_without_object_id: models.FileMetadataBase,
-        source_object_id: str,
-        source_bucket_id: str,
+        staging_object_id: str,
+        staging_bucket_id: str,
     ) -> None:
         """Registers a file and moves its content from the staging into the permanent
         storage. If the file with that exact metadata has already been registered,
@@ -86,26 +86,43 @@ class FileRegistry(FileRegistryPort):
 
         Args:
             file_without_object_id: metadata on the file to register.
-            source_object_id:
+            staging_object_id:
                 The S3 object ID for the staging bucket.
-            source_bucket_id:
+            staging_bucket_id:
                 The S3 bucket ID for staging.
 
         Raises:
-            self.FileUpdateError:
-                When the file already been registered but its metadata differs from the
-                provided one.
             self.FileContentNotInStagingError:
                 When the file content is not present in the storage staging.
         """
-        if await self._is_file_registered(
-            file_without_object_id=file_without_object_id
-        ):
-            # There is nothing to do:
-            log.info(
-                "File with ID '%s' is already registered.",
-                file_without_object_id.file_id,
+        storage_alias = file_without_object_id.storage_alias
+
+        try:
+            permanent_bucket_id, object_storage = self._object_storages.for_alias(
+                storage_alias
             )
+        except KeyError as error:
+            alias_not_configured = ValueError(
+                f"Storage alias '{storage_alias}' not configured."
+            )
+            log.critical(alias_not_configured, extra={"storage_alias": storage_alias})
+            raise alias_not_configured from error
+
+        try:
+            if await self._is_file_registered(
+                file_without_object_id=file_without_object_id
+            ):
+                # There is nothing to do:
+                log.info(
+                    "File with ID '%s' is already registered.",
+                    file_without_object_id.file_id,
+                )
+                return
+        except self.FileUpdateError as error:
+            # trying to re-register with different metadata should not crash the consumer
+            # this is not a service internal inconsistency and would cause unnecessary
+            # crashes on additional consumption attempts
+            log.error(error)
             return
 
         # Generate & assign object ID to metadata
@@ -118,22 +135,21 @@ class FileRegistry(FileRegistryPort):
             **file_without_object_id.model_dump(), object_id=object_id
         )
 
-        permanent_bucket_id, object_storage = self._object_storages.for_alias(
-            file.s3_endpoint_alias
-        )
-
         if not await object_storage.does_object_exist(
-            bucket_id=source_bucket_id, object_id=source_object_id
+            bucket_id=staging_bucket_id, object_id=staging_object_id
         ):
-            error = self.FileContentNotInStagingError(
+            content_not_in_staging = self.FileContentNotInStagingError(
                 file_id=file_without_object_id.file_id
             )
-            log.error(error, extra={"file_id": file_without_object_id.file_id})
-            raise error
+            log.error(
+                content_not_in_staging,
+                extra={"file_id": file_without_object_id.file_id},
+            )
+            raise content_not_in_staging
 
         await object_storage.copy_object(
-            source_bucket_id=source_bucket_id,
-            source_object_id=source_object_id,
+            source_bucket_id=staging_bucket_id,
+            source_object_id=staging_object_id,
             dest_bucket_id=permanent_bucket_id,
             dest_object_id=object_id,
         )
@@ -141,10 +157,8 @@ class FileRegistry(FileRegistryPort):
         log.info("Inserting file with file ID '%s'.", file.file_id)
         await self._file_metadata_dao.insert(file)
 
-        permanent_bucket, _ = self._object_storages.for_alias(file.s3_endpoint_alias)
-
         await self._event_publisher.file_internally_registered(
-            file=file, bucket_id=permanent_bucket
+            file=file, bucket_id=permanent_bucket_id
         )
 
     async def stage_registered_file(
@@ -152,8 +166,8 @@ class FileRegistry(FileRegistryPort):
         *,
         file_id: str,
         decrypted_sha256: str,
-        target_object_id: str,
-        target_bucket_id: str,
+        outbox_object_id: str,
+        outbox_bucket_id: str,
     ) -> None:
         """Stage a registered file to the outbox.
 
@@ -163,12 +177,10 @@ class FileRegistry(FileRegistryPort):
             decrypted_sha256:
                 The checksum of the decrypted content. This is used to make sure that
                 this service and the outside client are talking about the same file.
-            target_object_id:
+            outbox_object_id:
                 The S3 object ID for the outbox bucket.
-            target_bucket_id:
+            outbox_bucket_id:
                 The S3 bucket ID for the outbox.
-            s3_endpoint_alias:
-                The label of the object storage configuration to use
 
         Raises:
             self.FileNotInRegistryError:
@@ -204,11 +216,11 @@ class FileRegistry(FileRegistryPort):
             raise checksum_error
 
         permanent_bucket_id, object_storage = self._object_storages.for_alias(
-            file.s3_endpoint_alias
+            file.storage_alias
         )
 
         if await object_storage.does_object_exist(
-            bucket_id=target_bucket_id, object_id=target_object_id
+            bucket_id=outbox_bucket_id, object_id=outbox_object_id
         ):
             # the content is already where it should go, there is nothing to do
             log.info(
@@ -228,8 +240,8 @@ class FileRegistry(FileRegistryPort):
         await object_storage.copy_object(
             source_bucket_id=permanent_bucket_id,
             source_object_id=file.object_id,
-            dest_bucket_id=target_bucket_id,
-            dest_object_id=target_object_id,
+            dest_bucket_id=outbox_bucket_id,
+            dest_object_id=outbox_object_id,
         )
 
         log.info(
@@ -240,9 +252,9 @@ class FileRegistry(FileRegistryPort):
         await self._event_publisher.file_staged_for_download(
             file_id=file_id,
             decrypted_sha256=decrypted_sha256,
-            target_object_id=target_object_id,
-            target_bucket_id=target_bucket_id,
-            s3_endpoint_alias=file.s3_endpoint_alias,
+            target_object_id=outbox_object_id,
+            target_bucket_id=outbox_bucket_id,
+            storage_alias=file.storage_alias,
         )
 
     async def delete_file(self, *, file_id: str) -> None:
@@ -265,9 +277,7 @@ class FileRegistry(FileRegistryPort):
 
         # Get object ID and storage instance
         object_id = file.object_id
-        bucket_id, object_storage = self._object_storages.for_alias(
-            file.s3_endpoint_alias
-        )
+        bucket_id, object_storage = self._object_storages.for_alias(file.storage_alias)
 
         # Try to remove file from S3
         with suppress(object_storage.ObjectNotFoundError):

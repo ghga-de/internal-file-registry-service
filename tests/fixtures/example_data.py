@@ -38,7 +38,7 @@ EXAMPLE_METADATA_BASE = models.FileMetadataBase(
         "62c298fd987a6bac2066e4dbed274879247b3edd816c8351dc22ada6d37b24b0",
         "45cccbdfc4bfe2aa7f17428a087282d71be917ef059cac15a161284340840957",
     ],
-    s3_endpoint_alias="test",
+    storage_alias="test",
 )
 
 EXAMPLE_METADATA = models.FileMetadata(

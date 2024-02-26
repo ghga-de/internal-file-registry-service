@@ -84,7 +84,7 @@ class EventPubTranslator(EventPublisherPort):
     ) -> None:
         """Communicates the event that a new file has been internally registered."""
         payload = event_schemas.FileInternallyRegistered(
-            s3_endpoint_alias=file.s3_endpoint_alias,
+            s3_endpoint_alias=file.storage_alias,
             file_id=file.file_id,
             object_id=file.object_id,
             bucket_id=bucket_id,
@@ -113,11 +113,11 @@ class EventPubTranslator(EventPublisherPort):
         decrypted_sha256: str,
         target_object_id: str,
         target_bucket_id: str,
-        s3_endpoint_alias: str,
+        storage_alias: str,
     ) -> None:
         """Communicates the event that a file has been staged for download."""
         payload = event_schemas.FileStagedForDownload(
-            s3_endpoint_alias=s3_endpoint_alias,
+            s3_endpoint_alias=storage_alias,
             file_id=file_id,
             decrypted_sha256=decrypted_sha256,
             target_object_id=target_object_id,

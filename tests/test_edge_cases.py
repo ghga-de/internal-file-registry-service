@@ -15,6 +15,7 @@
 
 """Tests edge cases not covered by the typical journey test."""
 
+import logging
 
 import pytest
 from hexkit.providers.s3.testutils import FileObject, file_fixture  # noqa: F401
@@ -38,8 +39,8 @@ async def test_register_with_empty_staging(joint_fixture: JointFixture):  # noqa
     with pytest.raises(FileRegistryPort.FileContentNotInStagingError):
         await joint_fixture.file_registry.register_file(
             file_without_object_id=EXAMPLE_METADATA_BASE,
-            source_object_id="missing",
-            source_bucket_id=joint_fixture.staging_bucket,
+            staging_object_id="missing",
+            staging_bucket_id=joint_fixture.staging_bucket,
         )
 
 
@@ -51,7 +52,7 @@ async def test_reregistration(
     """Test the re-registration of a file with identical metadata (should not result in
     an exception).
     """
-    for s3, s3_endpoint_alias in (
+    for s3, storage_alias in (
         (joint_fixture.s3, joint_fixture.endpoint_aliases.node1),
         (joint_fixture.second_s3, joint_fixture.endpoint_aliases.node2),
     ):
@@ -67,7 +68,7 @@ async def test_reregistration(
         # register new file from the staging:
         # (And check if an event informing about the new registration has been published.)
         file_metadata_base = EXAMPLE_METADATA_BASE.model_copy(
-            update={"s3_endpoint_alias": s3_endpoint_alias}
+            update={"storage_alias": storage_alias}
         )
 
         async with joint_fixture.kafka.record_events(
@@ -75,8 +76,8 @@ async def test_reregistration(
         ) as recorder:
             await joint_fixture.file_registry.register_file(
                 file_without_object_id=file_metadata_base,
-                source_object_id=EXAMPLE_METADATA.object_id,
-                source_bucket_id=joint_fixture.staging_bucket,
+                staging_object_id=EXAMPLE_METADATA.object_id,
+                staging_bucket_id=joint_fixture.staging_bucket,
             )
 
         assert len(recorder.recorded_events) == 1
@@ -92,8 +93,8 @@ async def test_reregistration(
         ):
             await joint_fixture.file_registry.register_file(
                 file_without_object_id=file_metadata_base,
-                source_object_id=EXAMPLE_METADATA.object_id,
-                source_bucket_id=joint_fixture.staging_bucket,
+                staging_object_id=EXAMPLE_METADATA.object_id,
+                staging_bucket_id=joint_fixture.staging_bucket,
             )
 
         await joint_fixture.reset_state()
@@ -101,13 +102,14 @@ async def test_reregistration(
 
 @pytest.mark.asyncio(scope="session")
 async def test_reregistration_with_updated_metadata(
+    caplog,
     joint_fixture: JointFixture,  # noqa: F811
     file_fixture: FileObject,  # noqa: F811
 ):
     """Check that a re-registration of a file with updated metadata fails with the
     expected exception.
     """
-    for s3, s3_endpoint_alias in (
+    for s3, storage_alias in (
         (joint_fixture.s3, joint_fixture.endpoint_aliases.node1),
         (joint_fixture.second_s3, joint_fixture.endpoint_aliases.node2),
     ):
@@ -123,7 +125,7 @@ async def test_reregistration_with_updated_metadata(
         # register new file from the staging:
         # (And check if an event informing about the new registration has been published.)
         file_metadata_base = EXAMPLE_METADATA_BASE.model_copy(
-            update={"s3_endpoint_alias": s3_endpoint_alias}
+            update={"storage_alias": storage_alias}
         )
 
         async with joint_fixture.kafka.record_events(
@@ -131,8 +133,8 @@ async def test_reregistration_with_updated_metadata(
         ) as recorder:
             await joint_fixture.file_registry.register_file(
                 file_without_object_id=file_metadata_base,
-                source_object_id=EXAMPLE_METADATA.object_id,
-                source_bucket_id=joint_fixture.staging_bucket,
+                staging_object_id=EXAMPLE_METADATA.object_id,
+                staging_bucket_id=joint_fixture.staging_bucket,
             )
 
         assert len(recorder.recorded_events) == 1
@@ -141,18 +143,23 @@ async def test_reregistration_with_updated_metadata(
         assert event.type_ == joint_fixture.config.file_registered_event_type
 
         # try to re-register the same file with updated metadata:
-        # (Expect an exception and no second event.)
+        # Check for correct logging
         file_update = file_metadata_base.model_copy(update={"decrypted_size": 4321})
-        async with joint_fixture.kafka.expect_events(
-            events=[],
-            in_topic=joint_fixture.config.file_registered_event_topic,
-        ):
-            with pytest.raises(FileRegistryPort.FileUpdateError):
-                await joint_fixture.file_registry.register_file(
-                    file_without_object_id=file_update,
-                    source_object_id=EXAMPLE_METADATA.object_id,
-                    source_bucket_id=joint_fixture.staging_bucket,
-                )
+
+        caplog.clear()
+
+        with caplog.at_level(level=logging.ERROR, logger="ifrs.core.file_registry"):
+            expected_message = str(
+                FileRegistryPort.FileUpdateError(file_id=file_metadata_base.file_id)
+            )
+            await joint_fixture.file_registry.register_file(
+                file_without_object_id=file_update,
+                staging_object_id=EXAMPLE_METADATA.object_id,
+                staging_bucket_id=joint_fixture.staging_bucket,
+            )
+            assert len(caplog.messages) == 1
+            assert expected_message in caplog.messages
+
         await joint_fixture.reset_state()
 
 
@@ -165,8 +172,8 @@ async def test_stage_non_existing_file(joint_fixture: JointFixture):  # noqa: F8
         await joint_fixture.file_registry.stage_registered_file(
             file_id="notregisteredfile001",
             decrypted_sha256=EXAMPLE_METADATA_BASE.decrypted_sha256,
-            target_object_id=EXAMPLE_METADATA.object_id,
-            target_bucket_id=joint_fixture.outbox_bucket,
+            outbox_object_id=EXAMPLE_METADATA.object_id,
+            outbox_bucket_id=joint_fixture.outbox_bucket,
         )
 
 
@@ -181,11 +188,11 @@ async def test_stage_checksum_mismatch(
     # populate the database with a corresponding file metadata entry:
     await joint_fixture.file_metadata_dao.insert(EXAMPLE_METADATA)
 
-    for s3, s3_endpoint_alias in (
+    for s3, storage_alias in (
         (joint_fixture.s3, joint_fixture.endpoint_aliases.node1),
         (joint_fixture.second_s3, joint_fixture.endpoint_aliases.node2),
     ):
-        bucket_id = joint_fixture.config.object_storages[s3_endpoint_alias].bucket
+        bucket_id = joint_fixture.config.object_storages[storage_alias].bucket
         # place the content for an example file in the permanent storage:
         file_object = file_fixture.model_copy(
             update={
@@ -202,8 +209,8 @@ async def test_stage_checksum_mismatch(
                 decrypted_sha256=(
                     "e6da6d6d05cc057964877aad8a3e9ad712c8abeae279dfa2f89b07eba7ef8abe"
                 ),
-                target_object_id=EXAMPLE_METADATA.object_id,
-                target_bucket_id=joint_fixture.outbox_bucket,
+                outbox_object_id=EXAMPLE_METADATA.object_id,
+                outbox_bucket_id=joint_fixture.outbox_bucket,
             )
 
 
@@ -224,6 +231,6 @@ async def test_storage_db_inconsistency(
         await joint_fixture.file_registry.stage_registered_file(
             file_id=EXAMPLE_METADATA_BASE.file_id,
             decrypted_sha256=EXAMPLE_METADATA_BASE.decrypted_sha256,
-            target_object_id=EXAMPLE_METADATA.object_id,
-            target_bucket_id=joint_fixture.outbox_bucket,
+            outbox_object_id=EXAMPLE_METADATA.object_id,
+            outbox_bucket_id=joint_fixture.outbox_bucket,
         )
