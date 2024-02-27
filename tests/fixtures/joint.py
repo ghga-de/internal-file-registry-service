@@ -46,14 +46,14 @@ OUTBOX_BUCKET = "outbox"
 PERMANENT_BUCKET = "permanent"
 STAGING_BUCKET = "staging"
 
-S3_ENDPOINT_ALIASES = ("test", "test2")
+STORAGE_ALIASES = ("test", "test2")
 
 
 @dataclass
 class EndpointAliases:
-    node1: str = S3_ENDPOINT_ALIASES[0]
-    node2: str = S3_ENDPOINT_ALIASES[1]
-    fake: str = f"{S3_ENDPOINT_ALIASES[0]}_fake"
+    node1: str = STORAGE_ALIASES[0]
+    node2: str = STORAGE_ALIASES[1]
+    fake: str = f"{STORAGE_ALIASES[0]}_fake"
 
 
 def get_free_port() -> int:

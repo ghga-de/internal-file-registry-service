@@ -38,7 +38,7 @@ class EventPublisherPort(ABC):
         decrypted_sha256: str,
         target_object_id: str,
         target_bucket_id: str,
-        s3_endpoint_alias: str,
+        storage_alias: str,
     ) -> None:
         """Communicates the event that a file has been staged for download"""
         ...

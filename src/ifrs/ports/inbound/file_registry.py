@@ -96,8 +96,8 @@ class FileRegistryPort(ABC):
         self,
         *,
         file_without_object_id: models.FileMetadataBase,
-        source_object_id: str,
-        source_bucket_id: str,
+        staging_object_id: str,
+        staging_bucket_id: str,
     ) -> None:
         """Registers a file and moves its content from the staging into the permanent
         storage. If the file with that exact metadata has already been registered,
@@ -105,15 +105,12 @@ class FileRegistryPort(ABC):
 
         Args:
             file_without_object_id: metadata on the file to register.
-            source_object_id:
+            staging_object_id:
                 The S3 object ID for the staging bucket.
-            source_bucket_id:
+            staging_bucket_id:
                 The S3 bucket ID for staging.
 
         Raises:
-            self.FileUpdateError:
-                When the file already been registered but its metadata differs from the
-                provided one.
             self.FileContentNotInStagingError:
                 When the file content is not present in the storage staging.
         """
@@ -125,8 +122,8 @@ class FileRegistryPort(ABC):
         *,
         file_id: str,
         decrypted_sha256: str,
-        target_object_id: str,
-        target_bucket_id: str,
+        outbox_object_id: str,
+        outbox_bucket_id: str,
     ) -> None:
         """Stage a registered file to the outbox.
 
@@ -136,9 +133,9 @@ class FileRegistryPort(ABC):
             decrypted_sha256:
                 The checksum of the decrypted content. This is used to make sure that
                 this service and the outside client are talking about the same file.
-            target_object_id:
+            outbox_object_id:
                 The S3 object ID for the outbox bucket.
-            target_bucket_id:
+            outbox_bucket_id:
                 The S3 bucket ID for the outbox.
 
         Raises:
@@ -160,7 +157,5 @@ class FileRegistryPort(ABC):
         Args:
             file_id:
                 id for the file to delete.
-            s3_endpoint_alias:
-                The label of the object storage configuration to use
         """
         ...
